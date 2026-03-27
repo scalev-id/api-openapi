@@ -7,7 +7,9 @@
     "lint": "redocly lint specs/v2/openapi.yaml",
     "build": "node ./scripts/build-json.mjs",
     "build:docs": "redocly build-docs specs/v2/openapi.yaml --output dist/index.html",
-    "build:site": "node ./scripts/build-site.mjs"
+    "build:site": "node ./scripts/build-site.mjs",
+    "audit:nexus-auth": "node ./scripts/audit-nexus-auth-routes.mjs",
+    "sync:nexus-auth": "node ./scripts/sync-nexus-auth-openapi.mjs"
   },
   "devDependencies": {
     "@redocly/cli": "^2.25.1",
