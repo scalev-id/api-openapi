@@ -1,0 +1,2033 @@
+openapi: 3.0.3
+info:
+  title: Nexus Commerce API
+  version: 3.0.0
+  description: |
+    Public v3 commerce contract for storefront, customer, and authenticated business
+    commerce flows.
+
+    This specification intentionally documents only the `/v3` namespace.
+  license:
+    name: Proprietary
+servers:
+  - url: https://api.myscalev.com
+    description: Production
+security: []
+tags:
+  - name: Storefront
+    description: Public storefront catalog, guest cart, and guest checkout flows.
+  - name: Public Orders
+    description: Public order lookup and payment endpoints.
+  - name: Customer Auth
+    description: Public customer authentication and password-reset endpoints.
+  - name: Customer Account
+    description: Authenticated customer profile endpoints.
+  - name: Customer Cart
+    description: Authenticated customer cart management endpoints.
+  - name: Customer Checkout
+    description: Authenticated customer checkout preparation and confirmation endpoints.
+  - name: Customer Orders
+    description: Authenticated customer order read endpoints.
+  - name: Customer Subscriptions
+    description: Authenticated customer subscription and subscription-item endpoints.
+  - name: Customer Courses
+    description: Authenticated customer digital course access and progress endpoints.
+  - name: Discounts
+    description: Discount-code validation endpoints.
+  - name: Locations
+    description: Authenticated business location lookup endpoints.
+  - name: Shipping
+    description: Public and authenticated shipping lookup endpoints.
+  - name: Business Orders
+    description: Authenticated business order management endpoints.
+paths:
+  /v3/stores/{store_id}/storefront/products:
+    parameters:
+      - $ref: "#/components/parameters/StoreId"
+      - $ref: "#/components/parameters/OriginHeader"
+    get:
+      tags: [Storefront]
+      operationId: listStorefrontProducts
+      summary: List storefront products
+      responses:
+        "200":
+          $ref: "#/components/responses/SuccessResponse"
+        "404":
+          $ref: "#/components/responses/NotFoundResponse"
+
+  /v3/stores/{store_id}/storefront/products/count:
+    parameters:
+      - $ref: "#/components/parameters/StoreId"
+      - $ref: "#/components/parameters/OriginHeader"
+    get:
+      tags: [Storefront]
+      operationId: countStorefrontProducts
+      summary: Count storefront products
+      responses:
+        "200":
+          $ref: "#/components/responses/SuccessResponse"
+        "404":
+          $ref: "#/components/responses/NotFoundResponse"
+
+  /v3/stores/{store_id}/storefront/products/{slug}:
+    parameters:
+      - $ref: "#/components/parameters/StoreId"
+      - $ref: "#/components/parameters/ProductSlug"
+      - $ref: "#/components/parameters/OriginHeader"
+    get:
+      tags: [Storefront]
+      operationId: getStorefrontProduct
+      summary: Get a storefront product by slug
+      responses:
+        "200":
+          $ref: "#/components/responses/SuccessResponse"
+        "404":
+          $ref: "#/components/responses/NotFoundResponse"
+
+  /v3/stores/{store_id}/storefront/categories:
+    parameters:
+      - $ref: "#/components/parameters/StoreId"
+      - $ref: "#/components/parameters/OriginHeader"
+    get:
+      tags: [Storefront]
+      operationId: listStorefrontCategories
+      summary: List storefront categories
+      responses:
+        "200":
+          $ref: "#/components/responses/SuccessResponse"
+        "404":
+          $ref: "#/components/responses/NotFoundResponse"
+
+  /v3/stores/{store_id}/storefront/variants/pricing:
+    parameters:
+      - $ref: "#/components/parameters/StoreId"
+      - $ref: "#/components/parameters/VariantIds"
+      - $ref: "#/components/parameters/OriginHeader"
+    get:
+      tags: [Storefront]
+      operationId: getStorefrontVariantPricing
+      summary: Get storefront variant pricing
+      responses:
+        "200":
+          $ref: "#/components/responses/SuccessResponse"
+        "404":
+          $ref: "#/components/responses/NotFoundResponse"
+
+  /v3/stores/{store_id}/storefront/cart:
+    parameters:
+      - $ref: "#/components/parameters/StoreId"
+      - $ref: "#/components/parameters/OriginHeader"
+    get:
+      tags: [Storefront]
+      operationId: getGuestCart
+      summary: Get the guest storefront cart
+      responses:
+        "200":
+          $ref: "#/components/responses/SuccessResponse"
+        "404":
+          $ref: "#/components/responses/NotFoundResponse"
+
+  /v3/stores/{store_id}/storefront/cart/items:
+    parameters:
+      - $ref: "#/components/parameters/StoreId"
+      - $ref: "#/components/parameters/OriginHeader"
+    post:
+      tags: [Storefront]
+      operationId: addGuestCartItem
+      summary: Add an item to the guest storefront cart
+      requestBody:
+        $ref: "#/components/requestBodies/CartItemRequestBody"
+      responses:
+        "201":
+          $ref: "#/components/responses/CreatedResponse"
+        "400":
+          $ref: "#/components/responses/BadRequestResponse"
+        "404":
+          $ref: "#/components/responses/NotFoundResponse"
+
+  /v3/stores/{store_id}/storefront/cart/items/{item_id}:
+    parameters:
+      - $ref: "#/components/parameters/StoreId"
+      - $ref: "#/components/parameters/ItemId"
+      - $ref: "#/components/parameters/OriginHeader"
+    patch:
+      tags: [Storefront]
+      operationId: updateGuestCartItem
+      summary: Update a guest storefront cart item
+      requestBody:
+        $ref: "#/components/requestBodies/CartItemUpdateRequestBody"
+      responses:
+        "200":
+          $ref: "#/components/responses/SuccessResponse"
+        "400":
+          $ref: "#/components/responses/BadRequestResponse"
+        "404":
+          $ref: "#/components/responses/NotFoundResponse"
+    delete:
+      tags: [Storefront]
+      operationId: removeGuestCartItem
+      summary: Remove a guest storefront cart item
+      responses:
+        "200":
+          $ref: "#/components/responses/SuccessResponse"
+        "404":
+          $ref: "#/components/responses/NotFoundResponse"
+
+  /v3/stores/{store_id}/storefront/cart/merge:
+    parameters:
+      - $ref: "#/components/parameters/StoreId"
+      - $ref: "#/components/parameters/RequiredOriginHeader"
+    post:
+      tags: [Storefront]
+      operationId: mergeGuestCart
+      summary: Merge a guest cart into the authenticated customer cart
+      security:
+        - bearerAuth: []
+      responses:
+        "200":
+          $ref: "#/components/responses/SuccessResponse"
+        "401":
+          $ref: "#/components/responses/UnauthorizedResponse"
+        "404":
+          $ref: "#/components/responses/NotFoundResponse"
+
+  /v3/stores/{store_id}/storefront/guest-checkout:
+    parameters:
+      - $ref: "#/components/parameters/StoreId"
+      - $ref: "#/components/parameters/OriginHeader"
+    post:
+      tags: [Storefront]
+      operationId: createGuestCheckout
+      summary: Checkout a storefront cart as a guest
+      requestBody:
+        $ref: "#/components/requestBodies/GenericJsonRequestBody"
+      responses:
+        "201":
+          $ref: "#/components/responses/CreatedResponse"
+        "400":
+          $ref: "#/components/responses/BadRequestResponse"
+        "404":
+          $ref: "#/components/responses/NotFoundResponse"
+
+  /v3/orders/search-courier-service:
+    post:
+      tags: [Shipping]
+      operationId: searchPublicCourierServices
+      summary: Search courier services for public checkout
+      parameters:
+        - $ref: "#/components/parameters/OriginHeader"
+      requestBody:
+        $ref: "#/components/requestBodies/GenericJsonRequestBody"
+      responses:
+        "200":
+          $ref: "#/components/responses/SuccessResponse"
+        "400":
+          $ref: "#/components/responses/BadRequestResponse"
+
+  /v3/orders/public/{secret_slug}:
+    parameters:
+      - $ref: "#/components/parameters/SecretSlug"
+      - $ref: "#/components/parameters/OriginHeader"
+    get:
+      tags: [Public Orders]
+      operationId: getPublicOrder
+      summary: Get a public order by secret slug
+      responses:
+        "200":
+          $ref: "#/components/responses/SuccessResponse"
+        "404":
+          $ref: "#/components/responses/NotFoundResponse"
+
+  /v3/orders/public/{secret_slug}/payment:
+    parameters:
+      - $ref: "#/components/parameters/SecretSlug"
+      - $ref: "#/components/parameters/OriginHeader"
+    post:
+      tags: [Public Orders]
+      operationId: createPublicOrderPayment
+      summary: Create a payment for a public order
+      requestBody:
+        $ref: "#/components/requestBodies/GenericJsonRequestBody"
+      responses:
+        "200":
+          $ref: "#/components/responses/SuccessResponse"
+        "404":
+          $ref: "#/components/responses/NotFoundResponse"
+
+  /v3/discount-codes/check:
+    get:
+      tags: [Discounts]
+      operationId: checkDiscountCode
+      summary: Check discount code validity
+      parameters:
+        - $ref: "#/components/parameters/OriginHeader"
+      responses:
+        "200":
+          $ref: "#/components/responses/SuccessResponse"
+        "400":
+          $ref: "#/components/responses/BadRequestResponse"
+
+  /v3/customers/auth/otp/send:
+    post:
+      tags: [Customer Auth]
+      operationId: sendCustomerOtp
+      summary: Send a customer login OTP
+      parameters:
+        - $ref: "#/components/parameters/RequiredOriginHeader"
+      requestBody:
+        $ref: "#/components/requestBodies/CustomerOtpSendRequestBody"
+      responses:
+        "200":
+          $ref: "#/components/responses/SuccessResponse"
+        "400":
+          $ref: "#/components/responses/BadRequestResponse"
+        "401":
+          $ref: "#/components/responses/UnauthorizedResponse"
+
+  /v3/customers/auth/otp/verify:
+    post:
+      tags: [Customer Auth]
+      operationId: verifyCustomerOtp
+      summary: Verify a customer login OTP
+      parameters:
+        - $ref: "#/components/parameters/RequiredOriginHeader"
+      requestBody:
+        $ref: "#/components/requestBodies/CustomerOtpVerifyRequestBody"
+      responses:
+        "200":
+          $ref: "#/components/responses/SuccessResponse"
+        "400":
+          $ref: "#/components/responses/BadRequestResponse"
+        "401":
+          $ref: "#/components/responses/UnauthorizedResponse"
+
+  /v3/customers/jwt/refresh:
+    post:
+      tags: [Customer Auth]
+      operationId: refreshCustomerJwt
+      summary: Refresh a customer JWT
+      parameters:
+        - $ref: "#/components/parameters/RequiredOriginHeader"
+      requestBody:
+        $ref: "#/components/requestBodies/JwtRefreshRequestBody"
+      responses:
+        "200":
+          $ref: "#/components/responses/SuccessResponse"
+        "401":
+          $ref: "#/components/responses/UnauthorizedResponse"
+
+  /v3/customers/jwt/blacklist:
+    post:
+      tags: [Customer Auth]
+      operationId: blacklistCustomerJwt
+      summary: Blacklist customer JWTs
+      parameters:
+        - $ref: "#/components/parameters/RequiredOriginHeader"
+      requestBody:
+        $ref: "#/components/requestBodies/JwtBlacklistRequestBody"
+      responses:
+        "200":
+          $ref: "#/components/responses/SuccessResponse"
+        "400":
+          $ref: "#/components/responses/BadRequestResponse"
+
+  /v3/customers/forget-password:
+    post:
+      tags: [Customer Auth]
+      operationId: startCustomerPasswordReset
+      summary: Start a customer password reset flow
+      parameters:
+        - $ref: "#/components/parameters/RequiredOriginHeader"
+      requestBody:
+        $ref: "#/components/requestBodies/ForgetPasswordRequestBody"
+      responses:
+        "200":
+          $ref: "#/components/responses/SuccessResponse"
+        "400":
+          $ref: "#/components/responses/BadRequestResponse"
+
+  /v3/customers/save-password:
+    post:
+      tags: [Customer Auth]
+      operationId: saveCustomerPassword
+      summary: Save a new customer password from a reset token
+      parameters:
+        - $ref: "#/components/parameters/RequiredOriginHeader"
+      requestBody:
+        $ref: "#/components/requestBodies/SavePasswordRequestBody"
+      responses:
+        "200":
+          $ref: "#/components/responses/SuccessResponse"
+        "400":
+          $ref: "#/components/responses/BadRequestResponse"
+        "404":
+          $ref: "#/components/responses/NotFoundResponse"
+
+  /v3/customers/me:
+    get:
+      tags: [Customer Account]
+      operationId: getCustomerMe
+      summary: Get the authenticated customer profile
+      security:
+        - bearerAuth: []
+      parameters:
+        - $ref: "#/components/parameters/RequiredOriginHeader"
+      responses:
+        "200":
+          $ref: "#/components/responses/SuccessResponse"
+        "401":
+          $ref: "#/components/responses/UnauthorizedResponse"
+
+  /v3/customers/me/set-new-password:
+    post:
+      tags: [Customer Account]
+      operationId: setCustomerPassword
+      summary: Set a new password for the authenticated customer
+      security:
+        - bearerAuth: []
+      parameters:
+        - $ref: "#/components/parameters/RequiredOriginHeader"
+      requestBody:
+        $ref: "#/components/requestBodies/PasswordRequestBody"
+      responses:
+        "200":
+          $ref: "#/components/responses/SuccessResponse"
+        "400":
+          $ref: "#/components/responses/BadRequestResponse"
+        "401":
+          $ref: "#/components/responses/UnauthorizedResponse"
+
+  /v3/customers/me/cart:
+    get:
+      tags: [Customer Cart]
+      operationId: getCustomerCart
+      summary: Get the authenticated customer cart
+      security:
+        - bearerAuth: []
+      parameters:
+        - $ref: "#/components/parameters/RequiredOriginHeader"
+      responses:
+        "200":
+          $ref: "#/components/responses/SuccessResponse"
+        "401":
+          $ref: "#/components/responses/UnauthorizedResponse"
+
+  /v3/customers/me/cart/items:
+    post:
+      tags: [Customer Cart]
+      operationId: addCustomerCartItem
+      summary: Add an item to the authenticated customer cart
+      security:
+        - bearerAuth: []
+      parameters:
+        - $ref: "#/components/parameters/RequiredOriginHeader"
+      requestBody:
+        $ref: "#/components/requestBodies/CartItemRequestBody"
+      responses:
+        "200":
+          $ref: "#/components/responses/SuccessResponse"
+        "400":
+          $ref: "#/components/responses/BadRequestResponse"
+        "401":
+          $ref: "#/components/responses/UnauthorizedResponse"
+
+  /v3/customers/me/cart/items/{item_id}:
+    parameters:
+      - $ref: "#/components/parameters/ItemId"
+      - $ref: "#/components/parameters/RequiredOriginHeader"
+    patch:
+      tags: [Customer Cart]
+      operationId: updateCustomerCartItem
+      summary: Update an authenticated customer cart item
+      security:
+        - bearerAuth: []
+      requestBody:
+        $ref: "#/components/requestBodies/CartItemUpdateRequestBody"
+      responses:
+        "200":
+          $ref: "#/components/responses/SuccessResponse"
+        "400":
+          $ref: "#/components/responses/BadRequestResponse"
+        "401":
+          $ref: "#/components/responses/UnauthorizedResponse"
+    delete:
+      tags: [Customer Cart]
+      operationId: removeCustomerCartItem
+      summary: Remove an authenticated customer cart item
+      security:
+        - bearerAuth: []
+      responses:
+        "200":
+          $ref: "#/components/responses/SuccessResponse"
+        "401":
+          $ref: "#/components/responses/UnauthorizedResponse"
+
+  /v3/customers/me/cart/checkout:
+    post:
+      tags: [Customer Cart]
+      operationId: checkoutCustomerCart
+      summary: Checkout the authenticated customer cart
+      security:
+        - bearerAuth: []
+      parameters:
+        - $ref: "#/components/parameters/RequiredOriginHeader"
+      requestBody:
+        $ref: "#/components/requestBodies/GenericJsonRequestBody"
+      responses:
+        "201":
+          $ref: "#/components/responses/CreatedResponse"
+        "400":
+          $ref: "#/components/responses/BadRequestResponse"
+        "401":
+          $ref: "#/components/responses/UnauthorizedResponse"
+
+  /v3/customers/me/checkout/addresses:
+    get:
+      tags: [Customer Checkout]
+      operationId: listCheckoutAddresses
+      summary: List saved checkout addresses
+      security:
+        - bearerAuth: []
+      parameters:
+        - $ref: "#/components/parameters/RequiredOriginHeader"
+      responses:
+        "200":
+          $ref: "#/components/responses/SuccessResponse"
+        "401":
+          $ref: "#/components/responses/UnauthorizedResponse"
+
+  /v3/customers/me/checkout/payment-methods:
+    get:
+      tags: [Customer Checkout]
+      operationId: listCheckoutPaymentMethods
+      summary: List available checkout payment methods
+      security:
+        - bearerAuth: []
+      parameters:
+        - $ref: "#/components/parameters/RequiredOriginHeader"
+      responses:
+        "200":
+          $ref: "#/components/responses/SuccessResponse"
+        "401":
+          $ref: "#/components/responses/UnauthorizedResponse"
+
+  /v3/customers/me/checkout/shipping-options:
+    post:
+      tags: [Customer Checkout]
+      operationId: listCheckoutShippingOptions
+      summary: Get checkout shipping options
+      security:
+        - bearerAuth: []
+      parameters:
+        - $ref: "#/components/parameters/RequiredOriginHeader"
+      requestBody:
+        $ref: "#/components/requestBodies/GenericJsonRequestBody"
+      responses:
+        "200":
+          $ref: "#/components/responses/SuccessResponse"
+        "401":
+          $ref: "#/components/responses/UnauthorizedResponse"
+
+  /v3/customers/me/checkout/summary:
+    post:
+      tags: [Customer Checkout]
+      operationId: getCheckoutSummary
+      summary: Compute checkout summary
+      security:
+        - bearerAuth: []
+      parameters:
+        - $ref: "#/components/parameters/RequiredOriginHeader"
+      requestBody:
+        $ref: "#/components/requestBodies/GenericJsonRequestBody"
+      responses:
+        "200":
+          $ref: "#/components/responses/SuccessResponse"
+        "401":
+          $ref: "#/components/responses/UnauthorizedResponse"
+
+  /v3/customers/me/checkout/confirm:
+    post:
+      tags: [Customer Checkout]
+      operationId: confirmCheckout
+      summary: Confirm checkout
+      security:
+        - bearerAuth: []
+      parameters:
+        - $ref: "#/components/parameters/RequiredOriginHeader"
+      requestBody:
+        $ref: "#/components/requestBodies/GenericJsonRequestBody"
+      responses:
+        "201":
+          $ref: "#/components/responses/CreatedResponse"
+        "400":
+          $ref: "#/components/responses/BadRequestResponse"
+        "401":
+          $ref: "#/components/responses/UnauthorizedResponse"
+
+  /v3/customers/me/orders:
+    get:
+      tags: [Customer Orders]
+      operationId: listCustomerOrders
+      summary: List authenticated customer orders
+      security:
+        - bearerAuth: []
+      parameters:
+        - $ref: "#/components/parameters/RequiredOriginHeader"
+      responses:
+        "200":
+          $ref: "#/components/responses/SuccessResponse"
+        "401":
+          $ref: "#/components/responses/UnauthorizedResponse"
+
+  /v3/customers/me/orders/{id}:
+    parameters:
+      - $ref: "#/components/parameters/OrderId"
+      - $ref: "#/components/parameters/RequiredOriginHeader"
+    get:
+      tags: [Customer Orders]
+      operationId: getCustomerOrder
+      summary: Get an authenticated customer order
+      security:
+        - bearerAuth: []
+      responses:
+        "200":
+          $ref: "#/components/responses/SuccessResponse"
+        "401":
+          $ref: "#/components/responses/UnauthorizedResponse"
+        "404":
+          $ref: "#/components/responses/NotFoundResponse"
+
+  /v3/customers/me/subscriptions:
+    get:
+      tags: [Customer Subscriptions]
+      operationId: listCustomerSubscriptions
+      summary: List authenticated customer subscriptions
+      security:
+        - bearerAuth: []
+      parameters:
+        - $ref: "#/components/parameters/RequiredOriginHeader"
+      responses:
+        "200":
+          $ref: "#/components/responses/SuccessResponse"
+        "401":
+          $ref: "#/components/responses/UnauthorizedResponse"
+
+  /v3/customers/me/subscriptions/{id}:
+    parameters:
+      - $ref: "#/components/parameters/SubscriptionId"
+      - $ref: "#/components/parameters/RequiredOriginHeader"
+    get:
+      tags: [Customer Subscriptions]
+      operationId: getCustomerSubscription
+      summary: Get an authenticated customer subscription
+      security:
+        - bearerAuth: []
+      responses:
+        "200":
+          $ref: "#/components/responses/SuccessResponse"
+        "401":
+          $ref: "#/components/responses/UnauthorizedResponse"
+        "404":
+          $ref: "#/components/responses/NotFoundResponse"
+
+  /v3/customers/me/subscriptions/{id}/cancel:
+    parameters:
+      - $ref: "#/components/parameters/SubscriptionId"
+      - $ref: "#/components/parameters/RequiredOriginHeader"
+    post:
+      tags: [Customer Subscriptions]
+      operationId: cancelCustomerSubscription
+      summary: Cancel a customer subscription
+      security:
+        - bearerAuth: []
+      responses:
+        "200":
+          $ref: "#/components/responses/SuccessResponse"
+        "401":
+          $ref: "#/components/responses/UnauthorizedResponse"
+        "404":
+          $ref: "#/components/responses/NotFoundResponse"
+
+  /v3/customers/me/subscriptions/{id}/resume:
+    parameters:
+      - $ref: "#/components/parameters/SubscriptionId"
+      - $ref: "#/components/parameters/RequiredOriginHeader"
+    post:
+      tags: [Customer Subscriptions]
+      operationId: resumeCustomerSubscription
+      summary: Resume a customer subscription
+      security:
+        - bearerAuth: []
+      responses:
+        "200":
+          $ref: "#/components/responses/SuccessResponse"
+        "401":
+          $ref: "#/components/responses/UnauthorizedResponse"
+        "404":
+          $ref: "#/components/responses/NotFoundResponse"
+
+  /v3/customers/me/subscription-items/{id}/upgrade:
+    parameters:
+      - $ref: "#/components/parameters/SubscriptionItemId"
+      - $ref: "#/components/parameters/RequiredOriginHeader"
+    get:
+      tags: [Customer Subscriptions]
+      operationId: listSubscriptionUpgradeOptions
+      summary: List subscription upgrade options
+      security:
+        - bearerAuth: []
+      responses:
+        "200":
+          $ref: "#/components/responses/SuccessResponse"
+        "401":
+          $ref: "#/components/responses/UnauthorizedResponse"
+        "404":
+          $ref: "#/components/responses/NotFoundResponse"
+    post:
+      tags: [Customer Subscriptions]
+      operationId: upgradeSubscriptionItem
+      summary: Upgrade a subscription item
+      security:
+        - bearerAuth: []
+      requestBody:
+        $ref: "#/components/requestBodies/SubscriptionVariantChangeRequestBody"
+      responses:
+        "200":
+          $ref: "#/components/responses/SuccessResponse"
+        "400":
+          $ref: "#/components/responses/BadRequestResponse"
+        "401":
+          $ref: "#/components/responses/UnauthorizedResponse"
+        "404":
+          $ref: "#/components/responses/NotFoundResponse"
+
+  /v3/customers/me/subscription-items/{id}/downgrade:
+    parameters:
+      - $ref: "#/components/parameters/SubscriptionItemId"
+      - $ref: "#/components/parameters/RequiredOriginHeader"
+    get:
+      tags: [Customer Subscriptions]
+      operationId: listSubscriptionDowngradeOptions
+      summary: List subscription downgrade options
+      security:
+        - bearerAuth: []
+      responses:
+        "200":
+          $ref: "#/components/responses/SuccessResponse"
+        "401":
+          $ref: "#/components/responses/UnauthorizedResponse"
+        "404":
+          $ref: "#/components/responses/NotFoundResponse"
+    post:
+      tags: [Customer Subscriptions]
+      operationId: downgradeSubscriptionItem
+      summary: Downgrade a subscription item
+      security:
+        - bearerAuth: []
+      requestBody:
+        $ref: "#/components/requestBodies/SubscriptionVariantChangeRequestBody"
+      responses:
+        "200":
+          $ref: "#/components/responses/SuccessResponse"
+        "400":
+          $ref: "#/components/responses/BadRequestResponse"
+        "401":
+          $ref: "#/components/responses/UnauthorizedResponse"
+        "404":
+          $ref: "#/components/responses/NotFoundResponse"
+
+  /v3/customers/me/variants/{uuid}/course:
+    parameters:
+      - $ref: "#/components/parameters/Uuid"
+      - $ref: "#/components/parameters/RequiredOriginHeader"
+    get:
+      tags: [Customer Courses]
+      operationId: getCustomerVariantCourse
+      summary: Get course access for a purchased variant
+      security:
+        - bearerAuth: []
+      responses:
+        "200":
+          $ref: "#/components/responses/SuccessResponse"
+        "401":
+          $ref: "#/components/responses/UnauthorizedResponse"
+        "404":
+          $ref: "#/components/responses/NotFoundResponse"
+
+  /v3/customers/me/course-sections/{uuid}:
+    parameters:
+      - $ref: "#/components/parameters/Uuid"
+      - $ref: "#/components/parameters/RequiredOriginHeader"
+    get:
+      tags: [Customer Courses]
+      operationId: getCustomerCourseSection
+      summary: Get a course section
+      security:
+        - bearerAuth: []
+      responses:
+        "200":
+          $ref: "#/components/responses/SuccessResponse"
+        "401":
+          $ref: "#/components/responses/UnauthorizedResponse"
+        "404":
+          $ref: "#/components/responses/NotFoundResponse"
+
+  /v3/customers/me/course-contents/{uuid}:
+    parameters:
+      - $ref: "#/components/parameters/Uuid"
+      - $ref: "#/components/parameters/RequiredOriginHeader"
+    get:
+      tags: [Customer Courses]
+      operationId: getCustomerCourseContent
+      summary: Get a course content item
+      security:
+        - bearerAuth: []
+      responses:
+        "200":
+          $ref: "#/components/responses/SuccessResponse"
+        "401":
+          $ref: "#/components/responses/UnauthorizedResponse"
+        "404":
+          $ref: "#/components/responses/NotFoundResponse"
+    patch:
+      tags: [Customer Courses]
+      operationId: updateCustomerCourseContentProgress
+      summary: Update course content progress
+      security:
+        - bearerAuth: []
+      requestBody:
+        $ref: "#/components/requestBodies/GenericJsonRequestBody"
+      responses:
+        "200":
+          $ref: "#/components/responses/SuccessResponse"
+        "400":
+          $ref: "#/components/responses/BadRequestResponse"
+        "401":
+          $ref: "#/components/responses/UnauthorizedResponse"
+        "404":
+          $ref: "#/components/responses/NotFoundResponse"
+
+  /v3/locations:
+    get:
+      tags: [Locations]
+      operationId: listLocations
+      summary: List locations for authenticated business flows
+      security:
+        - bearerAuth: []
+        - apiKeyAuth: []
+      responses:
+        "200":
+          $ref: "#/components/responses/SuccessResponse"
+        "401":
+          $ref: "#/components/responses/UnauthorizedResponse"
+        "403":
+          $ref: "#/components/responses/ForbiddenResponse"
+
+  /v3/shipping-costs:
+    post:
+      tags: [Shipping]
+      operationId: searchShippingCosts
+      summary: Search shipping costs
+      security:
+        - bearerAuth: []
+        - apiKeyAuth: []
+      requestBody:
+        $ref: "#/components/requestBodies/GenericJsonRequestBody"
+      responses:
+        "200":
+          $ref: "#/components/responses/SuccessResponse"
+        "400":
+          $ref: "#/components/responses/BadRequestResponse"
+        "401":
+          $ref: "#/components/responses/UnauthorizedResponse"
+        "403":
+          $ref: "#/components/responses/ForbiddenResponse"
+
+  /v3/shipping-costs/search-courier-service:
+    post:
+      tags: [Shipping]
+      operationId: searchCourierServices
+      summary: Search courier services
+      security:
+        - bearerAuth: []
+        - apiKeyAuth: []
+      requestBody:
+        $ref: "#/components/requestBodies/GenericJsonRequestBody"
+      responses:
+        "200":
+          $ref: "#/components/responses/SuccessResponse"
+        "400":
+          $ref: "#/components/responses/BadRequestResponse"
+        "401":
+          $ref: "#/components/responses/UnauthorizedResponse"
+        "403":
+          $ref: "#/components/responses/ForbiddenResponse"
+
+  /v3/shipping-costs/search-warehouse:
+    post:
+      tags: [Shipping]
+      operationId: searchWarehouses
+      summary: Search warehouses
+      security:
+        - bearerAuth: []
+        - apiKeyAuth: []
+      requestBody:
+        $ref: "#/components/requestBodies/GenericJsonRequestBody"
+      responses:
+        "200":
+          $ref: "#/components/responses/SuccessResponse"
+        "400":
+          $ref: "#/components/responses/BadRequestResponse"
+        "401":
+          $ref: "#/components/responses/UnauthorizedResponse"
+        "403":
+          $ref: "#/components/responses/ForbiddenResponse"
+
+  /v3/orders:
+    get:
+      tags: [Business Orders]
+      operationId: listOrders
+      summary: List business orders
+      security:
+        - bearerAuth: []
+        - apiKeyAuth: []
+      responses:
+        "200":
+          $ref: "#/components/responses/SuccessResponse"
+        "401":
+          $ref: "#/components/responses/UnauthorizedResponse"
+        "403":
+          $ref: "#/components/responses/ForbiddenResponse"
+    post:
+      tags: [Business Orders]
+      operationId: createOrder
+      summary: Create a business order
+      security:
+        - bearerAuth: []
+        - apiKeyAuth: []
+      requestBody:
+        $ref: "#/components/requestBodies/GenericJsonRequestBody"
+      responses:
+        "200":
+          $ref: "#/components/responses/SuccessResponse"
+        "400":
+          $ref: "#/components/responses/BadRequestResponse"
+        "401":
+          $ref: "#/components/responses/UnauthorizedResponse"
+        "403":
+          $ref: "#/components/responses/ForbiddenResponse"
+
+  /v3/orders/statistics:
+    get:
+      tags: [Business Orders]
+      operationId: getOrderStatistics
+      summary: Get order statistics
+      security:
+        - bearerAuth: []
+        - apiKeyAuth: []
+      responses:
+        "200":
+          $ref: "#/components/responses/SuccessResponse"
+        "401":
+          $ref: "#/components/responses/UnauthorizedResponse"
+        "403":
+          $ref: "#/components/responses/ForbiddenResponse"
+
+  /v3/orders/change-status:
+    post:
+      tags: [Business Orders]
+      operationId: changeOrderStatus
+      summary: Change order status in bulk
+      security:
+        - bearerAuth: []
+        - apiKeyAuth: []
+      requestBody:
+        $ref: "#/components/requestBodies/GenericJsonRequestBody"
+      responses:
+        "200":
+          $ref: "#/components/responses/SuccessResponse"
+        "400":
+          $ref: "#/components/responses/BadRequestResponse"
+        "401":
+          $ref: "#/components/responses/UnauthorizedResponse"
+        "403":
+          $ref: "#/components/responses/ForbiddenResponse"
+
+  /v3/orders/delete:
+    post:
+      tags: [Business Orders]
+      operationId: deleteOrders
+      summary: Delete orders in bulk
+      security:
+        - bearerAuth: []
+        - apiKeyAuth: []
+      requestBody:
+        $ref: "#/components/requestBodies/GenericJsonRequestBody"
+      responses:
+        "200":
+          $ref: "#/components/responses/SuccessResponse"
+        "400":
+          $ref: "#/components/responses/BadRequestResponse"
+        "401":
+          $ref: "#/components/responses/UnauthorizedResponse"
+        "403":
+          $ref: "#/components/responses/ForbiddenResponse"
+
+  /v3/orders/mark-not-spam:
+    post:
+      tags: [Business Orders]
+      operationId: markOrdersNotSpam
+      summary: Mark orders as not spam
+      security:
+        - bearerAuth: []
+        - apiKeyAuth: []
+      requestBody:
+        $ref: "#/components/requestBodies/GenericJsonRequestBody"
+      responses:
+        "200":
+          $ref: "#/components/responses/SuccessResponse"
+        "400":
+          $ref: "#/components/responses/BadRequestResponse"
+        "401":
+          $ref: "#/components/responses/UnauthorizedResponse"
+        "403":
+          $ref: "#/components/responses/ForbiddenResponse"
+
+  /v3/orders/upload-change-status:
+    post:
+      tags: [Business Orders]
+      operationId: uploadOrderStatusChanges
+      summary: Upload a CSV to change order status
+      security:
+        - bearerAuth: []
+        - apiKeyAuth: []
+      requestBody:
+        $ref: "#/components/requestBodies/GenericUploadRequestBody"
+      responses:
+        "200":
+          $ref: "#/components/responses/SuccessResponse"
+        "400":
+          $ref: "#/components/responses/BadRequestResponse"
+        "401":
+          $ref: "#/components/responses/UnauthorizedResponse"
+        "403":
+          $ref: "#/components/responses/ForbiddenResponse"
+
+  /v3/orders/upload-receipt:
+    post:
+      tags: [Business Orders]
+      operationId: uploadOrderReceipt
+      summary: Upload order receipt data
+      security:
+        - bearerAuth: []
+        - apiKeyAuth: []
+      requestBody:
+        $ref: "#/components/requestBodies/GenericUploadRequestBody"
+      responses:
+        "200":
+          $ref: "#/components/responses/SuccessResponse"
+        "400":
+          $ref: "#/components/responses/BadRequestResponse"
+        "401":
+          $ref: "#/components/responses/UnauthorizedResponse"
+        "403":
+          $ref: "#/components/responses/ForbiddenResponse"
+
+  /v3/orders/upload:
+    post:
+      tags: [Business Orders]
+      operationId: uploadOrders
+      summary: Upload orders from a file
+      security:
+        - bearerAuth: []
+        - apiKeyAuth: []
+      requestBody:
+        $ref: "#/components/requestBodies/GenericUploadRequestBody"
+      responses:
+        "200":
+          $ref: "#/components/responses/SuccessResponse"
+        "400":
+          $ref: "#/components/responses/BadRequestResponse"
+        "401":
+          $ref: "#/components/responses/UnauthorizedResponse"
+        "403":
+          $ref: "#/components/responses/ForbiddenResponse"
+
+  /v3/orders/generate-awb:
+    post:
+      tags: [Business Orders]
+      operationId: generateOrderAwb
+      summary: Generate airway bills for orders
+      security:
+        - bearerAuth: []
+        - apiKeyAuth: []
+      requestBody:
+        $ref: "#/components/requestBodies/GenericJsonRequestBody"
+      responses:
+        "200":
+          $ref: "#/components/responses/SuccessResponse"
+        "400":
+          $ref: "#/components/responses/BadRequestResponse"
+        "401":
+          $ref: "#/components/responses/UnauthorizedResponse"
+        "403":
+          $ref: "#/components/responses/ForbiddenResponse"
+
+  /v3/orders/cancel-awb:
+    post:
+      tags: [Business Orders]
+      operationId: cancelOrderAwb
+      summary: Cancel airway bills for orders
+      security:
+        - bearerAuth: []
+        - apiKeyAuth: []
+      requestBody:
+        $ref: "#/components/requestBodies/GenericJsonRequestBody"
+      responses:
+        "200":
+          $ref: "#/components/responses/SuccessResponse"
+        "400":
+          $ref: "#/components/responses/BadRequestResponse"
+        "401":
+          $ref: "#/components/responses/UnauthorizedResponse"
+        "403":
+          $ref: "#/components/responses/ForbiddenResponse"
+
+  /v3/orders/tags:
+    get:
+      tags: [Business Orders]
+      operationId: listOrderTags
+      summary: List order tags
+      security:
+        - bearerAuth: []
+        - apiKeyAuth: []
+      responses:
+        "200":
+          $ref: "#/components/responses/SuccessResponse"
+        "401":
+          $ref: "#/components/responses/UnauthorizedResponse"
+        "403":
+          $ref: "#/components/responses/ForbiddenResponse"
+
+  /v3/orders/utm-sources:
+    get:
+      tags: [Business Orders]
+      operationId: listOrderUtmSources
+      summary: List order UTM sources
+      security:
+        - bearerAuth: []
+        - apiKeyAuth: []
+      responses:
+        "200":
+          $ref: "#/components/responses/SuccessResponse"
+        "401":
+          $ref: "#/components/responses/UnauthorizedResponse"
+        "403":
+          $ref: "#/components/responses/ForbiddenResponse"
+
+  /v3/orders/utm-mediums:
+    get:
+      tags: [Business Orders]
+      operationId: listOrderUtmMediums
+      summary: List order UTM mediums
+      security:
+        - bearerAuth: []
+        - apiKeyAuth: []
+      responses:
+        "200":
+          $ref: "#/components/responses/SuccessResponse"
+        "401":
+          $ref: "#/components/responses/UnauthorizedResponse"
+        "403":
+          $ref: "#/components/responses/ForbiddenResponse"
+
+  /v3/orders/utm-campaigns:
+    get:
+      tags: [Business Orders]
+      operationId: listOrderUtmCampaigns
+      summary: List order UTM campaigns
+      security:
+        - bearerAuth: []
+        - apiKeyAuth: []
+      responses:
+        "200":
+          $ref: "#/components/responses/SuccessResponse"
+        "401":
+          $ref: "#/components/responses/UnauthorizedResponse"
+        "403":
+          $ref: "#/components/responses/ForbiddenResponse"
+
+  /v3/orders/utm-contents:
+    get:
+      tags: [Business Orders]
+      operationId: listOrderUtmContents
+      summary: List order UTM contents
+      security:
+        - bearerAuth: []
+        - apiKeyAuth: []
+      responses:
+        "200":
+          $ref: "#/components/responses/SuccessResponse"
+        "401":
+          $ref: "#/components/responses/UnauthorizedResponse"
+        "403":
+          $ref: "#/components/responses/ForbiddenResponse"
+
+  /v3/orders/utm-terms:
+    get:
+      tags: [Business Orders]
+      operationId: listOrderUtmTerms
+      summary: List order UTM terms
+      security:
+        - bearerAuth: []
+        - apiKeyAuth: []
+      responses:
+        "200":
+          $ref: "#/components/responses/SuccessResponse"
+        "401":
+          $ref: "#/components/responses/UnauthorizedResponse"
+        "403":
+          $ref: "#/components/responses/ForbiddenResponse"
+
+  /v3/orders/pg-reference-id/{pg_reference_id}:
+    parameters:
+      - $ref: "#/components/parameters/PgReferenceId"
+    get:
+      tags: [Business Orders]
+      operationId: getOrderByPgReferenceId
+      summary: Get an order by payment gateway reference ID
+      security:
+        - bearerAuth: []
+        - apiKeyAuth: []
+      responses:
+        "200":
+          $ref: "#/components/responses/SuccessResponse"
+        "401":
+          $ref: "#/components/responses/UnauthorizedResponse"
+        "403":
+          $ref: "#/components/responses/ForbiddenResponse"
+        "404":
+          $ref: "#/components/responses/NotFoundResponse"
+
+  /v3/orders/pg-reference-ids:
+    get:
+      tags: [Business Orders]
+      operationId: listOrdersByPgReferenceIds
+      summary: Get orders by payment gateway reference IDs
+      security:
+        - bearerAuth: []
+        - apiKeyAuth: []
+      responses:
+        "200":
+          $ref: "#/components/responses/SuccessResponse"
+        "401":
+          $ref: "#/components/responses/UnauthorizedResponse"
+        "403":
+          $ref: "#/components/responses/ForbiddenResponse"
+
+  /v3/orders/{id}:
+    parameters:
+      - $ref: "#/components/parameters/OrderId"
+    get:
+      tags: [Business Orders]
+      operationId: getOrder
+      summary: Get a business order
+      security:
+        - bearerAuth: []
+        - apiKeyAuth: []
+      responses:
+        "200":
+          $ref: "#/components/responses/SuccessResponse"
+        "401":
+          $ref: "#/components/responses/UnauthorizedResponse"
+        "403":
+          $ref: "#/components/responses/ForbiddenResponse"
+        "404":
+          $ref: "#/components/responses/NotFoundResponse"
+    patch:
+      tags: [Business Orders]
+      operationId: updateOrder
+      summary: Update a business order
+      security:
+        - bearerAuth: []
+        - apiKeyAuth: []
+      requestBody:
+        $ref: "#/components/requestBodies/GenericJsonRequestBody"
+      responses:
+        "200":
+          $ref: "#/components/responses/SuccessResponse"
+        "400":
+          $ref: "#/components/responses/BadRequestResponse"
+        "401":
+          $ref: "#/components/responses/UnauthorizedResponse"
+        "403":
+          $ref: "#/components/responses/ForbiddenResponse"
+        "404":
+          $ref: "#/components/responses/NotFoundResponse"
+
+  /v3/orders/{id}/actions:
+    parameters:
+      - $ref: "#/components/parameters/OrderId"
+    get:
+      tags: [Business Orders]
+      operationId: getOrderActions
+      summary: Get available actions for an order
+      security:
+        - bearerAuth: []
+        - apiKeyAuth: []
+      responses:
+        "200":
+          $ref: "#/components/responses/SuccessResponse"
+        "401":
+          $ref: "#/components/responses/UnauthorizedResponse"
+        "403":
+          $ref: "#/components/responses/ForbiddenResponse"
+        "404":
+          $ref: "#/components/responses/NotFoundResponse"
+
+  /v3/orders/{id}/chats:
+    parameters:
+      - $ref: "#/components/parameters/OrderId"
+    get:
+      tags: [Business Orders]
+      operationId: listOrderChats
+      summary: Get order chat text
+      security:
+        - bearerAuth: []
+        - apiKeyAuth: []
+      responses:
+        "200":
+          $ref: "#/components/responses/SuccessResponse"
+        "401":
+          $ref: "#/components/responses/UnauthorizedResponse"
+        "403":
+          $ref: "#/components/responses/ForbiddenResponse"
+        "404":
+          $ref: "#/components/responses/NotFoundResponse"
+
+  /v3/orders/{id}/chats/{chat_id}:
+    parameters:
+      - $ref: "#/components/parameters/OrderId"
+      - $ref: "#/components/parameters/ChatId"
+    get:
+      tags: [Business Orders]
+      operationId: getOrderChat
+      summary: Get a single order chat entry
+      security:
+        - bearerAuth: []
+        - apiKeyAuth: []
+      responses:
+        "200":
+          $ref: "#/components/responses/SuccessResponse"
+        "401":
+          $ref: "#/components/responses/UnauthorizedResponse"
+        "403":
+          $ref: "#/components/responses/ForbiddenResponse"
+        "404":
+          $ref: "#/components/responses/NotFoundResponse"
+
+  /v3/orders/{id}/emails:
+    parameters:
+      - $ref: "#/components/parameters/OrderId"
+    get:
+      tags: [Business Orders]
+      operationId: listOrderEmails
+      summary: List order emails
+      security:
+        - bearerAuth: []
+        - apiKeyAuth: []
+      responses:
+        "200":
+          $ref: "#/components/responses/SuccessResponse"
+        "401":
+          $ref: "#/components/responses/UnauthorizedResponse"
+        "403":
+          $ref: "#/components/responses/ForbiddenResponse"
+        "404":
+          $ref: "#/components/responses/NotFoundResponse"
+
+  /v3/orders/{id}/message-history:
+    parameters:
+      - $ref: "#/components/parameters/OrderId"
+    get:
+      tags: [Business Orders]
+      operationId: getOrderMessageHistory
+      summary: Get order message history
+      security:
+        - bearerAuth: []
+        - apiKeyAuth: []
+      responses:
+        "200":
+          $ref: "#/components/responses/SuccessResponse"
+        "401":
+          $ref: "#/components/responses/UnauthorizedResponse"
+        "403":
+          $ref: "#/components/responses/ForbiddenResponse"
+        "404":
+          $ref: "#/components/responses/NotFoundResponse"
+    post:
+      tags: [Business Orders]
+      operationId: addOrderMessageHistory
+      summary: Add order message history
+      security:
+        - bearerAuth: []
+        - apiKeyAuth: []
+      requestBody:
+        $ref: "#/components/requestBodies/GenericJsonRequestBody"
+      responses:
+        "200":
+          $ref: "#/components/responses/SuccessResponse"
+        "400":
+          $ref: "#/components/responses/BadRequestResponse"
+        "401":
+          $ref: "#/components/responses/UnauthorizedResponse"
+        "403":
+          $ref: "#/components/responses/ForbiddenResponse"
+        "404":
+          $ref: "#/components/responses/NotFoundResponse"
+
+  /v3/orders/{id}/payment:
+    parameters:
+      - $ref: "#/components/parameters/OrderId"
+    post:
+      tags: [Business Orders]
+      operationId: createOrderPayment
+      summary: Create a payment for an order
+      security:
+        - bearerAuth: []
+        - apiKeyAuth: []
+      requestBody:
+        $ref: "#/components/requestBodies/GenericJsonRequestBody"
+      responses:
+        "200":
+          $ref: "#/components/responses/SuccessResponse"
+        "400":
+          $ref: "#/components/responses/BadRequestResponse"
+        "401":
+          $ref: "#/components/responses/UnauthorizedResponse"
+        "403":
+          $ref: "#/components/responses/ForbiddenResponse"
+        "404":
+          $ref: "#/components/responses/NotFoundResponse"
+
+  /v3/orders/{id}/customer:
+    parameters:
+      - $ref: "#/components/parameters/OrderId"
+    patch:
+      tags: [Business Orders]
+      operationId: updateOrderCustomer
+      summary: Update order customer data
+      security:
+        - bearerAuth: []
+        - apiKeyAuth: []
+      requestBody:
+        $ref: "#/components/requestBodies/GenericJsonRequestBody"
+      responses:
+        "200":
+          $ref: "#/components/responses/SuccessResponse"
+        "400":
+          $ref: "#/components/responses/BadRequestResponse"
+        "401":
+          $ref: "#/components/responses/UnauthorizedResponse"
+        "403":
+          $ref: "#/components/responses/ForbiddenResponse"
+        "404":
+          $ref: "#/components/responses/NotFoundResponse"
+
+  /v3/orders/{id}/shipment:
+    parameters:
+      - $ref: "#/components/parameters/OrderId"
+    patch:
+      tags: [Business Orders]
+      operationId: updateOrderShipment
+      summary: Update raw shipment data
+      security:
+        - bearerAuth: []
+        - apiKeyAuth: []
+      requestBody:
+        $ref: "#/components/requestBodies/GenericJsonRequestBody"
+      responses:
+        "200":
+          $ref: "#/components/responses/SuccessResponse"
+        "400":
+          $ref: "#/components/responses/BadRequestResponse"
+        "401":
+          $ref: "#/components/responses/UnauthorizedResponse"
+        "403":
+          $ref: "#/components/responses/ForbiddenResponse"
+        "404":
+          $ref: "#/components/responses/NotFoundResponse"
+
+  /v3/orders/{id}/shipment-receipt:
+    parameters:
+      - $ref: "#/components/parameters/OrderId"
+    patch:
+      tags: [Business Orders]
+      operationId: updateOrderShipmentReceipt
+      summary: Update shipment receipt data
+      security:
+        - bearerAuth: []
+        - apiKeyAuth: []
+      requestBody:
+        $ref: "#/components/requestBodies/GenericJsonRequestBody"
+      responses:
+        "200":
+          $ref: "#/components/responses/SuccessResponse"
+        "400":
+          $ref: "#/components/responses/BadRequestResponse"
+        "401":
+          $ref: "#/components/responses/UnauthorizedResponse"
+        "403":
+          $ref: "#/components/responses/ForbiddenResponse"
+        "404":
+          $ref: "#/components/responses/NotFoundResponse"
+
+  /v3/orders/{id}/shipment-status-history:
+    parameters:
+      - $ref: "#/components/parameters/OrderId"
+    post:
+      tags: [Business Orders]
+      operationId: createOrderShipmentStatusHistory
+      summary: Add shipment status history to an order
+      security:
+        - bearerAuth: []
+        - apiKeyAuth: []
+      requestBody:
+        $ref: "#/components/requestBodies/GenericJsonRequestBody"
+      responses:
+        "200":
+          $ref: "#/components/responses/SuccessResponse"
+        "400":
+          $ref: "#/components/responses/BadRequestResponse"
+        "401":
+          $ref: "#/components/responses/UnauthorizedResponse"
+        "403":
+          $ref: "#/components/responses/ForbiddenResponse"
+        "404":
+          $ref: "#/components/responses/NotFoundResponse"
+
+  /v3/orders/{id}/update-tags:
+    parameters:
+      - $ref: "#/components/parameters/OrderId"
+    post:
+      tags: [Business Orders]
+      operationId: updateOrderTags
+      summary: Update order tags
+      security:
+        - bearerAuth: []
+        - apiKeyAuth: []
+      requestBody:
+        $ref: "#/components/requestBodies/GenericJsonRequestBody"
+      responses:
+        "200":
+          $ref: "#/components/responses/SuccessResponse"
+        "400":
+          $ref: "#/components/responses/BadRequestResponse"
+        "401":
+          $ref: "#/components/responses/UnauthorizedResponse"
+        "403":
+          $ref: "#/components/responses/ForbiddenResponse"
+        "404":
+          $ref: "#/components/responses/NotFoundResponse"
+
+  /v3/orders/{id}/trigger-purchase:
+    parameters:
+      - $ref: "#/components/parameters/OrderId"
+    post:
+      tags: [Business Orders]
+      operationId: triggerOrderPurchase
+      summary: Trigger purchase processing for an order
+      security:
+        - bearerAuth: []
+        - apiKeyAuth: []
+      requestBody:
+        $ref: "#/components/requestBodies/GenericJsonRequestBody"
+      responses:
+        "200":
+          $ref: "#/components/responses/SuccessResponse"
+        "400":
+          $ref: "#/components/responses/BadRequestResponse"
+        "401":
+          $ref: "#/components/responses/UnauthorizedResponse"
+        "403":
+          $ref: "#/components/responses/ForbiddenResponse"
+        "404":
+          $ref: "#/components/responses/NotFoundResponse"
+
+  /v3/orders/{id}/duplicate:
+    parameters:
+      - $ref: "#/components/parameters/OrderId"
+    post:
+      tags: [Business Orders]
+      operationId: duplicateOrder
+      summary: Duplicate and cancel an order
+      security:
+        - bearerAuth: []
+        - apiKeyAuth: []
+      requestBody:
+        $ref: "#/components/requestBodies/GenericJsonRequestBody"
+      responses:
+        "200":
+          $ref: "#/components/responses/SuccessResponse"
+        "400":
+          $ref: "#/components/responses/BadRequestResponse"
+        "401":
+          $ref: "#/components/responses/UnauthorizedResponse"
+        "403":
+          $ref: "#/components/responses/ForbiddenResponse"
+        "404":
+          $ref: "#/components/responses/NotFoundResponse"
+
+  /v3/orders/{id}/check-payment:
+    parameters:
+      - $ref: "#/components/parameters/OrderId"
+    post:
+      tags: [Business Orders]
+      operationId: checkOrderPayment
+      summary: Check order payment status
+      security:
+        - bearerAuth: []
+        - apiKeyAuth: []
+      responses:
+        "200":
+          $ref: "#/components/responses/SuccessResponse"
+        "401":
+          $ref: "#/components/responses/UnauthorizedResponse"
+        "403":
+          $ref: "#/components/responses/ForbiddenResponse"
+        "404":
+          $ref: "#/components/responses/NotFoundResponse"
+
+  /v3/orders/{id}/check-settlement:
+    parameters:
+      - $ref: "#/components/parameters/OrderId"
+    post:
+      tags: [Business Orders]
+      operationId: checkOrderSettlement
+      summary: Check order settlement status
+      security:
+        - bearerAuth: []
+        - apiKeyAuth: []
+      responses:
+        "200":
+          $ref: "#/components/responses/SuccessResponse"
+        "401":
+          $ref: "#/components/responses/UnauthorizedResponse"
+        "403":
+          $ref: "#/components/responses/ForbiddenResponse"
+        "404":
+          $ref: "#/components/responses/NotFoundResponse"
+
+  /v3/orders/{id}/send-product-digital:
+    parameters:
+      - $ref: "#/components/parameters/OrderId"
+    post:
+      tags: [Business Orders]
+      operationId: sendDigitalProduct
+      summary: Send digital product access for an order
+      security:
+        - bearerAuth: []
+        - apiKeyAuth: []
+      responses:
+        "200":
+          $ref: "#/components/responses/SuccessResponse"
+        "401":
+          $ref: "#/components/responses/UnauthorizedResponse"
+        "403":
+          $ref: "#/components/responses/ForbiddenResponse"
+        "404":
+          $ref: "#/components/responses/NotFoundResponse"
+
+  /v3/orders/{id}/send-lms-access:
+    parameters:
+      - $ref: "#/components/parameters/OrderId"
+    post:
+      tags: [Business Orders]
+      operationId: sendLmsAccess
+      summary: Send LMS access for an order
+      security:
+        - bearerAuth: []
+        - apiKeyAuth: []
+      responses:
+        "200":
+          $ref: "#/components/responses/SuccessResponse"
+        "401":
+          $ref: "#/components/responses/UnauthorizedResponse"
+        "403":
+          $ref: "#/components/responses/ForbiddenResponse"
+        "404":
+          $ref: "#/components/responses/NotFoundResponse"
+
+components:
+  securitySchemes:
+    bearerAuth:
+      type: http
+      scheme: bearer
+      bearerFormat: JWT
+    apiKeyAuth:
+      type: apiKey
+      in: header
+      name: authorization
+      description: "Send `Authorization: Bearer <api_key>` for machine-authenticated business requests."
+
+  parameters:
+    OriginHeader:
+      name: x-origin
+      in: header
+      required: false
+      description: Store origin or custom domain used to resolve storefront context.
+      schema:
+        type: string
+    RequiredOriginHeader:
+      name: x-origin
+      in: header
+      required: true
+      description: Store origin or custom domain used to resolve customer context.
+      schema:
+        type: string
+    StoreId:
+      name: store_id
+      in: path
+      required: true
+      schema:
+        type: string
+      description: Store `unique_id`.
+    ProductSlug:
+      name: slug
+      in: path
+      required: true
+      schema:
+        type: string
+    SecretSlug:
+      name: secret_slug
+      in: path
+      required: true
+      schema:
+        type: string
+    OrderId:
+      name: id
+      in: path
+      required: true
+      schema:
+        type: string
+    SubscriptionId:
+      name: id
+      in: path
+      required: true
+      schema:
+        type: string
+    SubscriptionItemId:
+      name: id
+      in: path
+      required: true
+      schema:
+        type: string
+    ItemId:
+      name: item_id
+      in: path
+      required: true
+      schema:
+        type: string
+    ChatId:
+      name: chat_id
+      in: path
+      required: true
+      schema:
+        type: string
+    Uuid:
+      name: uuid
+      in: path
+      required: true
+      schema:
+        type: string
+    PgReferenceId:
+      name: pg_reference_id
+      in: path
+      required: true
+      schema:
+        type: string
+    VariantIds:
+      name: ids
+      in: query
+      required: false
+      description: Comma-separated variant IDs.
+      schema:
+        type: string
+
+  requestBodies:
+    GenericJsonRequestBody:
+      required: false
+      content:
+        application/json:
+          schema:
+            $ref: "#/components/schemas/GenericJsonObject"
+    GenericUploadRequestBody:
+      required: true
+      content:
+        multipart/form-data:
+          schema:
+            $ref: "#/components/schemas/GenericUploadRequest"
+    CartItemRequestBody:
+      required: true
+      content:
+        application/json:
+          schema:
+            $ref: "#/components/schemas/CartItemRequest"
+    CartItemUpdateRequestBody:
+      required: true
+      content:
+        application/json:
+          schema:
+            $ref: "#/components/schemas/CartItemUpdateRequest"
+    PasswordRequestBody:
+      required: true
+      content:
+        application/json:
+          schema:
+            $ref: "#/components/schemas/PasswordRequest"
+    ForgetPasswordRequestBody:
+      required: true
+      content:
+        application/json:
+          schema:
+            $ref: "#/components/schemas/ForgetPasswordRequest"
+    SavePasswordRequestBody:
+      required: true
+      content:
+        application/json:
+          schema:
+            $ref: "#/components/schemas/SavePasswordRequest"
+    CustomerOtpSendRequestBody:
+      required: true
+      content:
+        application/json:
+          schema:
+            $ref: "#/components/schemas/CustomerOtpSendRequest"
+    CustomerOtpVerifyRequestBody:
+      required: true
+      content:
+        application/json:
+          schema:
+            $ref: "#/components/schemas/CustomerOtpVerifyRequest"
+    JwtRefreshRequestBody:
+      required: true
+      content:
+        application/json:
+          schema:
+            $ref: "#/components/schemas/JwtRefreshRequest"
+    JwtBlacklistRequestBody:
+      required: true
+      content:
+        application/json:
+          schema:
+            $ref: "#/components/schemas/JwtBlacklistRequest"
+    SubscriptionVariantChangeRequestBody:
+      required: true
+      content:
+        application/json:
+          schema:
+            $ref: "#/components/schemas/SubscriptionVariantChangeRequest"
+
+  responses:
+    SuccessResponse:
+      description: Success
+      content:
+        application/json:
+          schema:
+            $ref: "#/components/schemas/ApiSuccessResponse"
+    CreatedResponse:
+      description: Created
+      content:
+        application/json:
+          schema:
+            $ref: "#/components/schemas/ApiSuccessResponse"
+    BadRequestResponse:
+      description: Bad Request
+      content:
+        application/json:
+          schema:
+            $ref: "#/components/schemas/ApiErrorResponse"
+    UnauthorizedResponse:
+      description: Unauthorized
+      content:
+        application/json:
+          schema:
+            $ref: "#/components/schemas/ApiErrorResponse"
+    ForbiddenResponse:
+      description: Forbidden
+      content:
+        application/json:
+          schema:
+            $ref: "#/components/schemas/ApiErrorResponse"
+    NotFoundResponse:
+      description: Not Found
+      content:
+        application/json:
+          schema:
+            $ref: "#/components/schemas/ApiErrorResponse"
+
+  schemas:
+    FlexibleObject:
+      type: object
+      additionalProperties: true
+    FlexibleValue:
+      oneOf:
+        - $ref: "#/components/schemas/FlexibleObject"
+        - type: array
+          items: {}
+        - type: string
+        - type: number
+        - type: boolean
+    ApiSuccessResponse:
+      type: object
+      required:
+        - code
+        - status
+      properties:
+        code:
+          type: integer
+          example: 200
+        status:
+          type: string
+          example: Success
+        data:
+          $ref: "#/components/schemas/FlexibleValue"
+        message:
+          type: string
+          nullable: true
+    ApiErrorResponse:
+      type: object
+      required:
+        - code
+        - status
+      properties:
+        code:
+          type: integer
+          example: 400
+        status:
+          type: string
+          example: Bad Request
+        error:
+          $ref: "#/components/schemas/FlexibleValue"
+        message:
+          type: string
+          nullable: true
+    GenericJsonObject:
+      type: object
+      additionalProperties: true
+    GenericUploadRequest:
+      type: object
+      additionalProperties: true
+      properties:
+        file:
+          type: string
+          format: binary
+    CartItemRequest:
+      type: object
+      required:
+        - variant_id
+      properties:
+        variant_id:
+          oneOf:
+            - type: integer
+            - type: string
+        quantity:
+          type: integer
+          minimum: 1
+          default: 1
+      additionalProperties: true
+    CartItemUpdateRequest:
+      type: object
+      required:
+        - quantity
+      properties:
+        quantity:
+          type: integer
+          minimum: 1
+      additionalProperties: true
+    PasswordRequest:
+      type: object
+      required:
+        - password
+      properties:
+        password:
+          type: string
+      additionalProperties: true
+    ForgetPasswordRequest:
+      type: object
+      required:
+        - email
+      properties:
+        email:
+          type: string
+          format: email
+      additionalProperties: true
+    SavePasswordRequest:
+      type: object
+      required:
+        - token
+        - password
+      properties:
+        token:
+          type: string
+        password:
+          type: string
+      additionalProperties: true
+    CustomerOtpSendRequest:
+      type: object
+      required:
+        - email
+        - password
+      properties:
+        email:
+          type: string
+          format: email
+        password:
+          type: string
+        login_as:
+          type: string
+          enum: [customer, owner]
+      additionalProperties: true
+    CustomerOtpVerifyRequest:
+      type: object
+      required:
+        - email
+        - otp
+      properties:
+        email:
+          type: string
+          format: email
+        otp:
+          type: string
+        login_as:
+          type: string
+          enum: [customer, owner]
+      additionalProperties: true
+    JwtRefreshRequest:
+      type: object
+      required:
+        - refresh
+      properties:
+        refresh:
+          type: string
+      additionalProperties: true
+    JwtBlacklistRequest:
+      type: object
+      required:
+        - tokens
+      properties:
+        tokens:
+          type: array
+          items:
+            type: string
+      additionalProperties: true
+    SubscriptionVariantChangeRequest:
+      type: object
+      required:
+        - variant_id
+      properties:
+        variant_id:
+          oneOf:
+            - type: integer
+            - type: string
+      additionalProperties: true

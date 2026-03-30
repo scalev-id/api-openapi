@@ -4,9 +4,9 @@ import { execFileSync } from "node:child_process";
 import { parse } from "yaml";
 
 const rootDir = path.resolve(import.meta.dirname, "..");
-const yamlPath = path.join(rootDir, "specs/v2/openapi.yaml");
+const yamlPath = path.join(rootDir, "specs/v3/openapi.yaml");
 const distDir = path.join(rootDir, "dist");
-const distSpecDir = path.join(distDir, "specs/v2");
+const distSpecDir = path.join(distDir, "specs/v3");
 const distYamlPath = path.join(distSpecDir, "openapi.yaml");
 const distJsonPath = path.join(distSpecDir, "openapi.json");
 const noJekyllPath = path.join(distDir, ".nojekyll");
@@ -23,9 +23,15 @@ fs.writeFileSync(noJekyllPath, "");
 
 execFileSync(
   "npx",
-  ["redocly", "build-docs", "specs/v2/openapi.yaml", "--output", "dist/index.html"],
+  [
+    "redocly",
+    "build-docs",
+    "specs/v3/openapi.yaml",
+    "--output",
+    "dist/index.html",
+  ],
   {
     cwd: rootDir,
-    stdio: "inherit"
-  }
+    stdio: "inherit",
+  },
 );
