@@ -1,6 +1,6 @@
 apis:
-  nexus@v2:
-    root: ./specs/v2/openapi.yaml
+  nexus@v3:
+    root: ./specs/v3/openapi.yaml
 
 extends:
   - recommended
