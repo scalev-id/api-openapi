@@ -7,6 +7,8 @@ info:
     commerce flows.
 
     This specification intentionally documents only the `/v3` namespace.
+    Store-derived public storefront routes under `/v3/stores/{store_id}/public/*`
+    require the `X-Scalev-Storefront-Api-Key` header.
   license:
     name: Proprietary
 servers:
@@ -14,8 +16,10 @@ servers:
     description: Production
 security: []
 tags:
+  - name: Orders
+    description: Authenticated business order management endpoints.
   - name: Storefront
-    description: Public storefront catalog, guest cart, and guest checkout flows.
+    description: Public storefront catalog, guest cart, and guest checkout flows. All store-derived public storefront routes require `X-Scalev-Storefront-Api-Key`.
   - name: Public Orders
     description: Public order lookup and payment endpoints.
   - name: Customer Auth
@@ -38,27 +42,35 @@ tags:
     description: Authenticated business location lookup endpoints.
   - name: Shipping
     description: Public and authenticated shipping lookup endpoints.
-  - name: Business Orders
-    description: Authenticated business order management endpoints.
+  - name: Business Products
+    description: Authenticated business product, variant, taxonomy, and course management endpoints.
+  - name: Business Bundles
+    description: Authenticated business bundle, bundle-price-option, and related bundle-management endpoints.
+  - name: Business Customers
+    description: Authenticated business customer and customer-address management endpoints.
+  - name: WABA
+    description: Authenticated WhatsApp Business Account operations and related WABA resources.
+  - name: WhatsApp Integrations
+    description: Authenticated WhatsApp integration management endpoints.
 paths:
-  /v3/stores/{store_id}/storefront/products:
+  /v3/stores/{store_id}/public/products:
     parameters:
       - $ref: "#/components/parameters/StoreId"
-      - $ref: "#/components/parameters/OriginHeader"
+      - $ref: "#/components/parameters/StorefrontPublicApiKey"
     get:
       tags: [Storefront]
       operationId: listStorefrontProducts
       summary: List storefront products
       responses:
         "200":
-          $ref: "#/components/responses/SuccessResponse"
+          $ref: "#/components/responses/PaginatedCollectionResponse"
         "404":
           $ref: "#/components/responses/NotFoundResponse"
 
-  /v3/stores/{store_id}/storefront/products/count:
+  /v3/stores/{store_id}/public/products/count:
     parameters:
       - $ref: "#/components/parameters/StoreId"
-      - $ref: "#/components/parameters/OriginHeader"
+      - $ref: "#/components/parameters/StorefrontPublicApiKey"
     get:
       tags: [Storefront]
       operationId: countStorefrontProducts
@@ -69,11 +81,11 @@ paths:
         "404":
           $ref: "#/components/responses/NotFoundResponse"
 
-  /v3/stores/{store_id}/storefront/products/{slug}:
+  /v3/stores/{store_id}/public/products/{slug}:
     parameters:
       - $ref: "#/components/parameters/StoreId"
+      - $ref: "#/components/parameters/StorefrontPublicApiKey"
       - $ref: "#/components/parameters/ProductSlug"
-      - $ref: "#/components/parameters/OriginHeader"
     get:
       tags: [Storefront]
       operationId: getStorefrontProduct
@@ -84,39 +96,39 @@ paths:
         "404":
           $ref: "#/components/responses/NotFoundResponse"
 
-  /v3/stores/{store_id}/storefront/categories:
+  /v3/stores/{store_id}/public/categories:
     parameters:
       - $ref: "#/components/parameters/StoreId"
-      - $ref: "#/components/parameters/OriginHeader"
+      - $ref: "#/components/parameters/StorefrontPublicApiKey"
     get:
       tags: [Storefront]
       operationId: listStorefrontCategories
       summary: List storefront categories
       responses:
         "200":
-          $ref: "#/components/responses/SuccessResponse"
+          $ref: "#/components/responses/CollectionResponse"
         "404":
           $ref: "#/components/responses/NotFoundResponse"
 
-  /v3/stores/{store_id}/storefront/variants/pricing:
+  /v3/stores/{store_id}/public/variants/pricing:
     parameters:
       - $ref: "#/components/parameters/StoreId"
+      - $ref: "#/components/parameters/StorefrontPublicApiKey"
       - $ref: "#/components/parameters/VariantIds"
-      - $ref: "#/components/parameters/OriginHeader"
     get:
       tags: [Storefront]
       operationId: getStorefrontVariantPricing
       summary: Get storefront variant pricing
       responses:
         "200":
-          $ref: "#/components/responses/SuccessResponse"
+          $ref: "#/components/responses/CollectionResponse"
         "404":
           $ref: "#/components/responses/NotFoundResponse"
 
-  /v3/stores/{store_id}/storefront/cart:
+  /v3/stores/{store_id}/public/cart:
     parameters:
       - $ref: "#/components/parameters/StoreId"
-      - $ref: "#/components/parameters/OriginHeader"
+      - $ref: "#/components/parameters/StorefrontPublicApiKey"
     get:
       tags: [Storefront]
       operationId: getGuestCart
@@ -127,10 +139,10 @@ paths:
         "404":
           $ref: "#/components/responses/NotFoundResponse"
 
-  /v3/stores/{store_id}/storefront/cart/items:
+  /v3/stores/{store_id}/public/cart/items:
     parameters:
       - $ref: "#/components/parameters/StoreId"
-      - $ref: "#/components/parameters/OriginHeader"
+      - $ref: "#/components/parameters/StorefrontPublicApiKey"
     post:
       tags: [Storefront]
       operationId: addGuestCartItem
@@ -145,11 +157,11 @@ paths:
         "404":
           $ref: "#/components/responses/NotFoundResponse"
 
-  /v3/stores/{store_id}/storefront/cart/items/{item_id}:
+  /v3/stores/{store_id}/public/cart/items/{item_id}:
     parameters:
       - $ref: "#/components/parameters/StoreId"
+      - $ref: "#/components/parameters/StorefrontPublicApiKey"
       - $ref: "#/components/parameters/ItemId"
-      - $ref: "#/components/parameters/OriginHeader"
     patch:
       tags: [Storefront]
       operationId: updateGuestCartItem
@@ -173,10 +185,10 @@ paths:
         "404":
           $ref: "#/components/responses/NotFoundResponse"
 
-  /v3/stores/{store_id}/storefront/cart/merge:
+  /v3/stores/{store_id}/public/cart/merge:
     parameters:
       - $ref: "#/components/parameters/StoreId"
-      - $ref: "#/components/parameters/RequiredOriginHeader"
+      - $ref: "#/components/parameters/StorefrontPublicApiKey"
     post:
       tags: [Storefront]
       operationId: mergeGuestCart
@@ -191,10 +203,10 @@ paths:
         "404":
           $ref: "#/components/responses/NotFoundResponse"
 
-  /v3/stores/{store_id}/storefront/guest-checkout:
+  /v3/stores/{store_id}/public/guest-checkout:
     parameters:
       - $ref: "#/components/parameters/StoreId"
-      - $ref: "#/components/parameters/OriginHeader"
+      - $ref: "#/components/parameters/StorefrontPublicApiKey"
     post:
       tags: [Storefront]
       operationId: createGuestCheckout
@@ -214,20 +226,17 @@ paths:
       tags: [Shipping]
       operationId: searchPublicCourierServices
       summary: Search courier services for public checkout
-      parameters:
-        - $ref: "#/components/parameters/OriginHeader"
       requestBody:
         $ref: "#/components/requestBodies/GenericJsonRequestBody"
       responses:
         "200":
-          $ref: "#/components/responses/SuccessResponse"
+          $ref: "#/components/responses/CollectionResponse"
         "400":
           $ref: "#/components/responses/BadRequestResponse"
 
   /v3/orders/public/{secret_slug}:
     parameters:
       - $ref: "#/components/parameters/SecretSlug"
-      - $ref: "#/components/parameters/OriginHeader"
     get:
       tags: [Public Orders]
       operationId: getPublicOrder
@@ -241,7 +250,6 @@ paths:
   /v3/orders/public/{secret_slug}/payment:
     parameters:
       - $ref: "#/components/parameters/SecretSlug"
-      - $ref: "#/components/parameters/OriginHeader"
     post:
       tags: [Public Orders]
       operationId: createPublicOrderPayment
@@ -254,43 +262,48 @@ paths:
         "404":
           $ref: "#/components/responses/NotFoundResponse"
 
-  /v3/discount-codes/check:
+  /v3/stores/{store_id}/public/discount-codes/check:
+    parameters:
+      - $ref: "#/components/parameters/StoreId"
+      - $ref: "#/components/parameters/StorefrontPublicApiKey"
     get:
       tags: [Discounts]
       operationId: checkDiscountCode
       summary: Check discount code validity
-      parameters:
-        - $ref: "#/components/parameters/OriginHeader"
       responses:
         "200":
           $ref: "#/components/responses/SuccessResponse"
         "400":
           $ref: "#/components/responses/BadRequestResponse"
 
-  /v3/customers/auth/otp/send:
+  /v3/stores/{store_id}/public/auth/otp/send:
     post:
       tags: [Customer Auth]
       operationId: sendCustomerOtp
-      summary: Send a customer login OTP
+      summary: Send a customer login OTP or return direct login tokens
       parameters:
-        - $ref: "#/components/parameters/RequiredOriginHeader"
+        - $ref: "#/components/parameters/StoreId"
+        - $ref: "#/components/parameters/StorefrontPublicApiKey"
       requestBody:
         $ref: "#/components/requestBodies/CustomerOtpSendRequestBody"
       responses:
         "200":
           $ref: "#/components/responses/SuccessResponse"
+        "204":
+          $ref: "#/components/responses/NoContentResponse"
         "400":
           $ref: "#/components/responses/BadRequestResponse"
         "401":
           $ref: "#/components/responses/UnauthorizedResponse"
 
-  /v3/customers/auth/otp/verify:
+  /v3/stores/{store_id}/public/auth/otp/verify:
     post:
       tags: [Customer Auth]
       operationId: verifyCustomerOtp
       summary: Verify a customer login OTP
       parameters:
-        - $ref: "#/components/parameters/RequiredOriginHeader"
+        - $ref: "#/components/parameters/StoreId"
+        - $ref: "#/components/parameters/StorefrontPublicApiKey"
       requestBody:
         $ref: "#/components/requestBodies/CustomerOtpVerifyRequestBody"
       responses:
@@ -301,13 +314,14 @@ paths:
         "401":
           $ref: "#/components/responses/UnauthorizedResponse"
 
-  /v3/customers/jwt/refresh:
+  /v3/stores/{store_id}/public/auth/jwt/refresh:
     post:
       tags: [Customer Auth]
       operationId: refreshCustomerJwt
       summary: Refresh a customer JWT
       parameters:
-        - $ref: "#/components/parameters/RequiredOriginHeader"
+        - $ref: "#/components/parameters/StoreId"
+        - $ref: "#/components/parameters/StorefrontPublicApiKey"
       requestBody:
         $ref: "#/components/requestBodies/JwtRefreshRequestBody"
       responses:
@@ -316,54 +330,57 @@ paths:
         "401":
           $ref: "#/components/responses/UnauthorizedResponse"
 
-  /v3/customers/jwt/blacklist:
+  /v3/stores/{store_id}/public/auth/jwt/blacklist:
     post:
       tags: [Customer Auth]
       operationId: blacklistCustomerJwt
       summary: Blacklist customer JWTs
       parameters:
-        - $ref: "#/components/parameters/RequiredOriginHeader"
+        - $ref: "#/components/parameters/StoreId"
+        - $ref: "#/components/parameters/StorefrontPublicApiKey"
       requestBody:
         $ref: "#/components/requestBodies/JwtBlacklistRequestBody"
       responses:
-        "200":
-          $ref: "#/components/responses/SuccessResponse"
+        "204":
+          $ref: "#/components/responses/NoContentResponse"
         "400":
           $ref: "#/components/responses/BadRequestResponse"
 
-  /v3/customers/forget-password:
+  /v3/stores/{store_id}/public/auth/forget-password:
     post:
       tags: [Customer Auth]
       operationId: startCustomerPasswordReset
       summary: Start a customer password reset flow
       parameters:
-        - $ref: "#/components/parameters/RequiredOriginHeader"
+        - $ref: "#/components/parameters/StoreId"
+        - $ref: "#/components/parameters/StorefrontPublicApiKey"
       requestBody:
         $ref: "#/components/requestBodies/ForgetPasswordRequestBody"
       responses:
-        "200":
-          $ref: "#/components/responses/SuccessResponse"
+        "204":
+          $ref: "#/components/responses/NoContentResponse"
         "400":
           $ref: "#/components/responses/BadRequestResponse"
 
-  /v3/customers/save-password:
+  /v3/stores/{store_id}/public/auth/save-password:
     post:
       tags: [Customer Auth]
       operationId: saveCustomerPassword
       summary: Save a new customer password from a reset token
       parameters:
-        - $ref: "#/components/parameters/RequiredOriginHeader"
+        - $ref: "#/components/parameters/StoreId"
+        - $ref: "#/components/parameters/StorefrontPublicApiKey"
       requestBody:
         $ref: "#/components/requestBodies/SavePasswordRequestBody"
       responses:
-        "200":
-          $ref: "#/components/responses/SuccessResponse"
+        "204":
+          $ref: "#/components/responses/NoContentResponse"
         "400":
           $ref: "#/components/responses/BadRequestResponse"
         "404":
           $ref: "#/components/responses/NotFoundResponse"
 
-  /v3/customers/me:
+  /v3/stores/{store_id}/customers/me:
     get:
       tags: [Customer Account]
       operationId: getCustomerMe
@@ -371,14 +388,14 @@ paths:
       security:
         - bearerAuth: []
       parameters:
-        - $ref: "#/components/parameters/RequiredOriginHeader"
+        - $ref: "#/components/parameters/StoreId"
       responses:
         "200":
           $ref: "#/components/responses/SuccessResponse"
         "401":
           $ref: "#/components/responses/UnauthorizedResponse"
 
-  /v3/customers/me/set-new-password:
+  /v3/stores/{store_id}/customers/me/set-new-password:
     post:
       tags: [Customer Account]
       operationId: setCustomerPassword
@@ -386,7 +403,7 @@ paths:
       security:
         - bearerAuth: []
       parameters:
-        - $ref: "#/components/parameters/RequiredOriginHeader"
+        - $ref: "#/components/parameters/StoreId"
       requestBody:
         $ref: "#/components/requestBodies/PasswordRequestBody"
       responses:
@@ -397,7 +414,7 @@ paths:
         "401":
           $ref: "#/components/responses/UnauthorizedResponse"
 
-  /v3/customers/me/cart:
+  /v3/stores/{store_id}/customers/me/cart:
     get:
       tags: [Customer Cart]
       operationId: getCustomerCart
@@ -405,14 +422,14 @@ paths:
       security:
         - bearerAuth: []
       parameters:
-        - $ref: "#/components/parameters/RequiredOriginHeader"
+        - $ref: "#/components/parameters/StoreId"
       responses:
         "200":
           $ref: "#/components/responses/SuccessResponse"
         "401":
           $ref: "#/components/responses/UnauthorizedResponse"
 
-  /v3/customers/me/cart/items:
+  /v3/stores/{store_id}/customers/me/cart/items:
     post:
       tags: [Customer Cart]
       operationId: addCustomerCartItem
@@ -420,7 +437,7 @@ paths:
       security:
         - bearerAuth: []
       parameters:
-        - $ref: "#/components/parameters/RequiredOriginHeader"
+        - $ref: "#/components/parameters/StoreId"
       requestBody:
         $ref: "#/components/requestBodies/CartItemRequestBody"
       responses:
@@ -431,10 +448,10 @@ paths:
         "401":
           $ref: "#/components/responses/UnauthorizedResponse"
 
-  /v3/customers/me/cart/items/{item_id}:
+  /v3/stores/{store_id}/customers/me/cart/items/{item_id}:
     parameters:
       - $ref: "#/components/parameters/ItemId"
-      - $ref: "#/components/parameters/RequiredOriginHeader"
+      - $ref: "#/components/parameters/StoreId"
     patch:
       tags: [Customer Cart]
       operationId: updateCustomerCartItem
@@ -462,7 +479,7 @@ paths:
         "401":
           $ref: "#/components/responses/UnauthorizedResponse"
 
-  /v3/customers/me/cart/checkout:
+  /v3/stores/{store_id}/customers/me/cart/checkout:
     post:
       tags: [Customer Cart]
       operationId: checkoutCustomerCart
@@ -470,7 +487,7 @@ paths:
       security:
         - bearerAuth: []
       parameters:
-        - $ref: "#/components/parameters/RequiredOriginHeader"
+        - $ref: "#/components/parameters/StoreId"
       requestBody:
         $ref: "#/components/requestBodies/GenericJsonRequestBody"
       responses:
@@ -481,7 +498,7 @@ paths:
         "401":
           $ref: "#/components/responses/UnauthorizedResponse"
 
-  /v3/customers/me/checkout/addresses:
+  /v3/stores/{store_id}/customers/me/checkout/addresses:
     get:
       tags: [Customer Checkout]
       operationId: listCheckoutAddresses
@@ -489,14 +506,14 @@ paths:
       security:
         - bearerAuth: []
       parameters:
-        - $ref: "#/components/parameters/RequiredOriginHeader"
+        - $ref: "#/components/parameters/StoreId"
       responses:
         "200":
-          $ref: "#/components/responses/SuccessResponse"
+          $ref: "#/components/responses/CollectionResponse"
         "401":
           $ref: "#/components/responses/UnauthorizedResponse"
 
-  /v3/customers/me/checkout/payment-methods:
+  /v3/stores/{store_id}/customers/me/checkout/payment-methods:
     get:
       tags: [Customer Checkout]
       operationId: listCheckoutPaymentMethods
@@ -504,14 +521,14 @@ paths:
       security:
         - bearerAuth: []
       parameters:
-        - $ref: "#/components/parameters/RequiredOriginHeader"
+        - $ref: "#/components/parameters/StoreId"
       responses:
         "200":
           $ref: "#/components/responses/SuccessResponse"
         "401":
           $ref: "#/components/responses/UnauthorizedResponse"
 
-  /v3/customers/me/checkout/shipping-options:
+  /v3/stores/{store_id}/customers/me/checkout/shipping-options:
     post:
       tags: [Customer Checkout]
       operationId: listCheckoutShippingOptions
@@ -519,16 +536,16 @@ paths:
       security:
         - bearerAuth: []
       parameters:
-        - $ref: "#/components/parameters/RequiredOriginHeader"
+        - $ref: "#/components/parameters/StoreId"
       requestBody:
         $ref: "#/components/requestBodies/GenericJsonRequestBody"
       responses:
         "200":
-          $ref: "#/components/responses/SuccessResponse"
+          $ref: "#/components/responses/CollectionResponse"
         "401":
           $ref: "#/components/responses/UnauthorizedResponse"
 
-  /v3/customers/me/checkout/summary:
+  /v3/stores/{store_id}/customers/me/checkout/summary:
     post:
       tags: [Customer Checkout]
       operationId: getCheckoutSummary
@@ -536,7 +553,7 @@ paths:
       security:
         - bearerAuth: []
       parameters:
-        - $ref: "#/components/parameters/RequiredOriginHeader"
+        - $ref: "#/components/parameters/StoreId"
       requestBody:
         $ref: "#/components/requestBodies/GenericJsonRequestBody"
       responses:
@@ -545,7 +562,7 @@ paths:
         "401":
           $ref: "#/components/responses/UnauthorizedResponse"
 
-  /v3/customers/me/checkout/confirm:
+  /v3/stores/{store_id}/customers/me/checkout/confirm:
     post:
       tags: [Customer Checkout]
       operationId: confirmCheckout
@@ -553,7 +570,7 @@ paths:
       security:
         - bearerAuth: []
       parameters:
-        - $ref: "#/components/parameters/RequiredOriginHeader"
+        - $ref: "#/components/parameters/StoreId"
       requestBody:
         $ref: "#/components/requestBodies/GenericJsonRequestBody"
       responses:
@@ -564,7 +581,7 @@ paths:
         "401":
           $ref: "#/components/responses/UnauthorizedResponse"
 
-  /v3/customers/me/orders:
+  /v3/stores/{store_id}/customers/me/orders:
     get:
       tags: [Customer Orders]
       operationId: listCustomerOrders
@@ -572,17 +589,17 @@ paths:
       security:
         - bearerAuth: []
       parameters:
-        - $ref: "#/components/parameters/RequiredOriginHeader"
+        - $ref: "#/components/parameters/StoreId"
       responses:
         "200":
-          $ref: "#/components/responses/SuccessResponse"
+          $ref: "#/components/responses/PaginatedCollectionResponse"
         "401":
           $ref: "#/components/responses/UnauthorizedResponse"
 
-  /v3/customers/me/orders/{id}:
+  /v3/stores/{store_id}/customers/me/orders/{id}:
     parameters:
       - $ref: "#/components/parameters/OrderId"
-      - $ref: "#/components/parameters/RequiredOriginHeader"
+      - $ref: "#/components/parameters/StoreId"
     get:
       tags: [Customer Orders]
       operationId: getCustomerOrder
@@ -597,7 +614,7 @@ paths:
         "404":
           $ref: "#/components/responses/NotFoundResponse"
 
-  /v3/customers/me/subscriptions:
+  /v3/stores/{store_id}/customers/me/subscriptions:
     get:
       tags: [Customer Subscriptions]
       operationId: listCustomerSubscriptions
@@ -605,17 +622,17 @@ paths:
       security:
         - bearerAuth: []
       parameters:
-        - $ref: "#/components/parameters/RequiredOriginHeader"
+        - $ref: "#/components/parameters/StoreId"
       responses:
         "200":
-          $ref: "#/components/responses/SuccessResponse"
+          $ref: "#/components/responses/PaginatedCollectionResponse"
         "401":
           $ref: "#/components/responses/UnauthorizedResponse"
 
-  /v3/customers/me/subscriptions/{id}:
+  /v3/stores/{store_id}/customers/me/subscriptions/{id}:
     parameters:
       - $ref: "#/components/parameters/SubscriptionId"
-      - $ref: "#/components/parameters/RequiredOriginHeader"
+      - $ref: "#/components/parameters/StoreId"
     get:
       tags: [Customer Subscriptions]
       operationId: getCustomerSubscription
@@ -630,10 +647,10 @@ paths:
         "404":
           $ref: "#/components/responses/NotFoundResponse"
 
-  /v3/customers/me/subscriptions/{id}/cancel:
+  /v3/stores/{store_id}/customers/me/subscriptions/{id}/cancel:
     parameters:
       - $ref: "#/components/parameters/SubscriptionId"
-      - $ref: "#/components/parameters/RequiredOriginHeader"
+      - $ref: "#/components/parameters/StoreId"
     post:
       tags: [Customer Subscriptions]
       operationId: cancelCustomerSubscription
@@ -648,10 +665,10 @@ paths:
         "404":
           $ref: "#/components/responses/NotFoundResponse"
 
-  /v3/customers/me/subscriptions/{id}/resume:
+  /v3/stores/{store_id}/customers/me/subscriptions/{id}/resume:
     parameters:
       - $ref: "#/components/parameters/SubscriptionId"
-      - $ref: "#/components/parameters/RequiredOriginHeader"
+      - $ref: "#/components/parameters/StoreId"
     post:
       tags: [Customer Subscriptions]
       operationId: resumeCustomerSubscription
@@ -666,10 +683,10 @@ paths:
         "404":
           $ref: "#/components/responses/NotFoundResponse"
 
-  /v3/customers/me/subscription-items/{id}/upgrade:
+  /v3/stores/{store_id}/customers/me/subscription-items/{id}/upgrade:
     parameters:
       - $ref: "#/components/parameters/SubscriptionItemId"
-      - $ref: "#/components/parameters/RequiredOriginHeader"
+      - $ref: "#/components/parameters/StoreId"
     get:
       tags: [Customer Subscriptions]
       operationId: listSubscriptionUpgradeOptions
@@ -678,7 +695,7 @@ paths:
         - bearerAuth: []
       responses:
         "200":
-          $ref: "#/components/responses/SuccessResponse"
+          $ref: "#/components/responses/CollectionResponse"
         "401":
           $ref: "#/components/responses/UnauthorizedResponse"
         "404":
@@ -701,10 +718,10 @@ paths:
         "404":
           $ref: "#/components/responses/NotFoundResponse"
 
-  /v3/customers/me/subscription-items/{id}/downgrade:
+  /v3/stores/{store_id}/customers/me/subscription-items/{id}/downgrade:
     parameters:
       - $ref: "#/components/parameters/SubscriptionItemId"
-      - $ref: "#/components/parameters/RequiredOriginHeader"
+      - $ref: "#/components/parameters/StoreId"
     get:
       tags: [Customer Subscriptions]
       operationId: listSubscriptionDowngradeOptions
@@ -713,7 +730,7 @@ paths:
         - bearerAuth: []
       responses:
         "200":
-          $ref: "#/components/responses/SuccessResponse"
+          $ref: "#/components/responses/CollectionResponse"
         "401":
           $ref: "#/components/responses/UnauthorizedResponse"
         "404":
@@ -736,10 +753,10 @@ paths:
         "404":
           $ref: "#/components/responses/NotFoundResponse"
 
-  /v3/customers/me/variants/{uuid}/course:
+  /v3/stores/{store_id}/customers/me/variants/{uuid}/course:
     parameters:
       - $ref: "#/components/parameters/Uuid"
-      - $ref: "#/components/parameters/RequiredOriginHeader"
+      - $ref: "#/components/parameters/StoreId"
     get:
       tags: [Customer Courses]
       operationId: getCustomerVariantCourse
@@ -754,10 +771,10 @@ paths:
         "404":
           $ref: "#/components/responses/NotFoundResponse"
 
-  /v3/customers/me/course-sections/{uuid}:
+  /v3/stores/{store_id}/customers/me/course-sections/{uuid}:
     parameters:
       - $ref: "#/components/parameters/Uuid"
-      - $ref: "#/components/parameters/RequiredOriginHeader"
+      - $ref: "#/components/parameters/StoreId"
     get:
       tags: [Customer Courses]
       operationId: getCustomerCourseSection
@@ -772,10 +789,10 @@ paths:
         "404":
           $ref: "#/components/responses/NotFoundResponse"
 
-  /v3/customers/me/course-contents/{uuid}:
+  /v3/stores/{store_id}/customers/me/course-contents/{uuid}:
     parameters:
       - $ref: "#/components/parameters/Uuid"
-      - $ref: "#/components/parameters/RequiredOriginHeader"
+      - $ref: "#/components/parameters/StoreId"
     get:
       tags: [Customer Courses]
       operationId: getCustomerCourseContent
@@ -817,7 +834,7 @@ paths:
         - apiKeyAuth: []
       responses:
         "200":
-          $ref: "#/components/responses/SuccessResponse"
+          $ref: "#/components/responses/PaginatedCollectionResponse"
         "401":
           $ref: "#/components/responses/UnauthorizedResponse"
         "403":
@@ -835,7 +852,7 @@ paths:
         $ref: "#/components/requestBodies/GenericJsonRequestBody"
       responses:
         "200":
-          $ref: "#/components/responses/SuccessResponse"
+          $ref: "#/components/responses/CollectionResponse"
         "400":
           $ref: "#/components/responses/BadRequestResponse"
         "401":
@@ -855,7 +872,7 @@ paths:
         $ref: "#/components/requestBodies/GenericJsonRequestBody"
       responses:
         "200":
-          $ref: "#/components/responses/SuccessResponse"
+          $ref: "#/components/responses/CollectionResponse"
         "400":
           $ref: "#/components/responses/BadRequestResponse"
         "401":
@@ -875,7 +892,7 @@ paths:
         $ref: "#/components/requestBodies/GenericJsonRequestBody"
       responses:
         "200":
-          $ref: "#/components/responses/SuccessResponse"
+          $ref: "#/components/responses/CollectionResponse"
         "400":
           $ref: "#/components/responses/BadRequestResponse"
         "401":
@@ -885,7 +902,7 @@ paths:
 
   /v3/orders:
     get:
-      tags: [Business Orders]
+      tags: [Orders]
       operationId: listOrders
       summary: List business orders
       security:
@@ -893,13 +910,13 @@ paths:
         - apiKeyAuth: []
       responses:
         "200":
-          $ref: "#/components/responses/SuccessResponse"
+          $ref: "#/components/responses/PaginatedCollectionResponse"
         "401":
           $ref: "#/components/responses/UnauthorizedResponse"
         "403":
           $ref: "#/components/responses/ForbiddenResponse"
     post:
-      tags: [Business Orders]
+      tags: [Orders]
       operationId: createOrder
       summary: Create a business order
       security:
@@ -919,7 +936,7 @@ paths:
 
   /v3/orders/statistics:
     get:
-      tags: [Business Orders]
+      tags: [Orders]
       operationId: getOrderStatistics
       summary: Get order statistics
       security:
@@ -935,7 +952,7 @@ paths:
 
   /v3/orders/change-status:
     post:
-      tags: [Business Orders]
+      tags: [Orders]
       operationId: changeOrderStatus
       summary: Change order status in bulk
       security:
@@ -945,7 +962,7 @@ paths:
         $ref: "#/components/requestBodies/GenericJsonRequestBody"
       responses:
         "200":
-          $ref: "#/components/responses/SuccessResponse"
+          $ref: "#/components/responses/CollectionResponse"
         "400":
           $ref: "#/components/responses/BadRequestResponse"
         "401":
@@ -955,7 +972,7 @@ paths:
 
   /v3/orders/delete:
     post:
-      tags: [Business Orders]
+      tags: [Orders]
       operationId: deleteOrders
       summary: Delete orders in bulk
       security:
@@ -965,7 +982,7 @@ paths:
         $ref: "#/components/requestBodies/GenericJsonRequestBody"
       responses:
         "200":
-          $ref: "#/components/responses/SuccessResponse"
+          $ref: "#/components/responses/CollectionResponse"
         "400":
           $ref: "#/components/responses/BadRequestResponse"
         "401":
@@ -975,7 +992,7 @@ paths:
 
   /v3/orders/mark-not-spam:
     post:
-      tags: [Business Orders]
+      tags: [Orders]
       operationId: markOrdersNotSpam
       summary: Mark orders as not spam
       security:
@@ -985,7 +1002,7 @@ paths:
         $ref: "#/components/requestBodies/GenericJsonRequestBody"
       responses:
         "200":
-          $ref: "#/components/responses/SuccessResponse"
+          $ref: "#/components/responses/CollectionResponse"
         "400":
           $ref: "#/components/responses/BadRequestResponse"
         "401":
@@ -995,7 +1012,7 @@ paths:
 
   /v3/orders/upload-change-status:
     post:
-      tags: [Business Orders]
+      tags: [Orders]
       operationId: uploadOrderStatusChanges
       summary: Upload a CSV to change order status
       security:
@@ -1005,7 +1022,7 @@ paths:
         $ref: "#/components/requestBodies/GenericUploadRequestBody"
       responses:
         "200":
-          $ref: "#/components/responses/SuccessResponse"
+          $ref: "#/components/responses/CollectionResponse"
         "400":
           $ref: "#/components/responses/BadRequestResponse"
         "401":
@@ -1015,7 +1032,7 @@ paths:
 
   /v3/orders/upload-receipt:
     post:
-      tags: [Business Orders]
+      tags: [Orders]
       operationId: uploadOrderReceipt
       summary: Upload order receipt data
       security:
@@ -1025,7 +1042,7 @@ paths:
         $ref: "#/components/requestBodies/GenericUploadRequestBody"
       responses:
         "200":
-          $ref: "#/components/responses/SuccessResponse"
+          $ref: "#/components/responses/CollectionResponse"
         "400":
           $ref: "#/components/responses/BadRequestResponse"
         "401":
@@ -1035,7 +1052,7 @@ paths:
 
   /v3/orders/upload:
     post:
-      tags: [Business Orders]
+      tags: [Orders]
       operationId: uploadOrders
       summary: Upload orders from a file
       security:
@@ -1055,7 +1072,7 @@ paths:
 
   /v3/orders/generate-awb:
     post:
-      tags: [Business Orders]
+      tags: [Orders]
       operationId: generateOrderAwb
       summary: Generate airway bills for orders
       security:
@@ -1075,7 +1092,7 @@ paths:
 
   /v3/orders/cancel-awb:
     post:
-      tags: [Business Orders]
+      tags: [Orders]
       operationId: cancelOrderAwb
       summary: Cancel airway bills for orders
       security:
@@ -1095,7 +1112,7 @@ paths:
 
   /v3/orders/tags:
     get:
-      tags: [Business Orders]
+      tags: [Orders]
       operationId: listOrderTags
       summary: List order tags
       security:
@@ -1103,7 +1120,7 @@ paths:
         - apiKeyAuth: []
       responses:
         "200":
-          $ref: "#/components/responses/SuccessResponse"
+          $ref: "#/components/responses/CollectionResponse"
         "401":
           $ref: "#/components/responses/UnauthorizedResponse"
         "403":
@@ -1111,7 +1128,7 @@ paths:
 
   /v3/orders/utm-sources:
     get:
-      tags: [Business Orders]
+      tags: [Orders]
       operationId: listOrderUtmSources
       summary: List order UTM sources
       security:
@@ -1119,7 +1136,7 @@ paths:
         - apiKeyAuth: []
       responses:
         "200":
-          $ref: "#/components/responses/SuccessResponse"
+          $ref: "#/components/responses/PaginatedCollectionResponse"
         "401":
           $ref: "#/components/responses/UnauthorizedResponse"
         "403":
@@ -1127,7 +1144,7 @@ paths:
 
   /v3/orders/utm-mediums:
     get:
-      tags: [Business Orders]
+      tags: [Orders]
       operationId: listOrderUtmMediums
       summary: List order UTM mediums
       security:
@@ -1135,7 +1152,7 @@ paths:
         - apiKeyAuth: []
       responses:
         "200":
-          $ref: "#/components/responses/SuccessResponse"
+          $ref: "#/components/responses/PaginatedCollectionResponse"
         "401":
           $ref: "#/components/responses/UnauthorizedResponse"
         "403":
@@ -1143,7 +1160,7 @@ paths:
 
   /v3/orders/utm-campaigns:
     get:
-      tags: [Business Orders]
+      tags: [Orders]
       operationId: listOrderUtmCampaigns
       summary: List order UTM campaigns
       security:
@@ -1151,7 +1168,7 @@ paths:
         - apiKeyAuth: []
       responses:
         "200":
-          $ref: "#/components/responses/SuccessResponse"
+          $ref: "#/components/responses/PaginatedCollectionResponse"
         "401":
           $ref: "#/components/responses/UnauthorizedResponse"
         "403":
@@ -1159,7 +1176,7 @@ paths:
 
   /v3/orders/utm-contents:
     get:
-      tags: [Business Orders]
+      tags: [Orders]
       operationId: listOrderUtmContents
       summary: List order UTM contents
       security:
@@ -1167,7 +1184,7 @@ paths:
         - apiKeyAuth: []
       responses:
         "200":
-          $ref: "#/components/responses/SuccessResponse"
+          $ref: "#/components/responses/PaginatedCollectionResponse"
         "401":
           $ref: "#/components/responses/UnauthorizedResponse"
         "403":
@@ -1175,7 +1192,7 @@ paths:
 
   /v3/orders/utm-terms:
     get:
-      tags: [Business Orders]
+      tags: [Orders]
       operationId: listOrderUtmTerms
       summary: List order UTM terms
       security:
@@ -1183,7 +1200,7 @@ paths:
         - apiKeyAuth: []
       responses:
         "200":
-          $ref: "#/components/responses/SuccessResponse"
+          $ref: "#/components/responses/PaginatedCollectionResponse"
         "401":
           $ref: "#/components/responses/UnauthorizedResponse"
         "403":
@@ -1193,7 +1210,7 @@ paths:
     parameters:
       - $ref: "#/components/parameters/PgReferenceId"
     get:
-      tags: [Business Orders]
+      tags: [Orders]
       operationId: getOrderByPgReferenceId
       summary: Get an order by payment gateway reference ID
       security:
@@ -1211,7 +1228,7 @@ paths:
 
   /v3/orders/pg-reference-ids:
     get:
-      tags: [Business Orders]
+      tags: [Orders]
       operationId: listOrdersByPgReferenceIds
       summary: Get orders by payment gateway reference IDs
       security:
@@ -1219,7 +1236,7 @@ paths:
         - apiKeyAuth: []
       responses:
         "200":
-          $ref: "#/components/responses/SuccessResponse"
+          $ref: "#/components/responses/CollectionResponse"
         "401":
           $ref: "#/components/responses/UnauthorizedResponse"
         "403":
@@ -1229,7 +1246,7 @@ paths:
     parameters:
       - $ref: "#/components/parameters/OrderId"
     get:
-      tags: [Business Orders]
+      tags: [Orders]
       operationId: getOrder
       summary: Get a business order
       security:
@@ -1245,7 +1262,7 @@ paths:
         "404":
           $ref: "#/components/responses/NotFoundResponse"
     patch:
-      tags: [Business Orders]
+      tags: [Orders]
       operationId: updateOrder
       summary: Update a business order
       security:
@@ -1269,7 +1286,7 @@ paths:
     parameters:
       - $ref: "#/components/parameters/OrderId"
     get:
-      tags: [Business Orders]
+      tags: [Orders]
       operationId: getOrderActions
       summary: Get available actions for an order
       security:
@@ -1289,7 +1306,7 @@ paths:
     parameters:
       - $ref: "#/components/parameters/OrderId"
     get:
-      tags: [Business Orders]
+      tags: [Orders]
       operationId: listOrderChats
       summary: Get order chat text
       security:
@@ -1310,7 +1327,7 @@ paths:
       - $ref: "#/components/parameters/OrderId"
       - $ref: "#/components/parameters/ChatId"
     get:
-      tags: [Business Orders]
+      tags: [Orders]
       operationId: getOrderChat
       summary: Get a single order chat entry
       security:
@@ -1330,7 +1347,7 @@ paths:
     parameters:
       - $ref: "#/components/parameters/OrderId"
     get:
-      tags: [Business Orders]
+      tags: [Orders]
       operationId: listOrderEmails
       summary: List order emails
       security:
@@ -1338,7 +1355,7 @@ paths:
         - apiKeyAuth: []
       responses:
         "200":
-          $ref: "#/components/responses/SuccessResponse"
+          $ref: "#/components/responses/CollectionResponse"
         "401":
           $ref: "#/components/responses/UnauthorizedResponse"
         "403":
@@ -1350,7 +1367,7 @@ paths:
     parameters:
       - $ref: "#/components/parameters/OrderId"
     get:
-      tags: [Business Orders]
+      tags: [Orders]
       operationId: getOrderMessageHistory
       summary: Get order message history
       security:
@@ -1366,7 +1383,7 @@ paths:
         "404":
           $ref: "#/components/responses/NotFoundResponse"
     post:
-      tags: [Business Orders]
+      tags: [Orders]
       operationId: addOrderMessageHistory
       summary: Add order message history
       security:
@@ -1390,7 +1407,7 @@ paths:
     parameters:
       - $ref: "#/components/parameters/OrderId"
     post:
-      tags: [Business Orders]
+      tags: [Orders]
       operationId: createOrderPayment
       summary: Create a payment for an order
       security:
@@ -1414,7 +1431,7 @@ paths:
     parameters:
       - $ref: "#/components/parameters/OrderId"
     patch:
-      tags: [Business Orders]
+      tags: [Orders]
       operationId: updateOrderCustomer
       summary: Update order customer data
       security:
@@ -1438,7 +1455,7 @@ paths:
     parameters:
       - $ref: "#/components/parameters/OrderId"
     patch:
-      tags: [Business Orders]
+      tags: [Orders]
       operationId: updateOrderShipment
       summary: Update raw shipment data
       security:
@@ -1462,7 +1479,7 @@ paths:
     parameters:
       - $ref: "#/components/parameters/OrderId"
     patch:
-      tags: [Business Orders]
+      tags: [Orders]
       operationId: updateOrderShipmentReceipt
       summary: Update shipment receipt data
       security:
@@ -1486,7 +1503,7 @@ paths:
     parameters:
       - $ref: "#/components/parameters/OrderId"
     post:
-      tags: [Business Orders]
+      tags: [Orders]
       operationId: createOrderShipmentStatusHistory
       summary: Add shipment status history to an order
       security:
@@ -1510,7 +1527,7 @@ paths:
     parameters:
       - $ref: "#/components/parameters/OrderId"
     post:
-      tags: [Business Orders]
+      tags: [Orders]
       operationId: updateOrderTags
       summary: Update order tags
       security:
@@ -1534,7 +1551,7 @@ paths:
     parameters:
       - $ref: "#/components/parameters/OrderId"
     post:
-      tags: [Business Orders]
+      tags: [Orders]
       operationId: triggerOrderPurchase
       summary: Trigger purchase processing for an order
       security:
@@ -1558,7 +1575,7 @@ paths:
     parameters:
       - $ref: "#/components/parameters/OrderId"
     post:
-      tags: [Business Orders]
+      tags: [Orders]
       operationId: duplicateOrder
       summary: Duplicate and cancel an order
       security:
@@ -1582,7 +1599,7 @@ paths:
     parameters:
       - $ref: "#/components/parameters/OrderId"
     post:
-      tags: [Business Orders]
+      tags: [Orders]
       operationId: checkOrderPayment
       summary: Check order payment status
       security:
@@ -1602,7 +1619,7 @@ paths:
     parameters:
       - $ref: "#/components/parameters/OrderId"
     post:
-      tags: [Business Orders]
+      tags: [Orders]
       operationId: checkOrderSettlement
       summary: Check order settlement status
       security:
@@ -1622,9 +1639,171 @@ paths:
     parameters:
       - $ref: "#/components/parameters/OrderId"
     post:
-      tags: [Business Orders]
+      tags: [Orders]
       operationId: sendDigitalProduct
       summary: Send digital product access for an order
+      security:
+        - bearerAuth: []
+        - apiKeyAuth: []
+      responses:
+        "204":
+          $ref: "#/components/responses/NoContentResponse"
+        "401":
+          $ref: "#/components/responses/UnauthorizedResponse"
+        "403":
+          $ref: "#/components/responses/ForbiddenResponse"
+        "404":
+          $ref: "#/components/responses/NotFoundResponse"
+
+  /v3/orders/{id}/send-lms-access:
+    parameters:
+      - $ref: "#/components/parameters/OrderId"
+    post:
+      tags: [Orders]
+      operationId: sendLmsAccess
+      summary: Send LMS access for an order
+      security:
+        - bearerAuth: []
+        - apiKeyAuth: []
+      responses:
+        "204":
+          $ref: "#/components/responses/NoContentResponse"
+        "401":
+          $ref: "#/components/responses/UnauthorizedResponse"
+        "403":
+          $ref: "#/components/responses/ForbiddenResponse"
+        "404":
+          $ref: "#/components/responses/NotFoundResponse"
+
+  /v3/products:
+    get:
+      tags: [Business Products]
+      operationId: listProducts
+      summary: List business products
+      security:
+        - bearerAuth: []
+        - apiKeyAuth: []
+      responses:
+        "200":
+          $ref: "#/components/responses/PaginatedCollectionResponse"
+        "401":
+          $ref: "#/components/responses/UnauthorizedResponse"
+        "403":
+          $ref: "#/components/responses/ForbiddenResponse"
+    post:
+      tags: [Business Products]
+      operationId: createProduct
+      summary: Create a product
+      security:
+        - bearerAuth: []
+        - apiKeyAuth: []
+      requestBody:
+        $ref: "#/components/requestBodies/GenericJsonRequestBody"
+      responses:
+        "200":
+          $ref: "#/components/responses/SuccessResponse"
+        "400":
+          $ref: "#/components/responses/BadRequestResponse"
+        "401":
+          $ref: "#/components/responses/UnauthorizedResponse"
+        "403":
+          $ref: "#/components/responses/ForbiddenResponse"
+
+  /v3/products/simplified:
+    get:
+      tags: [Business Products]
+      operationId: listProductsSimplified
+      summary: List simplified business products
+      security:
+        - bearerAuth: []
+        - apiKeyAuth: []
+      responses:
+        "200":
+          $ref: "#/components/responses/PaginatedCollectionResponse"
+        "401":
+          $ref: "#/components/responses/UnauthorizedResponse"
+        "403":
+          $ref: "#/components/responses/ForbiddenResponse"
+
+  /v3/products/count:
+    get:
+      tags: [Business Products]
+      operationId: countProducts
+      summary: Count business products
+      security:
+        - bearerAuth: []
+        - apiKeyAuth: []
+      responses:
+        "200":
+          $ref: "#/components/responses/SuccessResponse"
+        "401":
+          $ref: "#/components/responses/UnauthorizedResponse"
+        "403":
+          $ref: "#/components/responses/ForbiddenResponse"
+
+  /v3/products/{id}:
+    parameters:
+      - $ref: "#/components/parameters/GenericId"
+    get:
+      tags: [Business Products]
+      operationId: getProduct
+      summary: Get a business product
+      security:
+        - bearerAuth: []
+        - apiKeyAuth: []
+      responses:
+        "200":
+          $ref: "#/components/responses/SuccessResponse"
+        "401":
+          $ref: "#/components/responses/UnauthorizedResponse"
+        "403":
+          $ref: "#/components/responses/ForbiddenResponse"
+        "404":
+          $ref: "#/components/responses/NotFoundResponse"
+    patch:
+      tags: [Business Products]
+      operationId: updateProduct
+      summary: Update a business product
+      security:
+        - bearerAuth: []
+        - apiKeyAuth: []
+      requestBody:
+        $ref: "#/components/requestBodies/GenericJsonRequestBody"
+      responses:
+        "200":
+          $ref: "#/components/responses/SuccessResponse"
+        "400":
+          $ref: "#/components/responses/BadRequestResponse"
+        "401":
+          $ref: "#/components/responses/UnauthorizedResponse"
+        "403":
+          $ref: "#/components/responses/ForbiddenResponse"
+        "404":
+          $ref: "#/components/responses/NotFoundResponse"
+    delete:
+      tags: [Business Products]
+      operationId: deleteProduct
+      summary: Delete a business product
+      security:
+        - bearerAuth: []
+        - apiKeyAuth: []
+      responses:
+        "204":
+          $ref: "#/components/responses/NoContentResponse"
+        "401":
+          $ref: "#/components/responses/UnauthorizedResponse"
+        "403":
+          $ref: "#/components/responses/ForbiddenResponse"
+        "404":
+          $ref: "#/components/responses/NotFoundResponse"
+
+  /v3/products/{id}/duplicate:
+    parameters:
+      - $ref: "#/components/parameters/GenericId"
+    post:
+      tags: [Business Products]
+      operationId: duplicateProduct
+      summary: Duplicate a business product
       security:
         - bearerAuth: []
         - apiKeyAuth: []
@@ -1638,13 +1817,2242 @@ paths:
         "404":
           $ref: "#/components/responses/NotFoundResponse"
 
-  /v3/orders/{id}/send-lms-access:
+  /v3/products/{product_id}/partnership:
     parameters:
-      - $ref: "#/components/parameters/OrderId"
+      - $ref: "#/components/parameters/ProductId"
+    patch:
+      tags: [Business Products]
+      operationId: updateProductPartnership
+      summary: Update product partnership settings
+      security:
+        - bearerAuth: []
+        - apiKeyAuth: []
+      requestBody:
+        $ref: "#/components/requestBodies/GenericJsonRequestBody"
+      responses:
+        "200":
+          $ref: "#/components/responses/SuccessResponse"
+        "400":
+          $ref: "#/components/responses/BadRequestResponse"
+        "401":
+          $ref: "#/components/responses/UnauthorizedResponse"
+        "403":
+          $ref: "#/components/responses/ForbiddenResponse"
+        "404":
+          $ref: "#/components/responses/NotFoundResponse"
+
+  /v3/products/{product_id}/partnership/check-changes:
+    parameters:
+      - $ref: "#/components/parameters/ProductId"
     post:
-      tags: [Business Orders]
-      operationId: sendLmsAccess
-      summary: Send LMS access for an order
+      tags: [Business Products]
+      operationId: checkProductPartnershipChanges
+      summary: Check the impact of product partnership changes
+      security:
+        - bearerAuth: []
+        - apiKeyAuth: []
+      requestBody:
+        $ref: "#/components/requestBodies/GenericJsonRequestBody"
+      responses:
+        "200":
+          $ref: "#/components/responses/SuccessResponse"
+        "400":
+          $ref: "#/components/responses/BadRequestResponse"
+        "401":
+          $ref: "#/components/responses/UnauthorizedResponse"
+        "403":
+          $ref: "#/components/responses/ForbiddenResponse"
+        "404":
+          $ref: "#/components/responses/NotFoundResponse"
+
+  /v3/products/{product_id}/relations:
+    parameters:
+      - $ref: "#/components/parameters/ProductId"
+    get:
+      tags: [Business Products]
+      operationId: getProductRelations
+      summary: Get product relations
+      security:
+        - bearerAuth: []
+        - apiKeyAuth: []
+      responses:
+        "200":
+          $ref: "#/components/responses/SuccessResponse"
+        "401":
+          $ref: "#/components/responses/UnauthorizedResponse"
+        "403":
+          $ref: "#/components/responses/ForbiddenResponse"
+        "404":
+          $ref: "#/components/responses/NotFoundResponse"
+
+  /v3/products/{product_id}/partners:
+    parameters:
+      - $ref: "#/components/parameters/ProductId"
+    get:
+      tags: [Business Products]
+      operationId: listProductPartners
+      summary: List product partners
+      security:
+        - bearerAuth: []
+        - apiKeyAuth: []
+      responses:
+        "200":
+          $ref: "#/components/responses/PaginatedCollectionResponse"
+        "401":
+          $ref: "#/components/responses/UnauthorizedResponse"
+        "403":
+          $ref: "#/components/responses/ForbiddenResponse"
+        "404":
+          $ref: "#/components/responses/NotFoundResponse"
+    post:
+      tags: [Business Products]
+      operationId: createProductPartner
+      summary: Add a product partner
+      security:
+        - bearerAuth: []
+        - apiKeyAuth: []
+      requestBody:
+        $ref: "#/components/requestBodies/GenericJsonRequestBody"
+      responses:
+        "200":
+          $ref: "#/components/responses/SuccessResponse"
+        "400":
+          $ref: "#/components/responses/BadRequestResponse"
+        "401":
+          $ref: "#/components/responses/UnauthorizedResponse"
+        "403":
+          $ref: "#/components/responses/ForbiddenResponse"
+        "404":
+          $ref: "#/components/responses/NotFoundResponse"
+
+  /v3/products/{product_id}/partners/{id}:
+    parameters:
+      - $ref: "#/components/parameters/ProductId"
+      - $ref: "#/components/parameters/GenericId"
+    delete:
+      tags: [Business Products]
+      operationId: deleteProductPartner
+      summary: Remove a product partner
+      security:
+        - bearerAuth: []
+        - apiKeyAuth: []
+      responses:
+        "204":
+          $ref: "#/components/responses/NoContentResponse"
+        "401":
+          $ref: "#/components/responses/UnauthorizedResponse"
+        "403":
+          $ref: "#/components/responses/ForbiddenResponse"
+        "404":
+          $ref: "#/components/responses/NotFoundResponse"
+
+  /v3/products/{product_id}/knowledge-items:
+    parameters:
+      - $ref: "#/components/parameters/ProductId"
+    get:
+      tags: [Business Products]
+      operationId: listProductKnowledgeItems
+      summary: List product knowledge items
+      security:
+        - bearerAuth: []
+        - apiKeyAuth: []
+      responses:
+        "200":
+          $ref: "#/components/responses/PaginatedCollectionResponse"
+        "401":
+          $ref: "#/components/responses/UnauthorizedResponse"
+        "403":
+          $ref: "#/components/responses/ForbiddenResponse"
+        "404":
+          $ref: "#/components/responses/NotFoundResponse"
+    post:
+      tags: [Business Products]
+      operationId: createProductKnowledgeItem
+      summary: Create a product knowledge item
+      security:
+        - bearerAuth: []
+        - apiKeyAuth: []
+      requestBody:
+        $ref: "#/components/requestBodies/GenericJsonRequestBody"
+      responses:
+        "200":
+          $ref: "#/components/responses/SuccessResponse"
+        "400":
+          $ref: "#/components/responses/BadRequestResponse"
+        "401":
+          $ref: "#/components/responses/UnauthorizedResponse"
+        "403":
+          $ref: "#/components/responses/ForbiddenResponse"
+        "404":
+          $ref: "#/components/responses/NotFoundResponse"
+
+  /v3/products/{product_id}/knowledge-items/{id}:
+    parameters:
+      - $ref: "#/components/parameters/ProductId"
+      - $ref: "#/components/parameters/GenericId"
+    get:
+      tags: [Business Products]
+      operationId: getProductKnowledgeItem
+      summary: Get a product knowledge item
+      security:
+        - bearerAuth: []
+        - apiKeyAuth: []
+      responses:
+        "200":
+          $ref: "#/components/responses/SuccessResponse"
+        "401":
+          $ref: "#/components/responses/UnauthorizedResponse"
+        "403":
+          $ref: "#/components/responses/ForbiddenResponse"
+        "404":
+          $ref: "#/components/responses/NotFoundResponse"
+    patch:
+      tags: [Business Products]
+      operationId: updateProductKnowledgeItem
+      summary: Update a product knowledge item
+      security:
+        - bearerAuth: []
+        - apiKeyAuth: []
+      requestBody:
+        $ref: "#/components/requestBodies/GenericJsonRequestBody"
+      responses:
+        "200":
+          $ref: "#/components/responses/SuccessResponse"
+        "400":
+          $ref: "#/components/responses/BadRequestResponse"
+        "401":
+          $ref: "#/components/responses/UnauthorizedResponse"
+        "403":
+          $ref: "#/components/responses/ForbiddenResponse"
+        "404":
+          $ref: "#/components/responses/NotFoundResponse"
+    delete:
+      tags: [Business Products]
+      operationId: deleteProductKnowledgeItem
+      summary: Delete a product knowledge item
+      security:
+        - bearerAuth: []
+        - apiKeyAuth: []
+      responses:
+        "204":
+          $ref: "#/components/responses/NoContentResponse"
+        "401":
+          $ref: "#/components/responses/UnauthorizedResponse"
+        "403":
+          $ref: "#/components/responses/ForbiddenResponse"
+        "404":
+          $ref: "#/components/responses/NotFoundResponse"
+
+  /v3/products/{product_id}/follow-up-chats/generate:
+    parameters:
+      - $ref: "#/components/parameters/ProductId"
+    post:
+      tags: [Business Products]
+      operationId: generateProductFollowUpChats
+      summary: Generate product follow-up chats
+      security:
+        - bearerAuth: []
+        - apiKeyAuth: []
+      responses:
+        "204":
+          $ref: "#/components/responses/NoContentResponse"
+        "401":
+          $ref: "#/components/responses/UnauthorizedResponse"
+        "403":
+          $ref: "#/components/responses/ForbiddenResponse"
+        "404":
+          $ref: "#/components/responses/NotFoundResponse"
+
+  /v3/products/{product_id}/follow-up-chats:
+    parameters:
+      - $ref: "#/components/parameters/ProductId"
+    get:
+      tags: [Business Products]
+      operationId: listProductFollowUpChats
+      summary: List product follow-up chats
+      security:
+        - bearerAuth: []
+        - apiKeyAuth: []
+      responses:
+        "200":
+          $ref: "#/components/responses/PaginatedCollectionResponse"
+        "401":
+          $ref: "#/components/responses/UnauthorizedResponse"
+        "403":
+          $ref: "#/components/responses/ForbiddenResponse"
+        "404":
+          $ref: "#/components/responses/NotFoundResponse"
+    post:
+      tags: [Business Products]
+      operationId: createProductFollowUpChat
+      summary: Create a product follow-up chat
+      security:
+        - bearerAuth: []
+        - apiKeyAuth: []
+      requestBody:
+        $ref: "#/components/requestBodies/GenericJsonRequestBody"
+      responses:
+        "200":
+          $ref: "#/components/responses/SuccessResponse"
+        "400":
+          $ref: "#/components/responses/BadRequestResponse"
+        "401":
+          $ref: "#/components/responses/UnauthorizedResponse"
+        "403":
+          $ref: "#/components/responses/ForbiddenResponse"
+        "404":
+          $ref: "#/components/responses/NotFoundResponse"
+
+  /v3/products/{product_id}/follow-up-chats/{id}:
+    parameters:
+      - $ref: "#/components/parameters/ProductId"
+      - $ref: "#/components/parameters/GenericId"
+    get:
+      tags: [Business Products]
+      operationId: getProductFollowUpChat
+      summary: Get a product follow-up chat
+      security:
+        - bearerAuth: []
+        - apiKeyAuth: []
+      responses:
+        "200":
+          $ref: "#/components/responses/SuccessResponse"
+        "401":
+          $ref: "#/components/responses/UnauthorizedResponse"
+        "403":
+          $ref: "#/components/responses/ForbiddenResponse"
+        "404":
+          $ref: "#/components/responses/NotFoundResponse"
+    patch:
+      tags: [Business Products]
+      operationId: updateProductFollowUpChat
+      summary: Update a product follow-up chat
+      security:
+        - bearerAuth: []
+        - apiKeyAuth: []
+      requestBody:
+        $ref: "#/components/requestBodies/GenericJsonRequestBody"
+      responses:
+        "200":
+          $ref: "#/components/responses/SuccessResponse"
+        "400":
+          $ref: "#/components/responses/BadRequestResponse"
+        "401":
+          $ref: "#/components/responses/UnauthorizedResponse"
+        "403":
+          $ref: "#/components/responses/ForbiddenResponse"
+        "404":
+          $ref: "#/components/responses/NotFoundResponse"
+    delete:
+      tags: [Business Products]
+      operationId: deleteProductFollowUpChat
+      summary: Delete a product follow-up chat
+      security:
+        - bearerAuth: []
+        - apiKeyAuth: []
+      responses:
+        "204":
+          $ref: "#/components/responses/NoContentResponse"
+        "401":
+          $ref: "#/components/responses/UnauthorizedResponse"
+        "403":
+          $ref: "#/components/responses/ForbiddenResponse"
+        "404":
+          $ref: "#/components/responses/NotFoundResponse"
+
+  /v3/variants/{id}:
+    parameters:
+      - $ref: "#/components/parameters/GenericId"
+    get:
+      tags: [Business Products]
+      operationId: getVariant
+      summary: Get a business variant
+      security:
+        - bearerAuth: []
+        - apiKeyAuth: []
+      responses:
+        "200":
+          $ref: "#/components/responses/SuccessResponse"
+        "401":
+          $ref: "#/components/responses/UnauthorizedResponse"
+        "403":
+          $ref: "#/components/responses/ForbiddenResponse"
+        "404":
+          $ref: "#/components/responses/NotFoundResponse"
+
+  /v3/variants/{variant_id}/knowledge-items:
+    parameters:
+      - $ref: "#/components/parameters/VariantId"
+    get:
+      tags: [Business Products]
+      operationId: listVariantKnowledgeItems
+      summary: List variant knowledge items
+      security:
+        - bearerAuth: []
+        - apiKeyAuth: []
+      responses:
+        "200":
+          $ref: "#/components/responses/PaginatedCollectionResponse"
+        "401":
+          $ref: "#/components/responses/UnauthorizedResponse"
+        "403":
+          $ref: "#/components/responses/ForbiddenResponse"
+        "404":
+          $ref: "#/components/responses/NotFoundResponse"
+    post:
+      tags: [Business Products]
+      operationId: createVariantKnowledgeItem
+      summary: Create a variant knowledge item
+      security:
+        - bearerAuth: []
+        - apiKeyAuth: []
+      requestBody:
+        $ref: "#/components/requestBodies/GenericJsonRequestBody"
+      responses:
+        "200":
+          $ref: "#/components/responses/SuccessResponse"
+        "400":
+          $ref: "#/components/responses/BadRequestResponse"
+        "401":
+          $ref: "#/components/responses/UnauthorizedResponse"
+        "403":
+          $ref: "#/components/responses/ForbiddenResponse"
+        "404":
+          $ref: "#/components/responses/NotFoundResponse"
+
+  /v3/variants/{variant_id}/knowledge-items/{id}:
+    parameters:
+      - $ref: "#/components/parameters/VariantId"
+      - $ref: "#/components/parameters/GenericId"
+    get:
+      tags: [Business Products]
+      operationId: getVariantKnowledgeItem
+      summary: Get a variant knowledge item
+      security:
+        - bearerAuth: []
+        - apiKeyAuth: []
+      responses:
+        "200":
+          $ref: "#/components/responses/SuccessResponse"
+        "401":
+          $ref: "#/components/responses/UnauthorizedResponse"
+        "403":
+          $ref: "#/components/responses/ForbiddenResponse"
+        "404":
+          $ref: "#/components/responses/NotFoundResponse"
+    patch:
+      tags: [Business Products]
+      operationId: updateVariantKnowledgeItem
+      summary: Update a variant knowledge item
+      security:
+        - bearerAuth: []
+        - apiKeyAuth: []
+      requestBody:
+        $ref: "#/components/requestBodies/GenericJsonRequestBody"
+      responses:
+        "200":
+          $ref: "#/components/responses/SuccessResponse"
+        "400":
+          $ref: "#/components/responses/BadRequestResponse"
+        "401":
+          $ref: "#/components/responses/UnauthorizedResponse"
+        "403":
+          $ref: "#/components/responses/ForbiddenResponse"
+        "404":
+          $ref: "#/components/responses/NotFoundResponse"
+    delete:
+      tags: [Business Products]
+      operationId: deleteVariantKnowledgeItem
+      summary: Delete a variant knowledge item
+      security:
+        - bearerAuth: []
+        - apiKeyAuth: []
+      responses:
+        "204":
+          $ref: "#/components/responses/NoContentResponse"
+        "401":
+          $ref: "#/components/responses/UnauthorizedResponse"
+        "403":
+          $ref: "#/components/responses/ForbiddenResponse"
+        "404":
+          $ref: "#/components/responses/NotFoundResponse"
+
+  /v3/variants/{variant_id}/digital-product-files:
+    parameters:
+      - $ref: "#/components/parameters/VariantId"
+    get:
+      tags: [Business Products]
+      operationId: listVariantDigitalProductFiles
+      summary: List variant digital product files
+      security:
+        - bearerAuth: []
+        - apiKeyAuth: []
+      responses:
+        "200":
+          $ref: "#/components/responses/PaginatedCollectionResponse"
+        "401":
+          $ref: "#/components/responses/UnauthorizedResponse"
+        "403":
+          $ref: "#/components/responses/ForbiddenResponse"
+        "404":
+          $ref: "#/components/responses/NotFoundResponse"
+    post:
+      tags: [Business Products]
+      operationId: createVariantDigitalProductFile
+      summary: Create a variant digital product file upload record
+      security:
+        - bearerAuth: []
+        - apiKeyAuth: []
+      requestBody:
+        $ref: "#/components/requestBodies/GenericJsonRequestBody"
+      responses:
+        "200":
+          $ref: "#/components/responses/SuccessResponse"
+        "400":
+          $ref: "#/components/responses/BadRequestResponse"
+        "401":
+          $ref: "#/components/responses/UnauthorizedResponse"
+        "403":
+          $ref: "#/components/responses/ForbiddenResponse"
+        "404":
+          $ref: "#/components/responses/NotFoundResponse"
+
+  /v3/variants/{variant_id}/digital-product-files/{id}:
+    parameters:
+      - $ref: "#/components/parameters/VariantId"
+      - $ref: "#/components/parameters/GenericId"
+    get:
+      tags: [Business Products]
+      operationId: getVariantDigitalProductFile
+      summary: Get a variant digital product file
+      security:
+        - bearerAuth: []
+        - apiKeyAuth: []
+      responses:
+        "200":
+          $ref: "#/components/responses/SuccessResponse"
+        "401":
+          $ref: "#/components/responses/UnauthorizedResponse"
+        "403":
+          $ref: "#/components/responses/ForbiddenResponse"
+        "404":
+          $ref: "#/components/responses/NotFoundResponse"
+    delete:
+      tags: [Business Products]
+      operationId: deleteVariantDigitalProductFile
+      summary: Delete a variant digital product file
+      security:
+        - bearerAuth: []
+        - apiKeyAuth: []
+      responses:
+        "204":
+          $ref: "#/components/responses/NoContentResponse"
+        "401":
+          $ref: "#/components/responses/UnauthorizedResponse"
+        "403":
+          $ref: "#/components/responses/ForbiddenResponse"
+        "404":
+          $ref: "#/components/responses/NotFoundResponse"
+
+  /v3/product-taxonomies:
+    get:
+      tags: [Business Products]
+      operationId: listProductTaxonomies
+      summary: List product taxonomies
+      security:
+        - bearerAuth: []
+        - apiKeyAuth: []
+      responses:
+        "200":
+          $ref: "#/components/responses/CollectionResponse"
+        "401":
+          $ref: "#/components/responses/UnauthorizedResponse"
+        "403":
+          $ref: "#/components/responses/ForbiddenResponse"
+
+  /v3/product-taxonomies/{id}:
+    parameters:
+      - $ref: "#/components/parameters/GenericId"
+    get:
+      tags: [Business Products]
+      operationId: getProductTaxonomy
+      summary: Get a product taxonomy
+      security:
+        - bearerAuth: []
+        - apiKeyAuth: []
+      responses:
+        "200":
+          $ref: "#/components/responses/SuccessResponse"
+        "401":
+          $ref: "#/components/responses/UnauthorizedResponse"
+        "403":
+          $ref: "#/components/responses/ForbiddenResponse"
+        "404":
+          $ref: "#/components/responses/NotFoundResponse"
+
+  /v3/variants/{id}/course:
+    parameters:
+      - $ref: "#/components/parameters/GenericId"
+    get:
+      tags: [Business Products]
+      operationId: getVariantCourse
+      summary: Get a variant course skeleton
+      security:
+        - bearerAuth: []
+        - apiKeyAuth: []
+      responses:
+        "200":
+          $ref: "#/components/responses/SuccessResponse"
+        "401":
+          $ref: "#/components/responses/UnauthorizedResponse"
+        "403":
+          $ref: "#/components/responses/ForbiddenResponse"
+        "404":
+          $ref: "#/components/responses/NotFoundResponse"
+    patch:
+      tags: [Business Products]
+      operationId: updateVariantCourse
+      summary: Update a variant course skeleton
+      security:
+        - bearerAuth: []
+        - apiKeyAuth: []
+      requestBody:
+        $ref: "#/components/requestBodies/GenericJsonRequestBody"
+      responses:
+        "200":
+          $ref: "#/components/responses/SuccessResponse"
+        "400":
+          $ref: "#/components/responses/BadRequestResponse"
+        "401":
+          $ref: "#/components/responses/UnauthorizedResponse"
+        "403":
+          $ref: "#/components/responses/ForbiddenResponse"
+        "404":
+          $ref: "#/components/responses/NotFoundResponse"
+
+  /v3/variants/{variant_id}/course-sections:
+    parameters:
+      - $ref: "#/components/parameters/VariantId"
+    post:
+      tags: [Business Products]
+      operationId: createCourseSection
+      summary: Create a course section for a variant
+      security:
+        - bearerAuth: []
+        - apiKeyAuth: []
+      requestBody:
+        $ref: "#/components/requestBodies/GenericJsonRequestBody"
+      responses:
+        "200":
+          $ref: "#/components/responses/SuccessResponse"
+        "400":
+          $ref: "#/components/responses/BadRequestResponse"
+        "401":
+          $ref: "#/components/responses/UnauthorizedResponse"
+        "403":
+          $ref: "#/components/responses/ForbiddenResponse"
+        "404":
+          $ref: "#/components/responses/NotFoundResponse"
+
+  /v3/variants/{variant_id}/course-section-orders:
+    parameters:
+      - $ref: "#/components/parameters/VariantId"
+    patch:
+      tags: [Business Products]
+      operationId: updateCourseSectionOrders
+      summary: Update variant course section ordering
+      security:
+        - bearerAuth: []
+        - apiKeyAuth: []
+      requestBody:
+        $ref: "#/components/requestBodies/GenericJsonRequestBody"
+      responses:
+        "200":
+          $ref: "#/components/responses/SuccessResponse"
+        "400":
+          $ref: "#/components/responses/BadRequestResponse"
+        "401":
+          $ref: "#/components/responses/UnauthorizedResponse"
+        "403":
+          $ref: "#/components/responses/ForbiddenResponse"
+        "404":
+          $ref: "#/components/responses/NotFoundResponse"
+
+  /v3/variants/{id}/customers:
+    parameters:
+      - $ref: "#/components/parameters/GenericId"
+    get:
+      tags: [Business Products]
+      operationId: listVariantCustomers
+      summary: List customers with access to a variant
+      security:
+        - bearerAuth: []
+        - apiKeyAuth: []
+      responses:
+        "200":
+          $ref: "#/components/responses/PaginatedCollectionResponse"
+        "401":
+          $ref: "#/components/responses/UnauthorizedResponse"
+        "403":
+          $ref: "#/components/responses/ForbiddenResponse"
+        "404":
+          $ref: "#/components/responses/NotFoundResponse"
+
+  /v3/course-sections/{uuid}:
+    parameters:
+      - $ref: "#/components/parameters/Uuid"
+    get:
+      tags: [Business Products]
+      operationId: getCourseSection
+      summary: Get a course section
+      security:
+        - bearerAuth: []
+        - apiKeyAuth: []
+      responses:
+        "200":
+          $ref: "#/components/responses/SuccessResponse"
+        "401":
+          $ref: "#/components/responses/UnauthorizedResponse"
+        "403":
+          $ref: "#/components/responses/ForbiddenResponse"
+        "404":
+          $ref: "#/components/responses/NotFoundResponse"
+    patch:
+      tags: [Business Products]
+      operationId: updateCourseSection
+      summary: Update a course section
+      security:
+        - bearerAuth: []
+        - apiKeyAuth: []
+      requestBody:
+        $ref: "#/components/requestBodies/GenericJsonRequestBody"
+      responses:
+        "200":
+          $ref: "#/components/responses/SuccessResponse"
+        "400":
+          $ref: "#/components/responses/BadRequestResponse"
+        "401":
+          $ref: "#/components/responses/UnauthorizedResponse"
+        "403":
+          $ref: "#/components/responses/ForbiddenResponse"
+        "404":
+          $ref: "#/components/responses/NotFoundResponse"
+    delete:
+      tags: [Business Products]
+      operationId: deleteCourseSection
+      summary: Delete a course section
+      security:
+        - bearerAuth: []
+        - apiKeyAuth: []
+      responses:
+        "204":
+          $ref: "#/components/responses/NoContentResponse"
+        "401":
+          $ref: "#/components/responses/UnauthorizedResponse"
+        "403":
+          $ref: "#/components/responses/ForbiddenResponse"
+        "404":
+          $ref: "#/components/responses/NotFoundResponse"
+
+  /v3/course-sections/{section_uuid}/course-contents:
+    parameters:
+      - $ref: "#/components/parameters/SectionUuid"
+    post:
+      tags: [Business Products]
+      operationId: createCourseContent
+      summary: Create a course content item
+      security:
+        - bearerAuth: []
+        - apiKeyAuth: []
+      requestBody:
+        $ref: "#/components/requestBodies/GenericJsonRequestBody"
+      responses:
+        "200":
+          $ref: "#/components/responses/SuccessResponse"
+        "400":
+          $ref: "#/components/responses/BadRequestResponse"
+        "401":
+          $ref: "#/components/responses/UnauthorizedResponse"
+        "403":
+          $ref: "#/components/responses/ForbiddenResponse"
+        "404":
+          $ref: "#/components/responses/NotFoundResponse"
+
+  /v3/course-sections/{section_uuid}/course-content-orders:
+    parameters:
+      - $ref: "#/components/parameters/SectionUuid"
+    patch:
+      tags: [Business Products]
+      operationId: updateCourseContentOrders
+      summary: Update course content ordering
+      security:
+        - bearerAuth: []
+        - apiKeyAuth: []
+      requestBody:
+        $ref: "#/components/requestBodies/GenericJsonRequestBody"
+      responses:
+        "200":
+          $ref: "#/components/responses/SuccessResponse"
+        "400":
+          $ref: "#/components/responses/BadRequestResponse"
+        "401":
+          $ref: "#/components/responses/UnauthorizedResponse"
+        "403":
+          $ref: "#/components/responses/ForbiddenResponse"
+        "404":
+          $ref: "#/components/responses/NotFoundResponse"
+
+  /v3/course-contents/{uuid}:
+    parameters:
+      - $ref: "#/components/parameters/Uuid"
+    get:
+      tags: [Business Products]
+      operationId: getCourseContent
+      summary: Get a course content item
+      security:
+        - bearerAuth: []
+        - apiKeyAuth: []
+      responses:
+        "200":
+          $ref: "#/components/responses/SuccessResponse"
+        "401":
+          $ref: "#/components/responses/UnauthorizedResponse"
+        "403":
+          $ref: "#/components/responses/ForbiddenResponse"
+        "404":
+          $ref: "#/components/responses/NotFoundResponse"
+    patch:
+      tags: [Business Products]
+      operationId: updateCourseContent
+      summary: Update a course content item
+      security:
+        - bearerAuth: []
+        - apiKeyAuth: []
+      requestBody:
+        $ref: "#/components/requestBodies/GenericJsonRequestBody"
+      responses:
+        "200":
+          $ref: "#/components/responses/SuccessResponse"
+        "400":
+          $ref: "#/components/responses/BadRequestResponse"
+        "401":
+          $ref: "#/components/responses/UnauthorizedResponse"
+        "403":
+          $ref: "#/components/responses/ForbiddenResponse"
+        "404":
+          $ref: "#/components/responses/NotFoundResponse"
+    delete:
+      tags: [Business Products]
+      operationId: deleteCourseContent
+      summary: Delete a course content item
+      security:
+        - bearerAuth: []
+        - apiKeyAuth: []
+      responses:
+        "204":
+          $ref: "#/components/responses/NoContentResponse"
+        "401":
+          $ref: "#/components/responses/UnauthorizedResponse"
+        "403":
+          $ref: "#/components/responses/ForbiddenResponse"
+        "404":
+          $ref: "#/components/responses/NotFoundResponse"
+
+  /v3/bundles:
+    get:
+      tags: [Business Bundles]
+      operationId: listBundles
+      summary: List business bundles
+      security:
+        - bearerAuth: []
+        - apiKeyAuth: []
+      responses:
+        "200":
+          $ref: "#/components/responses/PaginatedCollectionResponse"
+        "401":
+          $ref: "#/components/responses/UnauthorizedResponse"
+        "403":
+          $ref: "#/components/responses/ForbiddenResponse"
+    post:
+      tags: [Business Bundles]
+      operationId: createBundle
+      summary: Create a bundle
+      security:
+        - bearerAuth: []
+        - apiKeyAuth: []
+      requestBody:
+        $ref: "#/components/requestBodies/GenericJsonRequestBody"
+      responses:
+        "200":
+          $ref: "#/components/responses/SuccessResponse"
+        "400":
+          $ref: "#/components/responses/BadRequestResponse"
+        "401":
+          $ref: "#/components/responses/UnauthorizedResponse"
+        "403":
+          $ref: "#/components/responses/ForbiddenResponse"
+
+  /v3/bundles/simplified:
+    get:
+      tags: [Business Bundles]
+      operationId: listBundlesSimplified
+      summary: List simplified business bundles
+      security:
+        - bearerAuth: []
+        - apiKeyAuth: []
+      responses:
+        "200":
+          $ref: "#/components/responses/PaginatedCollectionResponse"
+        "401":
+          $ref: "#/components/responses/UnauthorizedResponse"
+        "403":
+          $ref: "#/components/responses/ForbiddenResponse"
+
+  /v3/bundles/count:
+    get:
+      tags: [Business Bundles]
+      operationId: countBundles
+      summary: Count business bundles
+      security:
+        - bearerAuth: []
+        - apiKeyAuth: []
+      responses:
+        "200":
+          $ref: "#/components/responses/SuccessResponse"
+        "401":
+          $ref: "#/components/responses/UnauthorizedResponse"
+        "403":
+          $ref: "#/components/responses/ForbiddenResponse"
+
+  /v3/bundles/{id}:
+    parameters:
+      - $ref: "#/components/parameters/GenericId"
+    get:
+      tags: [Business Bundles]
+      operationId: getBundle
+      summary: Get a business bundle
+      security:
+        - bearerAuth: []
+        - apiKeyAuth: []
+      responses:
+        "200":
+          $ref: "#/components/responses/SuccessResponse"
+        "401":
+          $ref: "#/components/responses/UnauthorizedResponse"
+        "403":
+          $ref: "#/components/responses/ForbiddenResponse"
+        "404":
+          $ref: "#/components/responses/NotFoundResponse"
+    patch:
+      tags: [Business Bundles]
+      operationId: updateBundle
+      summary: Update a business bundle
+      security:
+        - bearerAuth: []
+        - apiKeyAuth: []
+      requestBody:
+        $ref: "#/components/requestBodies/GenericJsonRequestBody"
+      responses:
+        "200":
+          $ref: "#/components/responses/SuccessResponse"
+        "400":
+          $ref: "#/components/responses/BadRequestResponse"
+        "401":
+          $ref: "#/components/responses/UnauthorizedResponse"
+        "403":
+          $ref: "#/components/responses/ForbiddenResponse"
+        "404":
+          $ref: "#/components/responses/NotFoundResponse"
+    delete:
+      tags: [Business Bundles]
+      operationId: deleteBundle
+      summary: Delete a business bundle
+      security:
+        - bearerAuth: []
+        - apiKeyAuth: []
+      responses:
+        "204":
+          $ref: "#/components/responses/NoContentResponse"
+        "401":
+          $ref: "#/components/responses/UnauthorizedResponse"
+        "403":
+          $ref: "#/components/responses/ForbiddenResponse"
+        "404":
+          $ref: "#/components/responses/NotFoundResponse"
+
+  /v3/bundles/{id}/duplicate:
+    parameters:
+      - $ref: "#/components/parameters/GenericId"
+    post:
+      tags: [Business Bundles]
+      operationId: duplicateBundle
+      summary: Duplicate a business bundle
+      security:
+        - bearerAuth: []
+        - apiKeyAuth: []
+      responses:
+        "200":
+          $ref: "#/components/responses/SuccessResponse"
+        "401":
+          $ref: "#/components/responses/UnauthorizedResponse"
+        "403":
+          $ref: "#/components/responses/ForbiddenResponse"
+        "404":
+          $ref: "#/components/responses/NotFoundResponse"
+
+  /v3/bundles/{bundle_id}/relations:
+    parameters:
+      - $ref: "#/components/parameters/BundleId"
+    get:
+      tags: [Business Bundles]
+      operationId: getBundleRelations
+      summary: Get bundle relations
+      security:
+        - bearerAuth: []
+        - apiKeyAuth: []
+      responses:
+        "200":
+          $ref: "#/components/responses/SuccessResponse"
+        "401":
+          $ref: "#/components/responses/UnauthorizedResponse"
+        "403":
+          $ref: "#/components/responses/ForbiddenResponse"
+        "404":
+          $ref: "#/components/responses/NotFoundResponse"
+
+  /v3/bundles/{bundle_id}/partners:
+    parameters:
+      - $ref: "#/components/parameters/BundleId"
+    get:
+      tags: [Business Bundles]
+      operationId: listBundlePartners
+      summary: List bundle partners
+      security:
+        - bearerAuth: []
+        - apiKeyAuth: []
+      responses:
+        "200":
+          $ref: "#/components/responses/PaginatedCollectionResponse"
+        "401":
+          $ref: "#/components/responses/UnauthorizedResponse"
+        "403":
+          $ref: "#/components/responses/ForbiddenResponse"
+        "404":
+          $ref: "#/components/responses/NotFoundResponse"
+    post:
+      tags: [Business Bundles]
+      operationId: createBundlePartner
+      summary: Add a bundle partner
+      security:
+        - bearerAuth: []
+        - apiKeyAuth: []
+      requestBody:
+        $ref: "#/components/requestBodies/GenericJsonRequestBody"
+      responses:
+        "200":
+          $ref: "#/components/responses/SuccessResponse"
+        "400":
+          $ref: "#/components/responses/BadRequestResponse"
+        "401":
+          $ref: "#/components/responses/UnauthorizedResponse"
+        "403":
+          $ref: "#/components/responses/ForbiddenResponse"
+        "404":
+          $ref: "#/components/responses/NotFoundResponse"
+
+  /v3/bundles/{bundle_id}/partners/{id}:
+    parameters:
+      - $ref: "#/components/parameters/BundleId"
+      - $ref: "#/components/parameters/GenericId"
+    delete:
+      tags: [Business Bundles]
+      operationId: deleteBundlePartner
+      summary: Remove a bundle partner
+      security:
+        - bearerAuth: []
+        - apiKeyAuth: []
+      responses:
+        "204":
+          $ref: "#/components/responses/NoContentResponse"
+        "401":
+          $ref: "#/components/responses/UnauthorizedResponse"
+        "403":
+          $ref: "#/components/responses/ForbiddenResponse"
+        "404":
+          $ref: "#/components/responses/NotFoundResponse"
+
+  /v3/bundles/{bundle_id}/follow-up-chats/generate:
+    parameters:
+      - $ref: "#/components/parameters/BundleId"
+    post:
+      tags: [Business Bundles]
+      operationId: generateBundleFollowUpChats
+      summary: Generate bundle follow-up chats
+      security:
+        - bearerAuth: []
+        - apiKeyAuth: []
+      responses:
+        "204":
+          $ref: "#/components/responses/NoContentResponse"
+        "401":
+          $ref: "#/components/responses/UnauthorizedResponse"
+        "403":
+          $ref: "#/components/responses/ForbiddenResponse"
+        "404":
+          $ref: "#/components/responses/NotFoundResponse"
+
+  /v3/bundles/{bundle_id}/follow-up-chats:
+    parameters:
+      - $ref: "#/components/parameters/BundleId"
+    get:
+      tags: [Business Bundles]
+      operationId: listBundleFollowUpChats
+      summary: List bundle follow-up chats
+      security:
+        - bearerAuth: []
+        - apiKeyAuth: []
+      responses:
+        "200":
+          $ref: "#/components/responses/PaginatedCollectionResponse"
+        "401":
+          $ref: "#/components/responses/UnauthorizedResponse"
+        "403":
+          $ref: "#/components/responses/ForbiddenResponse"
+        "404":
+          $ref: "#/components/responses/NotFoundResponse"
+    post:
+      tags: [Business Bundles]
+      operationId: createBundleFollowUpChat
+      summary: Create a bundle follow-up chat
+      security:
+        - bearerAuth: []
+        - apiKeyAuth: []
+      requestBody:
+        $ref: "#/components/requestBodies/GenericJsonRequestBody"
+      responses:
+        "200":
+          $ref: "#/components/responses/SuccessResponse"
+        "400":
+          $ref: "#/components/responses/BadRequestResponse"
+        "401":
+          $ref: "#/components/responses/UnauthorizedResponse"
+        "403":
+          $ref: "#/components/responses/ForbiddenResponse"
+        "404":
+          $ref: "#/components/responses/NotFoundResponse"
+
+  /v3/bundles/{bundle_id}/follow-up-chats/{id}:
+    parameters:
+      - $ref: "#/components/parameters/BundleId"
+      - $ref: "#/components/parameters/GenericId"
+    get:
+      tags: [Business Bundles]
+      operationId: getBundleFollowUpChat
+      summary: Get a bundle follow-up chat
+      security:
+        - bearerAuth: []
+        - apiKeyAuth: []
+      responses:
+        "200":
+          $ref: "#/components/responses/SuccessResponse"
+        "401":
+          $ref: "#/components/responses/UnauthorizedResponse"
+        "403":
+          $ref: "#/components/responses/ForbiddenResponse"
+        "404":
+          $ref: "#/components/responses/NotFoundResponse"
+    patch:
+      tags: [Business Bundles]
+      operationId: updateBundleFollowUpChat
+      summary: Update a bundle follow-up chat
+      security:
+        - bearerAuth: []
+        - apiKeyAuth: []
+      requestBody:
+        $ref: "#/components/requestBodies/GenericJsonRequestBody"
+      responses:
+        "200":
+          $ref: "#/components/responses/SuccessResponse"
+        "400":
+          $ref: "#/components/responses/BadRequestResponse"
+        "401":
+          $ref: "#/components/responses/UnauthorizedResponse"
+        "403":
+          $ref: "#/components/responses/ForbiddenResponse"
+        "404":
+          $ref: "#/components/responses/NotFoundResponse"
+    delete:
+      tags: [Business Bundles]
+      operationId: deleteBundleFollowUpChat
+      summary: Delete a bundle follow-up chat
+      security:
+        - bearerAuth: []
+        - apiKeyAuth: []
+      responses:
+        "204":
+          $ref: "#/components/responses/NoContentResponse"
+        "401":
+          $ref: "#/components/responses/UnauthorizedResponse"
+        "403":
+          $ref: "#/components/responses/ForbiddenResponse"
+        "404":
+          $ref: "#/components/responses/NotFoundResponse"
+
+  /v3/bundles/{bundle_id}/bundle-price-options:
+    parameters:
+      - $ref: "#/components/parameters/BundleId"
+    get:
+      tags: [Business Bundles]
+      operationId: listBundlePriceOptions
+      summary: List bundle price options
+      security:
+        - bearerAuth: []
+        - apiKeyAuth: []
+      responses:
+        "200":
+          $ref: "#/components/responses/PaginatedCollectionResponse"
+        "401":
+          $ref: "#/components/responses/UnauthorizedResponse"
+        "403":
+          $ref: "#/components/responses/ForbiddenResponse"
+        "404":
+          $ref: "#/components/responses/NotFoundResponse"
+    post:
+      tags: [Business Bundles]
+      operationId: createBundlePriceOption
+      summary: Create a bundle price option
+      security:
+        - bearerAuth: []
+        - apiKeyAuth: []
+      requestBody:
+        $ref: "#/components/requestBodies/GenericJsonRequestBody"
+      responses:
+        "200":
+          $ref: "#/components/responses/SuccessResponse"
+        "400":
+          $ref: "#/components/responses/BadRequestResponse"
+        "401":
+          $ref: "#/components/responses/UnauthorizedResponse"
+        "403":
+          $ref: "#/components/responses/ForbiddenResponse"
+        "404":
+          $ref: "#/components/responses/NotFoundResponse"
+
+  /v3/bundles/{bundle_id}/bundle-price-options/{id}:
+    parameters:
+      - $ref: "#/components/parameters/BundleId"
+      - $ref: "#/components/parameters/GenericId"
+    patch:
+      tags: [Business Bundles]
+      operationId: updateBundlePriceOption
+      summary: Update a bundle price option
+      security:
+        - bearerAuth: []
+        - apiKeyAuth: []
+      requestBody:
+        $ref: "#/components/requestBodies/GenericJsonRequestBody"
+      responses:
+        "200":
+          $ref: "#/components/responses/SuccessResponse"
+        "400":
+          $ref: "#/components/responses/BadRequestResponse"
+        "401":
+          $ref: "#/components/responses/UnauthorizedResponse"
+        "403":
+          $ref: "#/components/responses/ForbiddenResponse"
+        "404":
+          $ref: "#/components/responses/NotFoundResponse"
+    delete:
+      tags: [Business Bundles]
+      operationId: deleteBundlePriceOption
+      summary: Delete a bundle price option
+      security:
+        - bearerAuth: []
+        - apiKeyAuth: []
+      responses:
+        "204":
+          $ref: "#/components/responses/NoContentResponse"
+        "401":
+          $ref: "#/components/responses/UnauthorizedResponse"
+        "403":
+          $ref: "#/components/responses/ForbiddenResponse"
+        "404":
+          $ref: "#/components/responses/NotFoundResponse"
+
+  /v3/bundles/{bundle_id}/bundle-price-options/{id}/relations:
+    parameters:
+      - $ref: "#/components/parameters/BundleId"
+      - $ref: "#/components/parameters/GenericId"
+    get:
+      tags: [Business Bundles]
+      operationId: getBundlePriceOptionRelations
+      summary: Get bundle price option relations
+      security:
+        - bearerAuth: []
+        - apiKeyAuth: []
+      responses:
+        "200":
+          $ref: "#/components/responses/SuccessResponse"
+        "401":
+          $ref: "#/components/responses/UnauthorizedResponse"
+        "403":
+          $ref: "#/components/responses/ForbiddenResponse"
+        "404":
+          $ref: "#/components/responses/NotFoundResponse"
+
+  /v3/customers:
+    get:
+      tags: [Business Customers]
+      operationId: listBusinessCustomers
+      summary: List business customers
+      security:
+        - bearerAuth: []
+        - apiKeyAuth: []
+      responses:
+        "200":
+          $ref: "#/components/responses/PaginatedCollectionResponse"
+        "401":
+          $ref: "#/components/responses/UnauthorizedResponse"
+        "403":
+          $ref: "#/components/responses/ForbiddenResponse"
+    post:
+      tags: [Business Customers]
+      operationId: createBusinessCustomer
+      summary: Create a business customer
+      security:
+        - bearerAuth: []
+        - apiKeyAuth: []
+      requestBody:
+        $ref: "#/components/requestBodies/GenericJsonRequestBody"
+      responses:
+        "200":
+          $ref: "#/components/responses/SuccessResponse"
+        "400":
+          $ref: "#/components/responses/BadRequestResponse"
+        "401":
+          $ref: "#/components/responses/UnauthorizedResponse"
+        "403":
+          $ref: "#/components/responses/ForbiddenResponse"
+
+  /v3/customers/count:
+    get:
+      tags: [Business Customers]
+      operationId: countBusinessCustomers
+      summary: Count business customers
+      security:
+        - bearerAuth: []
+        - apiKeyAuth: []
+      responses:
+        "200":
+          $ref: "#/components/responses/SuccessResponse"
+        "401":
+          $ref: "#/components/responses/UnauthorizedResponse"
+        "403":
+          $ref: "#/components/responses/ForbiddenResponse"
+
+  /v3/customers/upload:
+    post:
+      tags: [Business Customers]
+      operationId: uploadBusinessCustomers
+      summary: Upload business customers from CSV
+      security:
+        - bearerAuth: []
+        - apiKeyAuth: []
+      requestBody:
+        $ref: "#/components/requestBodies/GenericUploadRequestBody"
+      responses:
+        "200":
+          $ref: "#/components/responses/SuccessResponse"
+        "400":
+          $ref: "#/components/responses/BadRequestResponse"
+        "401":
+          $ref: "#/components/responses/UnauthorizedResponse"
+        "403":
+          $ref: "#/components/responses/ForbiddenResponse"
+
+  /v3/customers/tags:
+    get:
+      tags: [Business Customers]
+      operationId: listBusinessCustomerTags
+      summary: List business customer tags
+      security:
+        - bearerAuth: []
+        - apiKeyAuth: []
+      responses:
+        "200":
+          $ref: "#/components/responses/CollectionResponse"
+        "401":
+          $ref: "#/components/responses/UnauthorizedResponse"
+        "403":
+          $ref: "#/components/responses/ForbiddenResponse"
+
+  /v3/customers/{id}:
+    parameters:
+      - $ref: "#/components/parameters/GenericId"
+    get:
+      tags: [Business Customers]
+      operationId: getBusinessCustomer
+      summary: Get a business customer
+      security:
+        - bearerAuth: []
+        - apiKeyAuth: []
+      responses:
+        "200":
+          $ref: "#/components/responses/SuccessResponse"
+        "401":
+          $ref: "#/components/responses/UnauthorizedResponse"
+        "403":
+          $ref: "#/components/responses/ForbiddenResponse"
+        "404":
+          $ref: "#/components/responses/NotFoundResponse"
+    patch:
+      tags: [Business Customers]
+      operationId: updateBusinessCustomer
+      summary: Update a business customer
+      security:
+        - bearerAuth: []
+        - apiKeyAuth: []
+      requestBody:
+        $ref: "#/components/requestBodies/GenericJsonRequestBody"
+      responses:
+        "200":
+          $ref: "#/components/responses/SuccessResponse"
+        "400":
+          $ref: "#/components/responses/BadRequestResponse"
+        "401":
+          $ref: "#/components/responses/UnauthorizedResponse"
+        "403":
+          $ref: "#/components/responses/ForbiddenResponse"
+        "404":
+          $ref: "#/components/responses/NotFoundResponse"
+
+  /v3/customers/{id}/update-tags:
+    parameters:
+      - $ref: "#/components/parameters/GenericId"
+    post:
+      tags: [Business Customers]
+      operationId: updateBusinessCustomerTags
+      summary: Update tags on a business customer
+      security:
+        - bearerAuth: []
+        - apiKeyAuth: []
+      requestBody:
+        $ref: "#/components/requestBodies/GenericJsonRequestBody"
+      responses:
+        "200":
+          $ref: "#/components/responses/SuccessResponse"
+        "400":
+          $ref: "#/components/responses/BadRequestResponse"
+        "401":
+          $ref: "#/components/responses/UnauthorizedResponse"
+        "403":
+          $ref: "#/components/responses/ForbiddenResponse"
+        "404":
+          $ref: "#/components/responses/NotFoundResponse"
+
+  /v3/customers/{customer_id}/addresses:
+    parameters:
+      - $ref: "#/components/parameters/CustomerId"
+    get:
+      tags: [Business Customers]
+      operationId: listBusinessCustomerAddresses
+      summary: List addresses for a business customer
+      security:
+        - bearerAuth: []
+        - apiKeyAuth: []
+      responses:
+        "200":
+          $ref: "#/components/responses/PaginatedCollectionResponse"
+        "401":
+          $ref: "#/components/responses/UnauthorizedResponse"
+        "403":
+          $ref: "#/components/responses/ForbiddenResponse"
+        "404":
+          $ref: "#/components/responses/NotFoundResponse"
+    post:
+      tags: [Business Customers]
+      operationId: createBusinessCustomerAddress
+      summary: Create an address for a business customer
+      security:
+        - bearerAuth: []
+        - apiKeyAuth: []
+      requestBody:
+        $ref: "#/components/requestBodies/GenericJsonRequestBody"
+      responses:
+        "200":
+          $ref: "#/components/responses/SuccessResponse"
+        "400":
+          $ref: "#/components/responses/BadRequestResponse"
+        "401":
+          $ref: "#/components/responses/UnauthorizedResponse"
+        "403":
+          $ref: "#/components/responses/ForbiddenResponse"
+        "404":
+          $ref: "#/components/responses/NotFoundResponse"
+
+  /v3/customers/{customer_id}/addresses/{id}:
+    parameters:
+      - $ref: "#/components/parameters/CustomerId"
+      - $ref: "#/components/parameters/GenericId"
+    get:
+      tags: [Business Customers]
+      operationId: getBusinessCustomerAddress
+      summary: Get a business customer address
+      security:
+        - bearerAuth: []
+        - apiKeyAuth: []
+      responses:
+        "200":
+          $ref: "#/components/responses/SuccessResponse"
+        "401":
+          $ref: "#/components/responses/UnauthorizedResponse"
+        "403":
+          $ref: "#/components/responses/ForbiddenResponse"
+        "404":
+          $ref: "#/components/responses/NotFoundResponse"
+    patch:
+      tags: [Business Customers]
+      operationId: updateBusinessCustomerAddress
+      summary: Update a business customer address
+      security:
+        - bearerAuth: []
+        - apiKeyAuth: []
+      requestBody:
+        $ref: "#/components/requestBodies/GenericJsonRequestBody"
+      responses:
+        "200":
+          $ref: "#/components/responses/SuccessResponse"
+        "400":
+          $ref: "#/components/responses/BadRequestResponse"
+        "401":
+          $ref: "#/components/responses/UnauthorizedResponse"
+        "403":
+          $ref: "#/components/responses/ForbiddenResponse"
+        "404":
+          $ref: "#/components/responses/NotFoundResponse"
+    delete:
+      tags: [Business Customers]
+      operationId: deleteBusinessCustomerAddress
+      summary: Delete a business customer address
+      security:
+        - bearerAuth: []
+        - apiKeyAuth: []
+      responses:
+        "204":
+          $ref: "#/components/responses/NoContentResponse"
+        "401":
+          $ref: "#/components/responses/UnauthorizedResponse"
+        "403":
+          $ref: "#/components/responses/ForbiddenResponse"
+        "404":
+          $ref: "#/components/responses/NotFoundResponse"
+
+  /v3/waba-customer-tags:
+    get:
+      tags: [WABA]
+      operationId: listWabaCustomerTags
+      summary: List WABA customer tags
+      security:
+        - bearerAuth: []
+        - apiKeyAuth: []
+      responses:
+        "200":
+          $ref: "#/components/responses/PaginatedCollectionResponse"
+        "401":
+          $ref: "#/components/responses/UnauthorizedResponse"
+        "403":
+          $ref: "#/components/responses/ForbiddenResponse"
+    post:
+      tags: [WABA]
+      operationId: createWabaCustomerTag
+      summary: Create a WABA customer tag
+      security:
+        - bearerAuth: []
+        - apiKeyAuth: []
+      requestBody:
+        $ref: "#/components/requestBodies/GenericJsonRequestBody"
+      responses:
+        "200":
+          $ref: "#/components/responses/SuccessResponse"
+        "400":
+          $ref: "#/components/responses/BadRequestResponse"
+        "401":
+          $ref: "#/components/responses/UnauthorizedResponse"
+        "403":
+          $ref: "#/components/responses/ForbiddenResponse"
+
+  /v3/waba-customer-tags/{id}:
+    parameters:
+      - $ref: "#/components/parameters/GenericId"
+    get:
+      tags: [WABA]
+      operationId: getWabaCustomerTag
+      summary: Get a WABA customer tag
+      security:
+        - bearerAuth: []
+        - apiKeyAuth: []
+      responses:
+        "200":
+          $ref: "#/components/responses/SuccessResponse"
+        "401":
+          $ref: "#/components/responses/UnauthorizedResponse"
+        "403":
+          $ref: "#/components/responses/ForbiddenResponse"
+        "404":
+          $ref: "#/components/responses/NotFoundResponse"
+    patch:
+      tags: [WABA]
+      operationId: updateWabaCustomerTag
+      summary: Update a WABA customer tag
+      security:
+        - bearerAuth: []
+        - apiKeyAuth: []
+      requestBody:
+        $ref: "#/components/requestBodies/GenericJsonRequestBody"
+      responses:
+        "200":
+          $ref: "#/components/responses/SuccessResponse"
+        "400":
+          $ref: "#/components/responses/BadRequestResponse"
+        "401":
+          $ref: "#/components/responses/UnauthorizedResponse"
+        "403":
+          $ref: "#/components/responses/ForbiddenResponse"
+        "404":
+          $ref: "#/components/responses/NotFoundResponse"
+    delete:
+      tags: [WABA]
+      operationId: deleteWabaCustomerTag
+      summary: Delete a WABA customer tag
+      security:
+        - bearerAuth: []
+        - apiKeyAuth: []
+      responses:
+        "204":
+          $ref: "#/components/responses/NoContentResponse"
+        "401":
+          $ref: "#/components/responses/UnauthorizedResponse"
+        "403":
+          $ref: "#/components/responses/ForbiddenResponse"
+        "404":
+          $ref: "#/components/responses/NotFoundResponse"
+
+  /v3/waba-accounts:
+    get:
+      tags: [WABA]
+      operationId: listWabaAccounts
+      summary: List WABA accounts
+      security:
+        - bearerAuth: []
+        - apiKeyAuth: []
+      responses:
+        "200":
+          $ref: "#/components/responses/CollectionResponse"
+        "401":
+          $ref: "#/components/responses/UnauthorizedResponse"
+        "403":
+          $ref: "#/components/responses/ForbiddenResponse"
+
+  /v3/waba-accounts/login:
+    patch:
+      tags: [WABA]
+      operationId: loginWabaAccount
+      summary: Complete WABA login
+      security:
+        - bearerAuth: []
+        - apiKeyAuth: []
+      requestBody:
+        $ref: "#/components/requestBodies/GenericJsonRequestBody"
+      responses:
+        "204":
+          $ref: "#/components/responses/NoContentResponse"
+        "400":
+          $ref: "#/components/responses/BadRequestResponse"
+        "401":
+          $ref: "#/components/responses/UnauthorizedResponse"
+        "403":
+          $ref: "#/components/responses/ForbiddenResponse"
+
+  /v3/waba-accounts/{id}:
+    parameters:
+      - $ref: "#/components/parameters/GenericId"
+    get:
+      tags: [WABA]
+      operationId: getWabaAccount
+      summary: Get a WABA account
+      security:
+        - bearerAuth: []
+        - apiKeyAuth: []
+      responses:
+        "200":
+          $ref: "#/components/responses/SuccessResponse"
+        "401":
+          $ref: "#/components/responses/UnauthorizedResponse"
+        "403":
+          $ref: "#/components/responses/ForbiddenResponse"
+        "404":
+          $ref: "#/components/responses/NotFoundResponse"
+    patch:
+      tags: [WABA]
+      operationId: updateWabaAccount
+      summary: Update a WABA account
+      security:
+        - bearerAuth: []
+        - apiKeyAuth: []
+      requestBody:
+        $ref: "#/components/requestBodies/GenericJsonRequestBody"
+      responses:
+        "200":
+          $ref: "#/components/responses/SuccessResponse"
+        "400":
+          $ref: "#/components/responses/BadRequestResponse"
+        "401":
+          $ref: "#/components/responses/UnauthorizedResponse"
+        "403":
+          $ref: "#/components/responses/ForbiddenResponse"
+        "404":
+          $ref: "#/components/responses/NotFoundResponse"
+    delete:
+      tags: [WABA]
+      operationId: deleteWabaAccount
+      summary: Delete a WABA account
+      security:
+        - bearerAuth: []
+        - apiKeyAuth: []
+      responses:
+        "204":
+          $ref: "#/components/responses/NoContentResponse"
+        "401":
+          $ref: "#/components/responses/UnauthorizedResponse"
+        "403":
+          $ref: "#/components/responses/ForbiddenResponse"
+        "404":
+          $ref: "#/components/responses/NotFoundResponse"
+
+  /v3/waba-accounts/{id}/sync:
+    parameters:
+      - $ref: "#/components/parameters/GenericId"
+    post:
+      tags: [WABA]
+      operationId: syncWabaAccount
+      summary: Sync a WABA account
+      security:
+        - bearerAuth: []
+        - apiKeyAuth: []
+      responses:
+        "200":
+          $ref: "#/components/responses/SuccessResponse"
+        "401":
+          $ref: "#/components/responses/UnauthorizedResponse"
+        "403":
+          $ref: "#/components/responses/ForbiddenResponse"
+        "404":
+          $ref: "#/components/responses/NotFoundResponse"
+
+  /v3/waba-accounts/{id}/dataset:
+    parameters:
+      - $ref: "#/components/parameters/GenericId"
+    post:
+      tags: [WABA]
+      operationId: createWabaDataset
+      summary: Create a WABA dataset
+      security:
+        - bearerAuth: []
+        - apiKeyAuth: []
+      responses:
+        "200":
+          $ref: "#/components/responses/SuccessResponse"
+        "401":
+          $ref: "#/components/responses/UnauthorizedResponse"
+        "403":
+          $ref: "#/components/responses/ForbiddenResponse"
+        "404":
+          $ref: "#/components/responses/NotFoundResponse"
+
+  /v3/waba-accounts/{id}/register-phone:
+    parameters:
+      - $ref: "#/components/parameters/GenericId"
+    post:
+      tags: [WABA]
+      operationId: registerWabaPhone
+      summary: Register a WABA phone number
+      security:
+        - bearerAuth: []
+        - apiKeyAuth: []
+      requestBody:
+        $ref: "#/components/requestBodies/GenericJsonRequestBody"
+      responses:
+        "200":
+          $ref: "#/components/responses/SuccessResponse"
+        "400":
+          $ref: "#/components/responses/BadRequestResponse"
+        "401":
+          $ref: "#/components/responses/UnauthorizedResponse"
+        "403":
+          $ref: "#/components/responses/ForbiddenResponse"
+        "404":
+          $ref: "#/components/responses/NotFoundResponse"
+
+  /v3/waba-accounts/{id}/upload-media:
+    parameters:
+      - $ref: "#/components/parameters/GenericId"
+    post:
+      tags: [WABA]
+      operationId: uploadWabaMedia
+      summary: Upload WABA media
+      security:
+        - bearerAuth: []
+        - apiKeyAuth: []
+      requestBody:
+        $ref: "#/components/requestBodies/GenericUploadRequestBody"
+      responses:
+        "200":
+          $ref: "#/components/responses/SuccessResponse"
+        "400":
+          $ref: "#/components/responses/BadRequestResponse"
+        "401":
+          $ref: "#/components/responses/UnauthorizedResponse"
+        "403":
+          $ref: "#/components/responses/ForbiddenResponse"
+        "404":
+          $ref: "#/components/responses/NotFoundResponse"
+
+  /v3/waba-accounts/{id}/message-attempts:
+    parameters:
+      - $ref: "#/components/parameters/GenericId"
+    get:
+      tags: [WABA]
+      operationId: listWabaMessageAttempts
+      summary: List WABA message attempts
+      security:
+        - bearerAuth: []
+        - apiKeyAuth: []
+      responses:
+        "200":
+          $ref: "#/components/responses/PaginatedCollectionResponse"
+        "401":
+          $ref: "#/components/responses/UnauthorizedResponse"
+        "403":
+          $ref: "#/components/responses/ForbiddenResponse"
+        "404":
+          $ref: "#/components/responses/NotFoundResponse"
+
+  /v3/waba-accounts/{id}/message-templates:
+    parameters:
+      - $ref: "#/components/parameters/GenericId"
+    get:
+      tags: [WABA]
+      operationId: listWabaMessageTemplates
+      summary: List WABA message templates
+      security:
+        - bearerAuth: []
+        - apiKeyAuth: []
+      responses:
+        "200":
+          $ref: "#/components/responses/CollectionResponse"
+        "401":
+          $ref: "#/components/responses/UnauthorizedResponse"
+        "403":
+          $ref: "#/components/responses/ForbiddenResponse"
+        "404":
+          $ref: "#/components/responses/NotFoundResponse"
+
+  /v3/waba-accounts/{id}/send-messages:
+    parameters:
+      - $ref: "#/components/parameters/GenericId"
+    post:
+      tags: [WABA]
+      operationId: sendTemplateMessages
+      summary: Send template messages from a WABA account
+      security:
+        - bearerAuth: []
+        - apiKeyAuth: []
+      requestBody:
+        $ref: "#/components/requestBodies/GenericJsonRequestBody"
+      responses:
+        "204":
+          $ref: "#/components/responses/NoContentResponse"
+        "400":
+          $ref: "#/components/responses/BadRequestResponse"
+        "401":
+          $ref: "#/components/responses/UnauthorizedResponse"
+        "403":
+          $ref: "#/components/responses/ForbiddenResponse"
+        "404":
+          $ref: "#/components/responses/NotFoundResponse"
+
+  /v3/waba-accounts/{unique_id}/quick-replies:
+    parameters:
+      - $ref: "#/components/parameters/UniqueId"
+    get:
+      tags: [WABA]
+      operationId: listQuickReplies
+      summary: List WABA quick replies
+      security:
+        - bearerAuth: []
+        - apiKeyAuth: []
+      responses:
+        "200":
+          $ref: "#/components/responses/PaginatedCollectionResponse"
+        "401":
+          $ref: "#/components/responses/UnauthorizedResponse"
+        "403":
+          $ref: "#/components/responses/ForbiddenResponse"
+        "404":
+          $ref: "#/components/responses/NotFoundResponse"
+    post:
+      tags: [WABA]
+      operationId: createQuickReply
+      summary: Create a WABA quick reply
+      security:
+        - bearerAuth: []
+        - apiKeyAuth: []
+      requestBody:
+        $ref: "#/components/requestBodies/GenericJsonRequestBody"
+      responses:
+        "201":
+          $ref: "#/components/responses/CreatedResponse"
+        "400":
+          $ref: "#/components/responses/BadRequestResponse"
+        "401":
+          $ref: "#/components/responses/UnauthorizedResponse"
+        "403":
+          $ref: "#/components/responses/ForbiddenResponse"
+        "404":
+          $ref: "#/components/responses/NotFoundResponse"
+
+  /v3/waba-accounts/{unique_id}/quick-replies/{id}:
+    parameters:
+      - $ref: "#/components/parameters/UniqueId"
+      - $ref: "#/components/parameters/GenericId"
+    patch:
+      tags: [WABA]
+      operationId: updateQuickReply
+      summary: Update a WABA quick reply
+      security:
+        - bearerAuth: []
+        - apiKeyAuth: []
+      requestBody:
+        $ref: "#/components/requestBodies/GenericJsonRequestBody"
+      responses:
+        "200":
+          $ref: "#/components/responses/SuccessResponse"
+        "400":
+          $ref: "#/components/responses/BadRequestResponse"
+        "401":
+          $ref: "#/components/responses/UnauthorizedResponse"
+        "403":
+          $ref: "#/components/responses/ForbiddenResponse"
+        "404":
+          $ref: "#/components/responses/NotFoundResponse"
+    delete:
+      tags: [WABA]
+      operationId: deleteQuickReply
+      summary: Delete a WABA quick reply
+      security:
+        - bearerAuth: []
+        - apiKeyAuth: []
+      responses:
+        "204":
+          $ref: "#/components/responses/NoContentResponse"
+        "401":
+          $ref: "#/components/responses/UnauthorizedResponse"
+        "403":
+          $ref: "#/components/responses/ForbiddenResponse"
+        "404":
+          $ref: "#/components/responses/NotFoundResponse"
+
+  /v3/waba-accounts/{unique_id}/customers:
+    parameters:
+      - $ref: "#/components/parameters/UniqueId"
+    get:
+      tags: [WABA]
+      operationId: listWabaCustomers
+      summary: List WABA customers
+      security:
+        - bearerAuth: []
+        - apiKeyAuth: []
+      responses:
+        "200":
+          $ref: "#/components/responses/PaginatedCollectionResponse"
+        "401":
+          $ref: "#/components/responses/UnauthorizedResponse"
+        "403":
+          $ref: "#/components/responses/ForbiddenResponse"
+        "404":
+          $ref: "#/components/responses/NotFoundResponse"
+
+  /v3/waba-accounts/{unique_id}/customers/{id}:
+    parameters:
+      - $ref: "#/components/parameters/UniqueId"
+      - $ref: "#/components/parameters/GenericId"
+    patch:
+      tags: [WABA]
+      operationId: updateWabaCustomer
+      summary: Update a WABA customer
+      security:
+        - bearerAuth: []
+        - apiKeyAuth: []
+      requestBody:
+        $ref: "#/components/requestBodies/GenericJsonRequestBody"
+      responses:
+        "200":
+          $ref: "#/components/responses/SuccessResponse"
+        "400":
+          $ref: "#/components/responses/BadRequestResponse"
+        "401":
+          $ref: "#/components/responses/UnauthorizedResponse"
+        "403":
+          $ref: "#/components/responses/ForbiddenResponse"
+        "404":
+          $ref: "#/components/responses/NotFoundResponse"
+
+  /v3/waba-accounts/{unique_id}/customers/{id}/purchase:
+    parameters:
+      - $ref: "#/components/parameters/UniqueId"
+      - $ref: "#/components/parameters/GenericId"
+    post:
+      tags: [WABA]
+      operationId: sendWabaPurchase
+      summary: Send a WABA purchase message
+      security:
+        - bearerAuth: []
+        - apiKeyAuth: []
+      requestBody:
+        $ref: "#/components/requestBodies/GenericJsonRequestBody"
+      responses:
+        "200":
+          $ref: "#/components/responses/SuccessResponse"
+        "400":
+          $ref: "#/components/responses/BadRequestResponse"
+        "401":
+          $ref: "#/components/responses/UnauthorizedResponse"
+        "403":
+          $ref: "#/components/responses/ForbiddenResponse"
+        "404":
+          $ref: "#/components/responses/NotFoundResponse"
+
+  /v3/waba-accounts/{waba_unique_id}/customers/{wa_user_id}/messages:
+    parameters:
+      - $ref: "#/components/parameters/WabaUniqueId"
+      - $ref: "#/components/parameters/WaUserId"
+    get:
+      tags: [WABA]
+      operationId: listWabaMessages
+      summary: List WABA customer messages
+      security:
+        - bearerAuth: []
+        - apiKeyAuth: []
+      responses:
+        "200":
+          $ref: "#/components/responses/PaginatedCollectionResponse"
+        "401":
+          $ref: "#/components/responses/UnauthorizedResponse"
+        "403":
+          $ref: "#/components/responses/ForbiddenResponse"
+        "404":
+          $ref: "#/components/responses/NotFoundResponse"
+    post:
+      tags: [WABA]
+      operationId: sendWabaMessage
+      summary: Send a WABA customer message
+      security:
+        - bearerAuth: []
+        - apiKeyAuth: []
+      requestBody:
+        $ref: "#/components/requestBodies/GenericJsonRequestBody"
+      responses:
+        "200":
+          $ref: "#/components/responses/SuccessResponse"
+        "400":
+          $ref: "#/components/responses/BadRequestResponse"
+        "401":
+          $ref: "#/components/responses/UnauthorizedResponse"
+        "403":
+          $ref: "#/components/responses/ForbiddenResponse"
+        "404":
+          $ref: "#/components/responses/NotFoundResponse"
+
+  /v3/waba-accounts/{waba_unique_id}/customers/{wa_user_id}/messages/{wamid}:
+    parameters:
+      - $ref: "#/components/parameters/WabaUniqueId"
+      - $ref: "#/components/parameters/WaUserId"
+      - $ref: "#/components/parameters/Wamid"
+    get:
+      tags: [WABA]
+      operationId: getWabaMessage
+      summary: Get a WABA customer message
+      security:
+        - bearerAuth: []
+        - apiKeyAuth: []
+      responses:
+        "200":
+          $ref: "#/components/responses/SuccessResponse"
+        "401":
+          $ref: "#/components/responses/UnauthorizedResponse"
+        "403":
+          $ref: "#/components/responses/ForbiddenResponse"
+        "404":
+          $ref: "#/components/responses/NotFoundResponse"
+    patch:
+      tags: [WABA]
+      operationId: updateWabaMessage
+      summary: Update a WABA customer message
+      security:
+        - bearerAuth: []
+        - apiKeyAuth: []
+      requestBody:
+        $ref: "#/components/requestBodies/GenericJsonRequestBody"
+      responses:
+        "200":
+          $ref: "#/components/responses/SuccessResponse"
+        "400":
+          $ref: "#/components/responses/BadRequestResponse"
+        "401":
+          $ref: "#/components/responses/UnauthorizedResponse"
+        "403":
+          $ref: "#/components/responses/ForbiddenResponse"
+        "404":
+          $ref: "#/components/responses/NotFoundResponse"
+    delete:
+      tags: [WABA]
+      operationId: deleteWabaMessage
+      summary: Delete a WABA customer message
+      security:
+        - bearerAuth: []
+        - apiKeyAuth: []
+      responses:
+        "204":
+          $ref: "#/components/responses/NoContentResponse"
+        "401":
+          $ref: "#/components/responses/UnauthorizedResponse"
+        "403":
+          $ref: "#/components/responses/ForbiddenResponse"
+        "404":
+          $ref: "#/components/responses/NotFoundResponse"
+
+  /v3/waba-accounts/{waba_unique_id}/customers/{wa_user_id}/message-templates:
+    parameters:
+      - $ref: "#/components/parameters/WabaUniqueId"
+      - $ref: "#/components/parameters/WaUserId"
+    post:
+      tags: [WABA]
+      operationId: sendWabaTemplateMessage
+      summary: Send a WABA template message to a customer
+      security:
+        - bearerAuth: []
+        - apiKeyAuth: []
+      requestBody:
+        $ref: "#/components/requestBodies/GenericUploadRequestBody"
+      responses:
+        "200":
+          $ref: "#/components/responses/SuccessResponse"
+        "400":
+          $ref: "#/components/responses/BadRequestResponse"
+        "401":
+          $ref: "#/components/responses/UnauthorizedResponse"
+        "403":
+          $ref: "#/components/responses/ForbiddenResponse"
+        "404":
+          $ref: "#/components/responses/NotFoundResponse"
+
+  /v3/whatsapp-integrations:
+    get:
+      tags: [WhatsApp Integrations]
+      operationId: listWhatsappIntegrations
+      summary: List WhatsApp integrations
+      security:
+        - bearerAuth: []
+        - apiKeyAuth: []
+      responses:
+        "200":
+          $ref: "#/components/responses/CollectionResponse"
+        "401":
+          $ref: "#/components/responses/UnauthorizedResponse"
+        "403":
+          $ref: "#/components/responses/ForbiddenResponse"
+    post:
+      tags: [WhatsApp Integrations]
+      operationId: createWhatsappIntegration
+      summary: Create a WhatsApp integration
+      security:
+        - bearerAuth: []
+        - apiKeyAuth: []
+      requestBody:
+        $ref: "#/components/requestBodies/GenericJsonRequestBody"
+      responses:
+        "200":
+          $ref: "#/components/responses/SuccessResponse"
+        "400":
+          $ref: "#/components/responses/BadRequestResponse"
+        "401":
+          $ref: "#/components/responses/UnauthorizedResponse"
+        "403":
+          $ref: "#/components/responses/ForbiddenResponse"
+
+  /v3/whatsapp-integrations/{id}:
+    parameters:
+      - $ref: "#/components/parameters/GenericId"
+    get:
+      tags: [WhatsApp Integrations]
+      operationId: getWhatsappIntegration
+      summary: Get a WhatsApp integration
+      security:
+        - bearerAuth: []
+        - apiKeyAuth: []
+      responses:
+        "200":
+          $ref: "#/components/responses/SuccessResponse"
+        "401":
+          $ref: "#/components/responses/UnauthorizedResponse"
+        "403":
+          $ref: "#/components/responses/ForbiddenResponse"
+        "404":
+          $ref: "#/components/responses/NotFoundResponse"
+    patch:
+      tags: [WhatsApp Integrations]
+      operationId: updateWhatsappIntegration
+      summary: Update a WhatsApp integration
+      security:
+        - bearerAuth: []
+        - apiKeyAuth: []
+      requestBody:
+        $ref: "#/components/requestBodies/GenericJsonRequestBody"
+      responses:
+        "200":
+          $ref: "#/components/responses/SuccessResponse"
+        "400":
+          $ref: "#/components/responses/BadRequestResponse"
+        "401":
+          $ref: "#/components/responses/UnauthorizedResponse"
+        "403":
+          $ref: "#/components/responses/ForbiddenResponse"
+        "404":
+          $ref: "#/components/responses/NotFoundResponse"
+    delete:
+      tags: [WhatsApp Integrations]
+      operationId: deleteWhatsappIntegration
+      summary: Delete a WhatsApp integration
+      security:
+        - bearerAuth: []
+        - apiKeyAuth: []
+      responses:
+        "204":
+          $ref: "#/components/responses/NoContentResponse"
+        "401":
+          $ref: "#/components/responses/UnauthorizedResponse"
+        "403":
+          $ref: "#/components/responses/ForbiddenResponse"
+        "404":
+          $ref: "#/components/responses/NotFoundResponse"
+
+  /v3/whatsapp-integrations/{id}/check-status:
+    parameters:
+      - $ref: "#/components/parameters/GenericId"
+    post:
+      tags: [WhatsApp Integrations]
+      operationId: checkWhatsappIntegrationStatus
+      summary: Check WhatsApp integration status
       security:
         - bearerAuth: []
         - apiKeyAuth: []
@@ -1671,20 +4079,6 @@ components:
       description: "Send `Authorization: Bearer <api_key>` for machine-authenticated business requests."
 
   parameters:
-    OriginHeader:
-      name: x-origin
-      in: header
-      required: false
-      description: Store origin or custom domain used to resolve storefront context.
-      schema:
-        type: string
-    RequiredOriginHeader:
-      name: x-origin
-      in: header
-      required: true
-      description: Store origin or custom domain used to resolve customer context.
-      schema:
-        type: string
     StoreId:
       name: store_id
       in: path
@@ -1692,6 +4086,13 @@ components:
       schema:
         type: string
       description: Store `unique_id`.
+    StorefrontPublicApiKey:
+      name: X-Scalev-Storefront-Api-Key
+      in: header
+      required: true
+      schema:
+        type: string
+      description: Publishable storefront public API key for the target store.
     ProductSlug:
       name: slug
       in: path
@@ -1742,6 +4143,66 @@ components:
         type: string
     PgReferenceId:
       name: pg_reference_id
+      in: path
+      required: true
+      schema:
+        type: string
+    GenericId:
+      name: id
+      in: path
+      required: true
+      schema:
+        type: string
+    ProductId:
+      name: product_id
+      in: path
+      required: true
+      schema:
+        type: string
+    BundleId:
+      name: bundle_id
+      in: path
+      required: true
+      schema:
+        type: string
+    CustomerId:
+      name: customer_id
+      in: path
+      required: true
+      schema:
+        type: string
+    VariantId:
+      name: variant_id
+      in: path
+      required: true
+      schema:
+        type: string
+    SectionUuid:
+      name: section_uuid
+      in: path
+      required: true
+      schema:
+        type: string
+    UniqueId:
+      name: unique_id
+      in: path
+      required: true
+      schema:
+        type: string
+    WabaUniqueId:
+      name: waba_unique_id
+      in: path
+      required: true
+      schema:
+        type: string
+    WaUserId:
+      name: wa_user_id
+      in: path
+      required: true
+      schema:
+        type: string
+    Wamid:
+      name: wamid
       in: path
       required: true
       schema:
@@ -1834,13 +4295,27 @@ components:
       content:
         application/json:
           schema:
-            $ref: "#/components/schemas/ApiSuccessResponse"
+            $ref: "#/components/schemas/RawObjectResponseBody"
     CreatedResponse:
       description: Created
       content:
         application/json:
           schema:
-            $ref: "#/components/schemas/ApiSuccessResponse"
+            $ref: "#/components/schemas/RawObjectResponseBody"
+    CollectionResponse:
+      description: Success collection response
+      content:
+        application/json:
+          schema:
+            $ref: "#/components/schemas/CollectionResponseBody"
+    PaginatedCollectionResponse:
+      description: Success paginated collection response
+      content:
+        application/json:
+          schema:
+            $ref: "#/components/schemas/PaginatedCollectionResponseBody"
+    NoContentResponse:
+      description: Success with no response body
     BadRequestResponse:
       description: Bad Request
       content:
@@ -1878,40 +4353,63 @@ components:
         - type: string
         - type: number
         - type: boolean
-    ApiSuccessResponse:
+    RawObjectResponseBody:
+      type: object
+      additionalProperties: true
+      description: Raw single-resource success payload for v3.
+    CollectionResponseBody:
       type: object
       required:
-        - code
-        - status
+        - data
+        - is_paginated
       properties:
-        code:
-          type: integer
-          example: 200
-        status:
-          type: string
-          example: Success
         data:
-          $ref: "#/components/schemas/FlexibleValue"
-        message:
-          type: string
-          nullable: true
+          type: array
+          items: {}
+        is_paginated:
+          type: boolean
+          enum: [false]
+          example: false
+      additionalProperties: false
+      description: Non-paginated list payload for v3.
+    PaginatedCollectionResponseBody:
+      type: object
+      required:
+        - data
+        - is_paginated
+      properties:
+        data:
+          type: array
+          items: {}
+        is_paginated:
+          type: boolean
+          enum: [true]
+          example: true
+        has_next:
+          type: boolean
+        last_id:
+          oneOf:
+            - type: integer
+            - type: string
+        page_size:
+          type: integer
+        page:
+          type: integer
+      additionalProperties: true
+      description: Paginated list payload for v3.
     ApiErrorResponse:
       type: object
-      required:
-        - code
-        - status
       properties:
-        code:
-          type: integer
-          example: 400
-        status:
-          type: string
-          example: Bad Request
         error:
           $ref: "#/components/schemas/FlexibleValue"
+        error_code:
+          type: string
         message:
           type: string
-          nullable: true
+          description: Error-only human-readable detail.
+        errors:
+          $ref: "#/components/schemas/FlexibleValue"
+      additionalProperties: false
     GenericJsonObject:
       type: object
       additionalProperties: true
