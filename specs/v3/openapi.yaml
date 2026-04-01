@@ -28,8 +28,10 @@ tags:
     description: Public storefront catalog, guest cart, and guest checkout flows.
       All store-derived public storefront routes require
       `X-Scalev-Storefront-Api-Key`.
-  - name: Public Orders
-    description: Public order lookup and payment endpoints.
+  - name: OAuth
+    description: Public and machine OAuth token-management endpoints.
+  - name: OAuth Billing
+    description: OAuth-only billing reservation endpoints for installed apps.
   - name: Customer Auth
     description: Public customer authentication and password-reset endpoints.
   - name: Customer Account
@@ -48,8 +50,10 @@ tags:
     description: Discount-code validation endpoints.
   - name: Locations
     description: Authenticated business location lookup endpoints.
+  - name: Business Stores
+    description: Authenticated business store lookup endpoints that use legacy numeric store IDs.
   - name: Shipping
-    description: Public and authenticated shipping lookup endpoints.
+    description: Authenticated business shipping lookup endpoints.
   - name: Business Products
     description: Authenticated business product, variant, taxonomy, and course
       management endpoints.
@@ -73,6 +77,7 @@ paths:
         - Storefront
       operationId: listStorefrontProducts
       summary: List storefront products
+      description: "No OAuth machine scope. Public storefront endpoint."
       responses:
         "200":
           $ref: "#/components/responses/PaginatedCollectionResponse"
@@ -87,6 +92,7 @@ paths:
         - Storefront
       operationId: countStorefrontProducts
       summary: Count storefront products
+      description: "No OAuth machine scope. Public storefront endpoint."
       responses:
         "200":
           $ref: "#/components/responses/SuccessResponse"
@@ -102,6 +108,7 @@ paths:
         - Storefront
       operationId: getStorefrontProduct
       summary: Get a storefront product by slug
+      description: "No OAuth machine scope. Public storefront endpoint."
       responses:
         "200":
           $ref: "#/components/responses/SuccessResponse"
@@ -116,6 +123,7 @@ paths:
         - Storefront
       operationId: listStorefrontCategories
       summary: List storefront categories
+      description: "No OAuth machine scope. Public storefront endpoint."
       responses:
         "200":
           $ref: "#/components/responses/CollectionResponse"
@@ -131,6 +139,7 @@ paths:
         - Storefront
       operationId: getStorefrontVariantPricing
       summary: Get storefront variant pricing
+      description: "No OAuth machine scope. Public storefront endpoint."
       responses:
         "200":
           $ref: "#/components/responses/CollectionResponse"
@@ -145,6 +154,7 @@ paths:
         - Storefront
       operationId: getGuestCart
       summary: Get the guest storefront cart
+      description: "No OAuth machine scope. Public storefront endpoint."
       responses:
         "200":
           $ref: "#/components/responses/SuccessResponse"
@@ -159,6 +169,7 @@ paths:
         - Storefront
       operationId: addGuestCartItem
       summary: Add an item to the guest storefront cart
+      description: "No OAuth machine scope. Public storefront endpoint."
       requestBody:
         $ref: "#/components/requestBodies/CartItemRequestBody"
       responses:
@@ -178,6 +189,7 @@ paths:
         - Storefront
       operationId: updateGuestCartItem
       summary: Update a guest storefront cart item
+      description: "No OAuth machine scope. Public storefront endpoint."
       requestBody:
         $ref: "#/components/requestBodies/CartItemUpdateRequestBody"
       responses:
@@ -192,6 +204,7 @@ paths:
         - Storefront
       operationId: removeGuestCartItem
       summary: Remove a guest storefront cart item
+      description: "No OAuth machine scope. Public storefront endpoint."
       responses:
         "200":
           $ref: "#/components/responses/SuccessResponse"
@@ -206,6 +219,7 @@ paths:
         - Storefront
       operationId: mergeGuestCart
       summary: Merge a guest cart into the authenticated customer cart
+      description: "No OAuth machine scope. Public storefront endpoint."
       security:
         - bearerAuth: []
       responses:
@@ -224,6 +238,7 @@ paths:
         - Storefront
       operationId: createGuestCheckout
       summary: Checkout a storefront cart as a guest
+      description: "No OAuth machine scope. Public storefront endpoint."
       requestBody:
         $ref: "#/components/requestBodies/GenericJsonRequestBody"
       responses:
@@ -231,47 +246,6 @@ paths:
           $ref: "#/components/responses/CreatedResponse"
         "400":
           $ref: "#/components/responses/BadRequestResponse"
-        "404":
-          $ref: "#/components/responses/NotFoundResponse"
-  /v3/orders/search-courier-service:
-    post:
-      tags:
-        - Shipping
-      operationId: searchPublicCourierServices
-      summary: Search courier services for public checkout
-      requestBody:
-        $ref: "#/components/requestBodies/GenericJsonRequestBody"
-      responses:
-        "200":
-          $ref: "#/components/responses/CollectionResponse"
-        "400":
-          $ref: "#/components/responses/BadRequestResponse"
-  /v3/orders/public/{secret_slug}:
-    parameters:
-      - $ref: "#/components/parameters/SecretSlug"
-    get:
-      tags:
-        - Public Orders
-      operationId: getPublicOrder
-      summary: Get a public order by secret slug
-      responses:
-        "200":
-          $ref: "#/components/responses/SuccessResponse"
-        "404":
-          $ref: "#/components/responses/NotFoundResponse"
-  /v3/orders/public/{secret_slug}/payment:
-    parameters:
-      - $ref: "#/components/parameters/SecretSlug"
-    post:
-      tags:
-        - Public Orders
-      operationId: createPublicOrderPayment
-      summary: Create a payment for a public order
-      requestBody:
-        $ref: "#/components/requestBodies/GenericJsonRequestBody"
-      responses:
-        "200":
-          $ref: "#/components/responses/SuccessResponse"
         "404":
           $ref: "#/components/responses/NotFoundResponse"
   /v3/stores/{store_id}/public/discount-codes/check:
@@ -283,17 +257,125 @@ paths:
         - Discounts
       operationId: checkDiscountCode
       summary: Check discount code validity
+      description: "No OAuth machine scope. Public storefront endpoint."
       responses:
         "200":
           $ref: "#/components/responses/SuccessResponse"
         "400":
           $ref: "#/components/responses/BadRequestResponse"
+  /v3/oauth/application:
+    get:
+      tags:
+        - OAuth
+      operationId: getOAuthApplicationPublic
+      summary: Get public OAuth application metadata
+      description: "No OAuth installation scope. OAuth flow endpoint."
+      parameters:
+        - description: OAuth client ID.
+          in: query
+          name: client_id
+          required: true
+          schema:
+            type: string
+        - description: Redirect URI that must exactly match the application configuration.
+          in: query
+          name: redirect_uri
+          required: true
+          schema:
+            format: uri
+            type: string
+      responses:
+        "200":
+          $ref: "#/components/responses/SuccessResponse"
+        "404":
+          $ref: "#/components/responses/NotFoundResponse"
+  /v3/oauth/token:
+    post:
+      tags:
+        - OAuth
+      operationId: exchangeOAuthToken
+      summary: Exchange or refresh OAuth tokens
+      description: "No OAuth installation scope. OAuth flow endpoint."
+      requestBody:
+        $ref: "#/components/requestBodies/GenericJsonRequestBody"
+      responses:
+        "200":
+          $ref: "#/components/responses/SuccessResponse"
+        "400":
+          $ref: "#/components/responses/BadRequestResponse"
+  /v3/oauth/revoke:
+    post:
+      tags:
+        - OAuth
+      operationId: revokeOAuthToken
+      summary: Revoke an OAuth access or refresh token
+      description: "No OAuth installation scope. OAuth flow endpoint."
+      requestBody:
+        $ref: "#/components/requestBodies/GenericJsonRequestBody"
+      responses:
+        "204":
+          $ref: "#/components/responses/NoContentResponse"
+        "400":
+          $ref: "#/components/responses/BadRequestResponse"
+  /v3/oauth/introspect:
+    post:
+      tags:
+        - OAuth
+      operationId: introspectOAuthToken
+      summary: Introspect an OAuth access or refresh token
+      description: "No OAuth installation scope. OAuth flow endpoint."
+      requestBody:
+        $ref: "#/components/requestBodies/GenericJsonRequestBody"
+      responses:
+        "200":
+          $ref: "#/components/responses/SuccessResponse"
+        "400":
+          $ref: "#/components/responses/BadRequestResponse"
+  /v3/oauth/billing/reservations:
+    post:
+      tags:
+        - OAuth Billing
+      operationId: createOAuthBillingReservation
+      summary: Create an OAuth billing reservation
+      description: "No OAuth installation scope. OAuth flow endpoint. Requires an installed-app OAuth access token. JWT and business API key auth do not apply on this route."
+      security:
+        - bearerAuth: []
+      requestBody:
+        $ref: "#/components/requestBodies/GenericJsonRequestBody"
+      responses:
+        "200":
+          $ref: "#/components/responses/SuccessResponse"
+        "400":
+          $ref: "#/components/responses/BadRequestResponse"
+        "401":
+          $ref: "#/components/responses/UnauthorizedResponse"
+        "402":
+          $ref: "#/components/responses/PaymentRequiredResponse"
+  /v3/oauth/billing/reservations/{id}/release:
+    parameters:
+      - $ref: "#/components/parameters/GenericId"
+    post:
+      tags:
+        - OAuth Billing
+      operationId: releaseOAuthBillingReservation
+      summary: Release an OAuth billing reservation
+      description: "No OAuth installation scope. OAuth flow endpoint. Requires an installed-app OAuth access token. JWT and business API key auth do not apply on this route."
+      security:
+        - bearerAuth: []
+      responses:
+        "200":
+          $ref: "#/components/responses/SuccessResponse"
+        "400":
+          $ref: "#/components/responses/BadRequestResponse"
+        "401":
+          $ref: "#/components/responses/UnauthorizedResponse"
   /v3/stores/{store_id}/public/auth/otp/send:
     post:
       tags:
         - Customer Auth
       operationId: sendCustomerOtp
       summary: Send a customer login OTP or return direct login tokens
+      description: "No OAuth machine scope. Public storefront endpoint."
       parameters:
         - $ref: "#/components/parameters/StoreId"
         - $ref: "#/components/parameters/StorefrontPublicApiKey"
@@ -314,6 +396,7 @@ paths:
         - Customer Auth
       operationId: verifyCustomerOtp
       summary: Verify a customer login OTP
+      description: "No OAuth machine scope. Public storefront endpoint."
       parameters:
         - $ref: "#/components/parameters/StoreId"
         - $ref: "#/components/parameters/StorefrontPublicApiKey"
@@ -332,6 +415,7 @@ paths:
         - Customer Auth
       operationId: refreshCustomerJwt
       summary: Refresh a customer JWT
+      description: "No OAuth machine scope. Public storefront endpoint."
       parameters:
         - $ref: "#/components/parameters/StoreId"
         - $ref: "#/components/parameters/StorefrontPublicApiKey"
@@ -348,6 +432,7 @@ paths:
         - Customer Auth
       operationId: blacklistCustomerJwt
       summary: Blacklist customer JWTs
+      description: "No OAuth machine scope. Public storefront endpoint."
       parameters:
         - $ref: "#/components/parameters/StoreId"
         - $ref: "#/components/parameters/StorefrontPublicApiKey"
@@ -364,6 +449,7 @@ paths:
         - Customer Auth
       operationId: startCustomerPasswordReset
       summary: Start a customer password reset flow
+      description: "No OAuth machine scope. Public storefront endpoint."
       parameters:
         - $ref: "#/components/parameters/StoreId"
         - $ref: "#/components/parameters/StorefrontPublicApiKey"
@@ -380,6 +466,7 @@ paths:
         - Customer Auth
       operationId: saveCustomerPassword
       summary: Save a new customer password from a reset token
+      description: "No OAuth machine scope. Public storefront endpoint."
       parameters:
         - $ref: "#/components/parameters/StoreId"
         - $ref: "#/components/parameters/StorefrontPublicApiKey"
@@ -398,6 +485,7 @@ paths:
         - Customer Account
       operationId: getCustomerMe
       summary: Get the authenticated customer profile
+      description: "No OAuth machine scope."
       security:
         - bearerAuth: []
       parameters:
@@ -413,6 +501,7 @@ paths:
         - Customer Account
       operationId: setCustomerPassword
       summary: Set a new password for the authenticated customer
+      description: "No OAuth machine scope. Customer-authenticated storefront endpoint."
       security:
         - bearerAuth: []
       parameters:
@@ -432,6 +521,7 @@ paths:
         - Customer Cart
       operationId: getCustomerCart
       summary: Get the authenticated customer cart
+      description: "No OAuth machine scope. Customer-authenticated storefront endpoint."
       security:
         - bearerAuth: []
       parameters:
@@ -447,6 +537,7 @@ paths:
         - Customer Cart
       operationId: addCustomerCartItem
       summary: Add an item to the authenticated customer cart
+      description: "No OAuth machine scope. Customer-authenticated storefront endpoint."
       security:
         - bearerAuth: []
       parameters:
@@ -469,6 +560,7 @@ paths:
         - Customer Cart
       operationId: updateCustomerCartItem
       summary: Update an authenticated customer cart item
+      description: "No OAuth machine scope. Customer-authenticated storefront endpoint."
       security:
         - bearerAuth: []
       requestBody:
@@ -485,6 +577,7 @@ paths:
         - Customer Cart
       operationId: removeCustomerCartItem
       summary: Remove an authenticated customer cart item
+      description: "No OAuth machine scope. Customer-authenticated storefront endpoint."
       security:
         - bearerAuth: []
       responses:
@@ -498,6 +591,7 @@ paths:
         - Customer Cart
       operationId: checkoutCustomerCart
       summary: Checkout the authenticated customer cart
+      description: "No OAuth machine scope. Customer-authenticated storefront endpoint."
       security:
         - bearerAuth: []
       parameters:
@@ -517,6 +611,7 @@ paths:
         - Customer Checkout
       operationId: listCheckoutAddresses
       summary: List saved checkout addresses
+      description: "No OAuth machine scope. Customer-authenticated storefront endpoint."
       security:
         - bearerAuth: []
       parameters:
@@ -532,6 +627,7 @@ paths:
         - Customer Checkout
       operationId: listCheckoutPaymentMethods
       summary: List available checkout payment methods
+      description: "No OAuth machine scope. Customer-authenticated storefront endpoint."
       security:
         - bearerAuth: []
       parameters:
@@ -547,6 +643,7 @@ paths:
         - Customer Checkout
       operationId: listCheckoutShippingOptions
       summary: Get checkout shipping options
+      description: "No OAuth machine scope. Customer-authenticated storefront endpoint."
       security:
         - bearerAuth: []
       parameters:
@@ -564,6 +661,7 @@ paths:
         - Customer Checkout
       operationId: getCheckoutSummary
       summary: Compute checkout summary
+      description: "No OAuth machine scope. Customer-authenticated storefront endpoint."
       security:
         - bearerAuth: []
       parameters:
@@ -581,6 +679,7 @@ paths:
         - Customer Checkout
       operationId: confirmCheckout
       summary: Confirm checkout
+      description: "No OAuth machine scope. Customer-authenticated storefront endpoint."
       security:
         - bearerAuth: []
       parameters:
@@ -600,6 +699,7 @@ paths:
         - Customer Orders
       operationId: listCustomerOrders
       summary: List authenticated customer orders
+      description: "No OAuth machine scope. Customer-authenticated storefront endpoint."
       security:
         - bearerAuth: []
       parameters:
@@ -618,6 +718,7 @@ paths:
         - Customer Orders
       operationId: getCustomerOrder
       summary: Get an authenticated customer order
+      description: "No OAuth machine scope. Customer-authenticated storefront endpoint."
       security:
         - bearerAuth: []
       responses:
@@ -671,9 +772,7 @@ paths:
           $ref: "#/components/responses/ListCustomerSubscriptionsResponse"
         "401":
           $ref: "#/components/responses/UnauthorizedResponse"
-      description: Retrieves a paginated list of subscriptions. The data is sorted by
-        id in descending order. Uses cursor-based pagination with default page
-        size of 25 and maximum of 25.
+      description: "No OAuth machine scope. Customer-authenticated storefront endpoint. Retrieves a paginated list of subscriptions. The data is sorted by id in descending order. Uses cursor-based pagination with default page size of 25 and maximum of 25."
   /v3/stores/{store_id}/customers/me/subscriptions/{id}:
     parameters:
       - $ref: "#/components/parameters/SubscriptionId"
@@ -692,8 +791,7 @@ paths:
           $ref: "#/components/responses/UnauthorizedResponse"
         "404":
           $ref: "#/components/responses/NotFoundResponse"
-      description: Retrieves detailed information about a specific subscription
-        identified by its ID.
+      description: "No OAuth machine scope. Customer-authenticated storefront endpoint. Retrieves detailed information about a specific subscription identified by its ID."
   /v3/stores/{store_id}/customers/me/subscriptions/{id}/cancel:
     parameters:
       - $ref: "#/components/parameters/SubscriptionId"
@@ -712,13 +810,7 @@ paths:
           $ref: "#/components/responses/UnauthorizedResponse"
         "404":
           $ref: "#/components/responses/NotFoundResponse"
-      description: >
-        Cancels a subscription at period end. The subscription must be active
-        and not already marked for cancellation.
-
-        All active subscription items will be marked for cancellation as well.
-
-        Any pending/scheduled actions will be canceled.
+      description: "No OAuth machine scope. Customer-authenticated storefront endpoint. Cancels a subscription at period end. The subscription must be active and not already marked for cancellation. All active subscription items will be marked for cancellation as well. Any pending/scheduled actions will be canceled."
   /v3/stores/{store_id}/customers/me/subscriptions/{id}/resume:
     parameters:
       - $ref: "#/components/parameters/SubscriptionId"
@@ -737,16 +829,7 @@ paths:
           $ref: "#/components/responses/UnauthorizedResponse"
         "404":
           $ref: "#/components/responses/NotFoundResponse"
-      description: >
-        Resumes a subscription that was scheduled for cancellation at period
-        end.
-
-        The subscription must be active and have is_cancel_at_period_end = true.
-
-        All subscription items scheduled for cancellation will also be resumed.
-
-        If the subscription is approaching renewal, a new renewal action will be
-        created.
+      description: "No OAuth machine scope. Customer-authenticated storefront endpoint. Resumes a subscription that was scheduled for cancellation at period end. The subscription must be active and have is_cancel_at_period_end = true. All subscription items scheduled for cancellation will also be resumed. If the subscription is approaching renewal, a new renewal action will be created."
   /v3/stores/{store_id}/customers/me/subscription-items/{id}/upgrade:
     parameters:
       - $ref: "#/components/parameters/SubscriptionItemId"
@@ -765,12 +848,7 @@ paths:
           $ref: "#/components/responses/UnauthorizedResponse"
         "404":
           $ref: "#/components/responses/NotFoundResponse"
-      description: >
-        Retrieves a list of variants with higher prices than the current variant
-        of the subscription item.
-
-        Only active subscription items that are not scheduled for cancellation
-        are eligible.
+      description: "No OAuth machine scope. Customer-authenticated storefront endpoint. Retrieves a list of variants with higher prices than the current variant of the subscription item. Only active subscription items that are not scheduled for cancellation are eligible."
     post:
       tags:
         - Customer Subscriptions
@@ -789,13 +867,7 @@ paths:
           $ref: "#/components/responses/UnauthorizedResponse"
         "404":
           $ref: "#/components/responses/NotFoundResponse"
-      description: >
-        Upgrades a subscription item to a higher-priced variant.
-
-        Creates a subscription action with type 'upgrade' and executes it within
-        the same transaction.
-
-        The variant_id must be present in the list of upgrade variants.
+      description: "No OAuth machine scope. Customer-authenticated storefront endpoint. Upgrades a subscription item to a higher-priced variant. Creates a subscription action with type 'upgrade' and executes it within the same transaction. The variant_id must be present in the list of upgrade variants."
   /v3/stores/{store_id}/customers/me/subscription-items/{id}/downgrade:
     parameters:
       - $ref: "#/components/parameters/SubscriptionItemId"
@@ -814,12 +886,7 @@ paths:
           $ref: "#/components/responses/UnauthorizedResponse"
         "404":
           $ref: "#/components/responses/NotFoundResponse"
-      description: >
-        Retrieves a list of variants with lower prices than the current variant
-        of the subscription item.
-
-        Only active subscription items that are not scheduled for cancellation
-        are eligible.
+      description: "No OAuth machine scope. Customer-authenticated storefront endpoint. Retrieves a list of variants with lower prices than the current variant of the subscription item. Only active subscription items that are not scheduled for cancellation are eligible."
     post:
       tags:
         - Customer Subscriptions
@@ -838,13 +905,7 @@ paths:
           $ref: "#/components/responses/UnauthorizedResponse"
         "404":
           $ref: "#/components/responses/NotFoundResponse"
-      description: >
-        Downgrades a subscription item to a lower-priced variant.
-
-        Creates a subscription action with type 'downgrade' and executes it
-        within the same transaction.
-
-        The variant_id must be present in the list of downgrade variants.
+      description: "No OAuth machine scope. Customer-authenticated storefront endpoint. Downgrades a subscription item to a lower-priced variant. Creates a subscription action with type 'downgrade' and executes it within the same transaction. The variant_id must be present in the list of downgrade variants."
   /v3/stores/{store_id}/customers/me/variants/{uuid}/course:
     parameters:
       - $ref: "#/components/parameters/Uuid"
@@ -854,6 +915,7 @@ paths:
         - Customer Courses
       operationId: getCustomerVariantCourse
       summary: Get course access for a purchased variant
+      description: "No OAuth machine scope. Customer-authenticated storefront endpoint."
       security:
         - bearerAuth: []
       responses:
@@ -872,6 +934,7 @@ paths:
         - Customer Courses
       operationId: getCustomerCourseSection
       summary: Get a course section
+      description: "No OAuth machine scope. Customer-authenticated storefront endpoint."
       security:
         - bearerAuth: []
       responses:
@@ -890,6 +953,7 @@ paths:
         - Customer Courses
       operationId: getCustomerCourseContent
       summary: Get a course content item
+      description: "No OAuth machine scope. Customer-authenticated storefront endpoint."
       security:
         - bearerAuth: []
       responses:
@@ -904,6 +968,7 @@ paths:
         - Customer Courses
       operationId: updateCustomerCourseContentProgress
       summary: Update course content progress
+      description: "No OAuth machine scope. Customer-authenticated storefront endpoint."
       security:
         - bearerAuth: []
       requestBody:
@@ -915,6 +980,383 @@ paths:
           $ref: "#/components/responses/BadRequestResponse"
         "401":
           $ref: "#/components/responses/UnauthorizedResponse"
+        "404":
+          $ref: "#/components/responses/NotFoundResponse"
+  /v3/stores/simplified:
+    get:
+      tags:
+        - Business Stores
+      operationId: listBusinessStoresSimplified
+      summary: List stores in simplified business format
+      description: "Requires the `store:list` machine scope."
+      security:
+        - bearerAuth: []
+        - apiKeyAuth: []
+      parameters:
+        - description: Number of items per page.
+          in: query
+          name: page_size
+          required: false
+          schema:
+            type: integer
+        - description: Cursor for ID-based pagination.
+          in: query
+          name: last_id
+          required: false
+          schema:
+            type: integer
+      responses:
+        "200":
+          $ref: "#/components/responses/PaginatedCollectionResponse"
+        "401":
+          $ref: "#/components/responses/UnauthorizedResponse"
+        "403":
+          $ref: "#/components/responses/ForbiddenResponse"
+  /v3/stores/{store_id}/products:
+    parameters:
+      - $ref: "#/components/parameters/BusinessStoreId"
+    get:
+      tags:
+        - Business Stores
+      operationId: listBusinessStoreProducts
+      summary: List products for a business store
+      description: "Requires the `product:list` machine scope."
+      security:
+        - bearerAuth: []
+        - apiKeyAuth: []
+      parameters:
+        - description: Number of items per page.
+          in: query
+          name: page_size
+          required: false
+          schema:
+            type: integer
+        - description: Cursor for ID-based pagination.
+          in: query
+          name: last_id
+          required: false
+          schema:
+            type: integer
+      responses:
+        "200":
+          $ref: "#/components/responses/PaginatedCollectionResponse"
+        "401":
+          $ref: "#/components/responses/UnauthorizedResponse"
+        "403":
+          $ref: "#/components/responses/ForbiddenResponse"
+        "404":
+          $ref: "#/components/responses/NotFoundResponse"
+  /v3/stores/{store_id}/bundles:
+    parameters:
+      - $ref: "#/components/parameters/BusinessStoreId"
+    get:
+      tags:
+        - Business Stores
+      operationId: listBusinessStoreBundles
+      summary: List bundles for a business store
+      description: "Requires the `bundle:list` machine scope."
+      security:
+        - bearerAuth: []
+        - apiKeyAuth: []
+      parameters:
+        - description: Number of items per page.
+          in: query
+          name: page_size
+          required: false
+          schema:
+            type: integer
+        - description: Cursor for ID-based pagination.
+          in: query
+          name: last_id
+          required: false
+          schema:
+            type: integer
+      responses:
+        "200":
+          $ref: "#/components/responses/PaginatedCollectionResponse"
+        "401":
+          $ref: "#/components/responses/UnauthorizedResponse"
+        "403":
+          $ref: "#/components/responses/ForbiddenResponse"
+        "404":
+          $ref: "#/components/responses/NotFoundResponse"
+  /v3/stores/{store_id}/bundles/{bundle_id}:
+    parameters:
+      - $ref: "#/components/parameters/BusinessStoreId"
+      - $ref: "#/components/parameters/BundleId"
+    get:
+      tags:
+        - Business Stores
+      operationId: getBusinessStoreBundle
+      summary: Get a bundle for a business store
+      description: "Requires the `bundle:read` machine scope."
+      security:
+        - bearerAuth: []
+        - apiKeyAuth: []
+      responses:
+        "200":
+          $ref: "#/components/responses/SuccessResponse"
+        "401":
+          $ref: "#/components/responses/UnauthorizedResponse"
+        "403":
+          $ref: "#/components/responses/ForbiddenResponse"
+        "404":
+          $ref: "#/components/responses/NotFoundResponse"
+  /v3/stores/{store_id}/bundle-price-options:
+    parameters:
+      - $ref: "#/components/parameters/BusinessStoreId"
+    post:
+      tags:
+        - Business Stores
+      operationId: attachBusinessStoreBundlePriceOptions
+      summary: Attach bundle price options to a business store
+      description: "Requires the `store:update` machine scope."
+      security:
+        - bearerAuth: []
+        - apiKeyAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required:
+                - bpo_ids
+              properties:
+                bpo_ids:
+                  type: array
+                  items:
+                    type: integer
+      responses:
+        "204":
+          $ref: "#/components/responses/NoContentResponse"
+        "400":
+          $ref: "#/components/responses/BadRequestResponse"
+        "401":
+          $ref: "#/components/responses/UnauthorizedResponse"
+        "403":
+          $ref: "#/components/responses/ForbiddenResponse"
+        "404":
+          $ref: "#/components/responses/NotFoundResponse"
+  /v3/stores/{store_id}/bundle-price-options/{id}:
+    parameters:
+      - $ref: "#/components/parameters/BusinessStoreId"
+      - name: id
+        in: path
+        required: true
+        schema:
+          type: string
+    delete:
+      tags:
+        - Business Stores
+      operationId: detachBusinessStoreBundlePriceOption
+      summary: Remove a bundle price option from a business store
+      description: "Requires the `store:update` machine scope."
+      security:
+        - bearerAuth: []
+        - apiKeyAuth: []
+      responses:
+        "204":
+          $ref: "#/components/responses/NoContentResponse"
+        "401":
+          $ref: "#/components/responses/UnauthorizedResponse"
+        "403":
+          $ref: "#/components/responses/ForbiddenResponse"
+        "404":
+          $ref: "#/components/responses/NotFoundResponse"
+  /v3/stores/{store_id}/bundle-price-options/{id}/relations:
+    parameters:
+      - $ref: "#/components/parameters/BusinessStoreId"
+      - name: id
+        in: path
+        required: true
+        schema:
+          type: string
+    get:
+      tags:
+        - Business Stores
+      operationId: getBusinessStoreBundlePriceOptionRelations
+      summary: Get bundle price option relations for a business store
+      description: "Requires the `bundle:read` machine scope."
+      security:
+        - bearerAuth: []
+        - apiKeyAuth: []
+      responses:
+        "200":
+          $ref: "#/components/responses/SuccessResponse"
+        "401":
+          $ref: "#/components/responses/UnauthorizedResponse"
+        "403":
+          $ref: "#/components/responses/ForbiddenResponse"
+        "404":
+          $ref: "#/components/responses/NotFoundResponse"
+  /v3/stores/{store_id}/product-knowledge:
+    parameters:
+      - $ref: "#/components/parameters/BusinessStoreId"
+    get:
+      tags:
+        - Business Stores
+      operationId: searchBusinessStoreProductKnowledge
+      summary: Search store-scoped product knowledge
+      description: "Requires the `store:list` machine scope."
+      security:
+        - bearerAuth: []
+        - apiKeyAuth: []
+      parameters:
+        - description: Search query.
+          in: query
+          name: search
+          required: true
+          schema:
+            type: string
+        - description: Optional product filter.
+          in: query
+          name: product_id
+          required: false
+          schema:
+            type: integer
+        - description: Optional variant filter.
+          in: query
+          name: variant_id
+          required: false
+          schema:
+            type: integer
+        - description: Optional result limit.
+          in: query
+          name: limit
+          required: false
+          schema:
+            type: integer
+      responses:
+        "200":
+          $ref: "#/components/responses/CollectionResponse"
+        "401":
+          $ref: "#/components/responses/UnauthorizedResponse"
+        "403":
+          $ref: "#/components/responses/ForbiddenResponse"
+        "404":
+          $ref: "#/components/responses/NotFoundResponse"
+  /v3/stores/{store_id}/payment-methods:
+    parameters:
+      - $ref: "#/components/parameters/BusinessStoreId"
+    get:
+      tags:
+        - Business Stores
+      operationId: listBusinessStorePaymentMethods
+      summary: List enabled payment methods for a business store
+      description: "Requires the `store:list` machine scope."
+      security:
+        - bearerAuth: []
+        - apiKeyAuth: []
+      responses:
+        "200":
+          $ref: "#/components/responses/CollectionResponse"
+        "401":
+          $ref: "#/components/responses/UnauthorizedResponse"
+        "403":
+          $ref: "#/components/responses/ForbiddenResponse"
+        "404":
+          $ref: "#/components/responses/NotFoundResponse"
+  /v3/stores/{store_id}/payment-accounts:
+    parameters:
+      - $ref: "#/components/parameters/BusinessStoreId"
+    get:
+      tags:
+        - Business Stores
+      operationId: listBusinessStorePaymentAccounts
+      summary: List payment accounts available to a business store
+      description: "Requires the `payment_account:list` machine scope."
+      security:
+        - bearerAuth: []
+        - apiKeyAuth: []
+      parameters:
+        - description: Number of items per page.
+          in: query
+          name: page_size
+          required: false
+          schema:
+            type: integer
+        - description: Cursor for ID-based pagination.
+          in: query
+          name: last_id
+          required: false
+          schema:
+            type: integer
+      responses:
+        "200":
+          $ref: "#/components/responses/PaginatedCollectionResponse"
+        "401":
+          $ref: "#/components/responses/UnauthorizedResponse"
+        "403":
+          $ref: "#/components/responses/ForbiddenResponse"
+        "404":
+          $ref: "#/components/responses/NotFoundResponse"
+  /v3/stores/{store_id}/pages:
+    parameters:
+      - $ref: "#/components/parameters/BusinessStoreId"
+    get:
+      tags:
+        - Business Stores
+      operationId: listBusinessStorePages
+      summary: List pages for a business store
+      description: "Requires the `page:list` machine scope."
+      security:
+        - bearerAuth: []
+        - apiKeyAuth: []
+      parameters:
+        - description: Number of items per page.
+          in: query
+          name: page_size
+          required: false
+          schema:
+            type: integer
+        - description: Cursor for ID-based pagination.
+          in: query
+          name: last_id
+          required: false
+          schema:
+            type: integer
+      responses:
+        "200":
+          $ref: "#/components/responses/PaginatedCollectionResponse"
+        "401":
+          $ref: "#/components/responses/UnauthorizedResponse"
+        "403":
+          $ref: "#/components/responses/ForbiddenResponse"
+        "404":
+          $ref: "#/components/responses/NotFoundResponse"
+  /v3/stores/{store_id}/channels:
+    parameters:
+      - $ref: "#/components/parameters/BusinessStoreId"
+    get:
+      tags:
+        - Business Stores
+      operationId: listBusinessStoreChannels
+      summary: List channels for a business store
+      description: "Requires the `store:list` machine scope."
+      security:
+        - bearerAuth: []
+        - apiKeyAuth: []
+      parameters:
+        - description: Number of items per page.
+          in: query
+          name: page_size
+          required: false
+          schema:
+            type: integer
+        - description: Cursor for ID-based pagination.
+          in: query
+          name: last_id
+          required: false
+          schema:
+            type: integer
+      responses:
+        "200":
+          $ref: "#/components/responses/PaginatedCollectionResponse"
+        "401":
+          $ref: "#/components/responses/UnauthorizedResponse"
+        "403":
+          $ref: "#/components/responses/ForbiddenResponse"
         "404":
           $ref: "#/components/responses/NotFoundResponse"
   /v3/locations:
@@ -933,7 +1375,7 @@ paths:
           $ref: "#/components/responses/UnauthorizedResponse"
         "403":
           $ref: "#/components/responses/ForbiddenResponse"
-      description: Retrieve a list of locations with search and pagination.
+      description: "Requires the `order:create` machine scope. Retrieve a list of locations with search and pagination."
       parameters:
         - description: Page number for pagination
           in: query
@@ -958,6 +1400,25 @@ paths:
           required: false
           schema:
             type: string
+  /v3/locations/{location_id}/postal-codes:
+    parameters:
+      - $ref: "#/components/parameters/LocationId"
+    get:
+      tags:
+        - Locations
+      operationId: listLocationPostalCodes
+      summary: List postal codes for a location for authenticated business flows
+      description: "Requires the `order:create` machine scope."
+      security:
+        - bearerAuth: []
+        - apiKeyAuth: []
+      responses:
+        "200":
+          $ref: "#/components/responses/CollectionResponse"
+        "401":
+          $ref: "#/components/responses/UnauthorizedResponse"
+        "403":
+          $ref: "#/components/responses/ForbiddenResponse"
   /v3/shipping-costs:
     post:
       tags:
@@ -978,8 +1439,7 @@ paths:
           $ref: "#/components/responses/UnauthorizedResponse"
         "403":
           $ref: "#/components/responses/ForbiddenResponse"
-      description: Retrieve shipping cost estimates based on origin, destination,
-        courier services, and package weight.
+      description: "Requires the `order:create` machine scope. Retrieve shipping cost estimates based on origin, destination, courier services, and package weight."
   /v3/shipping-costs/search-courier-service:
     post:
       tags:
@@ -1000,8 +1460,7 @@ paths:
           $ref: "#/components/responses/UnauthorizedResponse"
         "403":
           $ref: "#/components/responses/ForbiddenResponse"
-      description: Retrieve available courier services based on warehouse,
-        destination, payment method, and package weight.
+      description: "Requires the `order:create` machine scope. Retrieve available courier services based on warehouse, destination, payment method, and package weight."
   /v3/shipping-costs/search-warehouse:
     post:
       tags:
@@ -1022,8 +1481,7 @@ paths:
           $ref: "#/components/responses/UnauthorizedResponse"
         "403":
           $ref: "#/components/responses/ForbiddenResponse"
-      description: Search for warehouses based on order details, store, destination,
-        and product variants.
+      description: "Requires the `order:create` machine scope. Search for warehouses based on order details, store, destination, and product variants."
   /v3/orders:
     get:
       tags:
@@ -1040,10 +1498,7 @@ paths:
           $ref: "#/components/responses/UnauthorizedResponse"
         "403":
           $ref: "#/components/responses/ForbiddenResponse"
-      description: Retrieves a paginated list of orders with optional filtering. The
-        data is sorted by created_at in descending order and cannot be changed.
-        Uses cursor-based pagination with default page size of 25 and maximum of
-        25.
+      description: "Requires the `order:list` machine scope. Retrieves a paginated list of orders with optional filtering. The data is sorted by created_at in descending order and cannot be changed. Uses cursor-based pagination with default page size of 25 and maximum of 25."
       parameters:
         - description: "Number of items per page (default: 25, max: 25)"
           in: query
@@ -1377,7 +1832,7 @@ paths:
           $ref: "#/components/responses/UnauthorizedResponse"
         "403":
           $ref: "#/components/responses/ForbiddenResponse"
-      description: Create a new order with the provided details.
+      description: "Requires the `order:create` machine scope. Create a new order with the provided details."
   /v3/orders/statistics:
     get:
       tags:
@@ -1394,9 +1849,7 @@ paths:
           $ref: "#/components/responses/UnauthorizedResponse"
         "403":
           $ref: "#/components/responses/ForbiddenResponse"
-      description: Retrieves descriptive statistics about orders, such as total
-        orders, total revenue, and other aggregated data. Can be filtered using
-        the same parameters as the orders list endpoint.
+      description: "Requires the `order:statistics:list` machine scope. Retrieves descriptive statistics about orders, such as total orders, total revenue, and other aggregated data. Can be filtered using the same parameters as the orders list endpoint."
       parameters:
         - description: Type of datetime for statistics (defaults to 'created_at')
           in: query
@@ -1525,7 +1978,7 @@ paths:
           $ref: "#/components/responses/UnauthorizedResponse"
         "403":
           $ref: "#/components/responses/ForbiddenResponse"
-      description: Change the status of multiple orders.
+      description: "Requires the `order:change_status` machine scope. Change the status of multiple orders."
   /v3/orders/delete:
     post:
       tags:
@@ -1546,7 +1999,7 @@ paths:
           $ref: "#/components/responses/UnauthorizedResponse"
         "403":
           $ref: "#/components/responses/ForbiddenResponse"
-      description: Delete multiple orders by IDs.
+      description: "Requires the `order:delete` machine scope. Delete multiple orders by IDs."
   /v3/orders/mark-not-spam:
     post:
       tags:
@@ -1567,7 +2020,7 @@ paths:
           $ref: "#/components/responses/UnauthorizedResponse"
         "403":
           $ref: "#/components/responses/ForbiddenResponse"
-      description: Mark multiple orders as not spam.
+      description: "Requires the `order:update` machine scope. Mark multiple orders as not spam."
   /v3/orders/upload-change-status:
     post:
       tags:
@@ -1588,14 +2041,7 @@ paths:
           $ref: "#/components/responses/UnauthorizedResponse"
         "403":
           $ref: "#/components/responses/ForbiddenResponse"
-      description: "Upload a CSV file to change status of multiple orders. Template
-        file can be downloaded from the link here:
-        https://app.scalev.id/example/update_status_template.csv. (1) Leave
-        blank the 'shipment_receipt' field if you don't want to change the
-        receipt/tracking number. Note: this will not change receipts/tracking
-        numbers that are automatically generated by Scalev through the 'Request
-        Pickup' menu. (2) Leave blank the 'day', 'month', and 'year' fields if
-        you want to use the time of upload."
+      description: "Requires the `order:change_status` machine scope. Upload a CSV file to change status of multiple orders. Template file can be downloaded from the link here: https://app.scalev.id/example/update_status_template.csv. (1) Leave blank the 'shipment_receipt' field if you don't want to change the receipt/tracking number. Note: this will not change receipts/tracking numbers that are automatically generated by Scalev through the 'Request Pickup' menu. (2) Leave blank the 'day', 'month', and 'year' fields if you want to use the time of upload."
   /v3/orders/upload-receipt:
     post:
       tags:
@@ -1616,9 +2062,7 @@ paths:
           $ref: "#/components/responses/UnauthorizedResponse"
         "403":
           $ref: "#/components/responses/ForbiddenResponse"
-      description: "Upload file to update shipment receipts (tracking IDs) for
-        multiple orders. Template file can be downloaded from the link here:
-        https://app.scalev.id/example/receipt_template.csv."
+      description: "Requires the `order:update` machine scope. Upload file to update shipment receipts (tracking IDs) for multiple orders. Template file can be downloaded from the link here: https://app.scalev.id/example/receipt_template.csv."
   /v3/orders/upload:
     post:
       tags:
@@ -1639,18 +2083,7 @@ paths:
           $ref: "#/components/responses/UnauthorizedResponse"
         "403":
           $ref: "#/components/responses/ForbiddenResponse"
-      description: "Upload orders from CSV file. (1) Archive mode. Choose this mode if
-        you want to import old data from another platform you've been using. You
-        can directly create products that you made on your previous platform.
-        Orders that are created will immediately have 'Completed' status.
-        Download template for Archive mode here:
-        https://app.scalev.id/example/template_archive.csv. (2) Regular mode.
-        Choose this mode if you want to enter current data that you wish to
-        input in bulk, not one by one via order input. It will take inventory
-        into account if your products have inventory enabled. Successfully
-        created orders will have 'Created', 'Pending', or 'Confirmed' status,
-        depending on the completeness of the data. Download template for Regular
-        mode here: https://app.scalev.id/example/template_regular.csv."
+      description: "Requires the `order:create` machine scope. Upload orders from CSV file. (1) Archive mode. Choose this mode if you want to import old data from another platform you've been using. You can directly create products that you made on your previous platform. Orders that are created will immediately have 'Completed' status. Download template for Archive mode here: https://app.scalev.id/example/template_archive.csv. (2) Regular mode. Choose this mode if you want to enter current data that you wish to input in bulk, not one by one via order input. It will take inventory into account if your products have inventory enabled. Successfully created orders will have 'Created', 'Pending', or 'Confirmed' status, depending on the completeness of the data. Download template for Regular mode here: https://app.scalev.id/example/template_regular.csv."
   /v3/orders/generate-awb:
     post:
       tags:
@@ -1671,7 +2104,7 @@ paths:
           $ref: "#/components/responses/UnauthorizedResponse"
         "403":
           $ref: "#/components/responses/ForbiddenResponse"
-      description: Generate Air Waybill for multiple orders.
+      description: "Requires the `order:create_awb` machine scope. Generate Air Waybill for multiple orders."
   /v3/orders/cancel-awb:
     post:
       tags:
@@ -1692,7 +2125,7 @@ paths:
           $ref: "#/components/responses/UnauthorizedResponse"
         "403":
           $ref: "#/components/responses/ForbiddenResponse"
-      description: Cancel Air Waybill for multiple orders.
+      description: "Requires the `order:create_awb` machine scope. Cancel Air Waybill for multiple orders."
   /v3/orders/tags:
     get:
       tags:
@@ -1709,7 +2142,7 @@ paths:
           $ref: "#/components/responses/UnauthorizedResponse"
         "403":
           $ref: "#/components/responses/ForbiddenResponse"
-      description: Retrieve a list of tags associated with orders.
+      description: "Requires the `order:list` machine scope. Retrieve a list of tags associated with orders."
       parameters:
         - description: Search term to filter tags by name
           in: query
@@ -1733,7 +2166,7 @@ paths:
           $ref: "#/components/responses/UnauthorizedResponse"
         "403":
           $ref: "#/components/responses/ForbiddenResponse"
-      description: Retrieve a list of unique UTM source values from orders.
+      description: "Requires the `order:list` machine scope. Retrieve a list of unique UTM source values from orders."
       parameters:
         - description: Search term to filter UTM sources
           in: query
@@ -1757,7 +2190,7 @@ paths:
           $ref: "#/components/responses/UnauthorizedResponse"
         "403":
           $ref: "#/components/responses/ForbiddenResponse"
-      description: Retrieve a list of unique UTM medium values from orders.
+      description: "Requires the `order:list` machine scope. Retrieve a list of unique UTM medium values from orders."
       parameters:
         - description: Search term to filter UTM mediums
           in: query
@@ -1781,7 +2214,7 @@ paths:
           $ref: "#/components/responses/UnauthorizedResponse"
         "403":
           $ref: "#/components/responses/ForbiddenResponse"
-      description: Retrieve a list of unique UTM campaign values from orders.
+      description: "Requires the `order:list` machine scope. Retrieve a list of unique UTM campaign values from orders."
       parameters:
         - description: Search term to filter UTM campaigns
           in: query
@@ -1805,7 +2238,7 @@ paths:
           $ref: "#/components/responses/UnauthorizedResponse"
         "403":
           $ref: "#/components/responses/ForbiddenResponse"
-      description: Retrieve a list of unique UTM content values from orders.
+      description: "Requires the `order:list` machine scope. Retrieve a list of unique UTM content values from orders."
       parameters:
         - description: Search term to filter UTM contents
           in: query
@@ -1829,7 +2262,7 @@ paths:
           $ref: "#/components/responses/UnauthorizedResponse"
         "403":
           $ref: "#/components/responses/ForbiddenResponse"
-      description: Retrieve a list of unique UTM term values from orders.
+      description: "Requires the `order:list` machine scope. Retrieve a list of unique UTM term values from orders."
       parameters:
         - description: Search term to filter UTM terms
           in: query
@@ -1857,7 +2290,7 @@ paths:
           $ref: "#/components/responses/ForbiddenResponse"
         "404":
           $ref: "#/components/responses/NotFoundResponse"
-      description: Retrieve order details using payment gateway reference ID.
+      description: "Requires the `order:read` machine scope. Retrieve order details using payment gateway reference ID."
   /v3/orders/pg-reference-ids:
     get:
       tags:
@@ -1874,7 +2307,7 @@ paths:
           $ref: "#/components/responses/UnauthorizedResponse"
         "403":
           $ref: "#/components/responses/ForbiddenResponse"
-      description: Retrieve orders using multiple payment gateway reference IDs.
+      description: "Requires the `order:list` machine scope. Retrieve orders using multiple payment gateway reference IDs."
       parameters:
         - description: Comma-separated payment gateway reference IDs
           in: query
@@ -1902,7 +2335,7 @@ paths:
           $ref: "#/components/responses/ForbiddenResponse"
         "404":
           $ref: "#/components/responses/NotFoundResponse"
-      description: Retrieve detailed information about a specific order.
+      description: "Requires the `order:read` machine scope. Retrieve detailed information about a specific order."
     patch:
       tags:
         - Orders
@@ -1924,7 +2357,7 @@ paths:
           $ref: "#/components/responses/ForbiddenResponse"
         "404":
           $ref: "#/components/responses/NotFoundResponse"
-      description: Update order details by ID.
+      description: "Requires the `order:update` machine scope. Update order details by ID."
   /v3/orders/{id}/actions:
     parameters:
       - $ref: "#/components/parameters/OrderId"
@@ -1945,7 +2378,7 @@ paths:
           $ref: "#/components/responses/ForbiddenResponse"
         "404":
           $ref: "#/components/responses/NotFoundResponse"
-      description: Retrieve flags to determine available actions for an order.
+      description: "Requires the `order:read` machine scope. Retrieve flags to determine available actions for an order."
   /v3/orders/{id}/chats:
     parameters:
       - $ref: "#/components/parameters/OrderId"
@@ -1966,7 +2399,7 @@ paths:
           $ref: "#/components/responses/ForbiddenResponse"
         "404":
           $ref: "#/components/responses/NotFoundResponse"
-      description: Retrieve chat text messages associated with an order.
+      description: "Requires the `order:read` machine scope. Retrieve chat text messages associated with an order."
   /v3/orders/{id}/chats/{chat_id}:
     parameters:
       - $ref: "#/components/parameters/OrderId"
@@ -1988,7 +2421,7 @@ paths:
           $ref: "#/components/responses/ForbiddenResponse"
         "404":
           $ref: "#/components/responses/NotFoundResponse"
-      description: Retrieve a specific chat text message.
+      description: "Requires the `order:read` machine scope. Retrieve a specific chat text message."
   /v3/orders/{id}/emails:
     parameters:
       - $ref: "#/components/parameters/OrderId"
@@ -2009,7 +2442,7 @@ paths:
           $ref: "#/components/responses/ForbiddenResponse"
         "404":
           $ref: "#/components/responses/NotFoundResponse"
-      description: Get list of emails sent for an order.
+      description: "Requires the `order:list` machine scope. Get list of emails sent for an order."
   /v3/orders/{id}/message-history:
     parameters:
       - $ref: "#/components/parameters/OrderId"
@@ -2030,7 +2463,7 @@ paths:
           $ref: "#/components/responses/ForbiddenResponse"
         "404":
           $ref: "#/components/responses/NotFoundResponse"
-      description: Get message history for an order.
+      description: "Requires the `order:read` machine scope. Get message history for an order."
     post:
       tags:
         - Orders
@@ -2052,7 +2485,7 @@ paths:
           $ref: "#/components/responses/ForbiddenResponse"
         "404":
           $ref: "#/components/responses/NotFoundResponse"
-      description: Add a new message to order message history.
+      description: "Requires the `order:update` machine scope. Add a new message to order message history."
   /v3/orders/{id}/payment:
     parameters:
       - $ref: "#/components/parameters/OrderId"
@@ -2075,7 +2508,7 @@ paths:
           $ref: "#/components/responses/ForbiddenResponse"
         "404":
           $ref: "#/components/responses/NotFoundResponse"
-      description: Create a payment request / intent for an order.
+      description: "Requires the `order:update` machine scope. Create a payment request / intent for an order."
   /v3/orders/{id}/customer:
     parameters:
       - $ref: "#/components/parameters/OrderId"
@@ -2100,7 +2533,7 @@ paths:
           $ref: "#/components/responses/ForbiddenResponse"
         "404":
           $ref: "#/components/responses/NotFoundResponse"
-      description: Update the customer associated with an order.
+      description: "Requires the `order:update` machine scope. Update the customer associated with an order."
   /v3/orders/{id}/shipment:
     parameters:
       - $ref: "#/components/parameters/OrderId"
@@ -2125,7 +2558,7 @@ paths:
           $ref: "#/components/responses/ForbiddenResponse"
         "404":
           $ref: "#/components/responses/NotFoundResponse"
-      description: Update shipment-related data for an order.
+      description: "Requires the `order:update` machine scope. Update shipment-related data for an order."
   /v3/orders/{id}/shipment-receipt:
     parameters:
       - $ref: "#/components/parameters/OrderId"
@@ -2150,7 +2583,7 @@ paths:
           $ref: "#/components/responses/ForbiddenResponse"
         "404":
           $ref: "#/components/responses/NotFoundResponse"
-      description: Update shipment receipt / tracking ID for an order.
+      description: "Requires the `order:update` machine scope. Update shipment receipt / tracking ID for an order."
   /v3/orders/{id}/shipment-status-history:
     parameters:
       - $ref: "#/components/parameters/OrderId"
@@ -2175,7 +2608,7 @@ paths:
           $ref: "#/components/responses/ForbiddenResponse"
         "404":
           $ref: "#/components/responses/NotFoundResponse"
-      description: Create a new shipment status history entry for an order.
+      description: "Requires the `order:update` machine scope. Create a new shipment status history entry for an order."
   /v3/orders/{id}/update-tags:
     parameters:
       - $ref: "#/components/parameters/OrderId"
@@ -2200,7 +2633,7 @@ paths:
           $ref: "#/components/responses/ForbiddenResponse"
         "404":
           $ref: "#/components/responses/NotFoundResponse"
-      description: Update tags for an order.
+      description: "Requires the `order:update` machine scope. Update tags for an order."
   /v3/orders/{id}/trigger-purchase:
     parameters:
       - $ref: "#/components/parameters/OrderId"
@@ -2223,7 +2656,7 @@ paths:
           $ref: "#/components/responses/ForbiddenResponse"
         "404":
           $ref: "#/components/responses/NotFoundResponse"
-      description: Trigger purchase event for analytics and tracking.
+      description: "Requires the `order:update` machine scope. Trigger purchase event for analytics and tracking."
   /v3/orders/{id}/duplicate:
     parameters:
       - $ref: "#/components/parameters/OrderId"
@@ -2248,7 +2681,7 @@ paths:
           $ref: "#/components/responses/ForbiddenResponse"
         "404":
           $ref: "#/components/responses/NotFoundResponse"
-      description: Create a duplicate of an order and cancel the original.
+      description: "Requires the `order:create` machine scope. Create a duplicate of an order and cancel the original."
   /v3/orders/{id}/check-payment:
     parameters:
       - $ref: "#/components/parameters/OrderId"
@@ -2269,7 +2702,7 @@ paths:
           $ref: "#/components/responses/ForbiddenResponse"
         "404":
           $ref: "#/components/responses/NotFoundResponse"
-      description: Check the payment status of an order.
+      description: "Requires the `order:read` machine scope. Check the payment status of an order."
   /v3/orders/{id}/check-settlement:
     parameters:
       - $ref: "#/components/parameters/OrderId"
@@ -2290,7 +2723,7 @@ paths:
           $ref: "#/components/responses/ForbiddenResponse"
         "404":
           $ref: "#/components/responses/NotFoundResponse"
-      description: Check the settlement status of an order.
+      description: "Requires the `order:read` machine scope. Check the settlement status of an order."
   /v3/orders/{id}/send-product-digital:
     parameters:
       - $ref: "#/components/parameters/OrderId"
@@ -2311,7 +2744,7 @@ paths:
           $ref: "#/components/responses/ForbiddenResponse"
         "404":
           $ref: "#/components/responses/NotFoundResponse"
-      description: Send email containing links to download digital products to customer.
+      description: "Requires the `order:read` machine scope. Send email containing links to download digital products to customer."
   /v3/orders/{id}/send-lms-access:
     parameters:
       - $ref: "#/components/parameters/OrderId"
@@ -2332,7 +2765,7 @@ paths:
           $ref: "#/components/responses/ForbiddenResponse"
         "404":
           $ref: "#/components/responses/NotFoundResponse"
-      description: Send LMS access email to customer.
+      description: "Requires the `order:read` machine scope. Send LMS access email to customer."
   /v3/products:
     get:
       tags:
@@ -2349,9 +2782,7 @@ paths:
           $ref: "#/components/responses/UnauthorizedResponse"
         "403":
           $ref: "#/components/responses/ForbiddenResponse"
-      description: Retrieves a paginated list of products with optional filtering. The
-        data is sorted by id in descending order and cannot be changed. Uses
-        cursor-based pagination with default page size of 25 and maximum of 25.
+      description: "Requires the `product:list` machine scope. Retrieves a paginated list of products with optional filtering. The data is sorted by id in descending order and cannot be changed. Uses cursor-based pagination with default page size of 25 and maximum of 25."
       parameters:
         - description: "Number of items per page (default: 25, max: 25)"
           in: query
@@ -2469,7 +2900,7 @@ paths:
           $ref: "#/components/responses/UnauthorizedResponse"
         "403":
           $ref: "#/components/responses/ForbiddenResponse"
-      description: Creates a new product with the provided data.
+      description: "Requires the `product:create` machine scope. Creates a new product with the provided data."
   /v3/products/simplified:
     get:
       tags:
@@ -2486,10 +2917,7 @@ paths:
           $ref: "#/components/responses/UnauthorizedResponse"
         "403":
           $ref: "#/components/responses/ForbiddenResponse"
-      description: Retrieves a simplified paginated list of products with optional
-        filtering. The data is sorted by id in descending order and cannot be
-        changed. Uses cursor-based pagination with default page size of 25 and
-        maximum of 25.
+      description: "Requires the `product:list` machine scope. Retrieves a simplified paginated list of products with optional filtering. The data is sorted by id in descending order and cannot be changed. Uses cursor-based pagination with default page size of 25 and maximum of 25."
       parameters:
         - description: If provided, includes `is_owned_by_store` field in the bundle price
             options to indicate if the option is already included in the
@@ -2612,7 +3040,7 @@ paths:
           $ref: "#/components/responses/UnauthorizedResponse"
         "403":
           $ref: "#/components/responses/ForbiddenResponse"
-      description: Returns the total count of products.
+      description: "Requires the `product:list` machine scope. Returns the total count of products."
       parameters:
         - description: "Number of items per page (default: 25, max: 25)"
           in: query
@@ -2731,8 +3159,7 @@ paths:
           $ref: "#/components/responses/ForbiddenResponse"
         "404":
           $ref: "#/components/responses/NotFoundResponse"
-      description: Retrieves the details of a single product, including its variants
-        and other associated data.
+      description: "Requires the `product:read` machine scope. Retrieves the details of a single product, including its variants and other associated data."
     patch:
       tags:
         - Business Products
@@ -2754,7 +3181,7 @@ paths:
           $ref: "#/components/responses/ForbiddenResponse"
         "404":
           $ref: "#/components/responses/NotFoundResponse"
-      description: Updates the details of a product, including its variants.
+      description: "Requires the `product:update` machine scope. Updates the details of a product, including its variants."
     delete:
       tags:
         - Business Products
@@ -2772,7 +3199,7 @@ paths:
           $ref: "#/components/responses/ForbiddenResponse"
         "404":
           $ref: "#/components/responses/NotFoundResponse"
-      description: Deletes a product and all its associated data.
+      description: "Requires the `product:delete` machine scope. Deletes a product and all its associated data."
   /v3/products/{id}/duplicate:
     parameters:
       - $ref: "#/components/parameters/GenericId"
@@ -2793,11 +3220,7 @@ paths:
           $ref: "#/components/responses/ForbiddenResponse"
         "404":
           $ref: "#/components/responses/NotFoundResponse"
-      description: Creates a copy of an existing product including all variants,
-        digital files, course structure (for courses), labels, follow-up chats,
-        and email automation settings. The new product name will be suffixed
-        with '(Copy)'. Partnership settings and store associations are NOT
-        copied.
+      description: "Requires the `product:create` machine scope. Creates a copy of an existing product including all variants, digital files, course structure (for courses), labels, follow-up chats, and email automation settings. The new product name will be suffixed with '(Copy)'. Partnership settings and store associations are NOT copied."
   /v3/products/{product_id}/partnership:
     parameters:
       - $ref: "#/components/parameters/ProductId"
@@ -2806,6 +3229,7 @@ paths:
         - Business Products
       operationId: updateProductPartnership
       summary: Update product partnership settings
+      description: "Requires the `product:update` machine scope."
       security:
         - bearerAuth: []
         - apiKeyAuth: []
@@ -2830,6 +3254,7 @@ paths:
         - Business Products
       operationId: checkProductPartnershipChanges
       summary: Check the impact of product partnership changes
+      description: "Requires the `product:update` machine scope."
       security:
         - bearerAuth: []
         - apiKeyAuth: []
@@ -2866,8 +3291,7 @@ paths:
           $ref: "#/components/responses/ForbiddenResponse"
         "404":
           $ref: "#/components/responses/NotFoundResponse"
-      description: Shows the relations of a product, including variants, stores,
-        bundles, and pages.
+      description: "Requires the `product:read` machine scope. Shows the relations of a product, including variants, stores, bundles, and pages."
   /v3/products/{product_id}/partners:
     parameters:
       - $ref: "#/components/parameters/ProductId"
@@ -2888,7 +3312,7 @@ paths:
           $ref: "#/components/responses/ForbiddenResponse"
         "404":
           $ref: "#/components/responses/NotFoundResponse"
-      description: Retrieves a paginated list of product partners.
+      description: "Requires the `product:list` machine scope. Retrieves a paginated list of product partners."
       parameters:
         - description: Last ID for cursor-based pagination
           in: query
@@ -2925,7 +3349,7 @@ paths:
           $ref: "#/components/responses/ForbiddenResponse"
         "404":
           $ref: "#/components/responses/NotFoundResponse"
-      description: Creates a new product partner.
+      description: "Requires the `product:update` machine scope. Creates a new product partner."
   /v3/products/{product_id}/partners/{id}:
     parameters:
       - $ref: "#/components/parameters/ProductId"
@@ -2947,7 +3371,7 @@ paths:
           $ref: "#/components/responses/ForbiddenResponse"
         "404":
           $ref: "#/components/responses/NotFoundResponse"
-      description: Deletes a product partner.
+      description: "Requires the `product:update` machine scope. Deletes a product partner."
   /v3/products/{product_id}/knowledge-items:
     parameters:
       - $ref: "#/components/parameters/ProductId"
@@ -2968,8 +3392,7 @@ paths:
           $ref: "#/components/responses/ForbiddenResponse"
         "404":
           $ref: "#/components/responses/NotFoundResponse"
-      description: Retrieves a paginated list of product-level knowledge items. The
-        data is sorted by id in ascending order.
+      description: "Requires the `product:list` machine scope. Retrieves a paginated list of product-level knowledge items. The data is sorted by id in ascending order."
       parameters:
         - description: Last ID for cursor-based pagination (UUIDv7)
           in: query
@@ -3007,7 +3430,7 @@ paths:
           $ref: "#/components/responses/ForbiddenResponse"
         "404":
           $ref: "#/components/responses/NotFoundResponse"
-      description: Creates a new product-level knowledge item.
+      description: "Requires the `product:update` machine scope. Creates a new product-level knowledge item."
   /v3/products/{product_id}/knowledge-items/{id}:
     parameters:
       - $ref: "#/components/parameters/ProductId"
@@ -3029,7 +3452,7 @@ paths:
           $ref: "#/components/responses/ForbiddenResponse"
         "404":
           $ref: "#/components/responses/NotFoundResponse"
-      description: Retrieves a single product-level knowledge item by ID.
+      description: "Requires the `product:read` machine scope. Retrieves a single product-level knowledge item by ID."
     patch:
       tags:
         - Business Products
@@ -3051,7 +3474,7 @@ paths:
           $ref: "#/components/responses/ForbiddenResponse"
         "404":
           $ref: "#/components/responses/NotFoundResponse"
-      description: Updates an existing product-level knowledge item.
+      description: "Requires the `product:update` machine scope. Updates an existing product-level knowledge item."
     delete:
       tags:
         - Business Products
@@ -3069,7 +3492,7 @@ paths:
           $ref: "#/components/responses/ForbiddenResponse"
         "404":
           $ref: "#/components/responses/NotFoundResponse"
-      description: Deletes a product-level knowledge item.
+      description: "Requires the `product:update` machine scope. Deletes a product-level knowledge item."
   /v3/products/{product_id}/follow-up-chats/generate:
     parameters:
       - $ref: "#/components/parameters/ProductId"
@@ -3090,7 +3513,7 @@ paths:
           $ref: "#/components/responses/ForbiddenResponse"
         "404":
           $ref: "#/components/responses/NotFoundResponse"
-      description: Generates a new follow up chat for a product.
+      description: "Requires the `product:update` machine scope. Generates a new follow up chat for a product."
   /v3/products/{product_id}/follow-up-chats:
     parameters:
       - $ref: "#/components/parameters/ProductId"
@@ -3111,7 +3534,7 @@ paths:
           $ref: "#/components/responses/ForbiddenResponse"
         "404":
           $ref: "#/components/responses/NotFoundResponse"
-      description: Retrieves a paginated list of follow up chats for a product.
+      description: "Requires the `product:list` machine scope. Retrieves a paginated list of follow up chats for a product."
       parameters:
         - description: Last ID for cursor-based pagination
           in: query
@@ -3148,7 +3571,7 @@ paths:
           $ref: "#/components/responses/ForbiddenResponse"
         "404":
           $ref: "#/components/responses/NotFoundResponse"
-      description: Create a follow up chat template for a product.
+      description: "Requires the `product:update` machine scope. Create a follow up chat template for a product."
   /v3/products/{product_id}/follow-up-chats/{id}:
     parameters:
       - $ref: "#/components/parameters/ProductId"
@@ -3170,7 +3593,7 @@ paths:
           $ref: "#/components/responses/ForbiddenResponse"
         "404":
           $ref: "#/components/responses/NotFoundResponse"
-      description: Shows a single follow up chat template by ID.
+      description: "Requires the `product:read` machine scope. Shows a single follow up chat template by ID."
     patch:
       tags:
         - Business Products
@@ -3192,7 +3615,7 @@ paths:
           $ref: "#/components/responses/ForbiddenResponse"
         "404":
           $ref: "#/components/responses/NotFoundResponse"
-      description: Updates a follow up chat template.
+      description: "Requires the `product:update` machine scope. Updates a follow up chat template."
     delete:
       tags:
         - Business Products
@@ -3210,7 +3633,7 @@ paths:
           $ref: "#/components/responses/ForbiddenResponse"
         "404":
           $ref: "#/components/responses/NotFoundResponse"
-      description: Deletes a follow up chat template.
+      description: "Requires the `product:update` machine scope. Deletes a follow up chat template."
   /v3/variants/{id}:
     parameters:
       - $ref: "#/components/parameters/GenericId"
@@ -3231,7 +3654,7 @@ paths:
           $ref: "#/components/responses/ForbiddenResponse"
         "404":
           $ref: "#/components/responses/NotFoundResponse"
-      description: Shows a single product variant by ID.
+      description: "Requires the `product:read` machine scope. Shows a single product variant by ID."
   /v3/variants/{variant_id}/knowledge-items:
     parameters:
       - $ref: "#/components/parameters/VariantId"
@@ -3252,8 +3675,7 @@ paths:
           $ref: "#/components/responses/ForbiddenResponse"
         "404":
           $ref: "#/components/responses/NotFoundResponse"
-      description: Retrieves a paginated list of variant-level knowledge items. The
-        data is sorted by id in ascending order.
+      description: "Requires the `product:list` machine scope. Retrieves a paginated list of variant-level knowledge items. The data is sorted by id in ascending order."
       parameters:
         - description: Last ID for cursor-based pagination (UUIDv7)
           in: query
@@ -3291,7 +3713,7 @@ paths:
           $ref: "#/components/responses/ForbiddenResponse"
         "404":
           $ref: "#/components/responses/NotFoundResponse"
-      description: Creates a new variant-level knowledge item.
+      description: "Requires the `product:update` machine scope. Creates a new variant-level knowledge item."
   /v3/variants/{variant_id}/knowledge-items/{id}:
     parameters:
       - $ref: "#/components/parameters/VariantId"
@@ -3313,7 +3735,7 @@ paths:
           $ref: "#/components/responses/ForbiddenResponse"
         "404":
           $ref: "#/components/responses/NotFoundResponse"
-      description: Retrieves a single variant-level knowledge item by ID.
+      description: "Requires the `product:read` machine scope. Retrieves a single variant-level knowledge item by ID."
     patch:
       tags:
         - Business Products
@@ -3335,7 +3757,7 @@ paths:
           $ref: "#/components/responses/ForbiddenResponse"
         "404":
           $ref: "#/components/responses/NotFoundResponse"
-      description: Updates an existing variant-level knowledge item.
+      description: "Requires the `product:update` machine scope. Updates an existing variant-level knowledge item."
     delete:
       tags:
         - Business Products
@@ -3353,7 +3775,7 @@ paths:
           $ref: "#/components/responses/ForbiddenResponse"
         "404":
           $ref: "#/components/responses/NotFoundResponse"
-      description: Deletes a variant-level knowledge item.
+      description: "Requires the `product:update` machine scope. Deletes a variant-level knowledge item."
   /v3/variants/{variant_id}/digital-product-files:
     parameters:
       - $ref: "#/components/parameters/VariantId"
@@ -3374,7 +3796,7 @@ paths:
           $ref: "#/components/responses/ForbiddenResponse"
         "404":
           $ref: "#/components/responses/NotFoundResponse"
-      description: Retrieves a paginated list of digital product files for a variant.
+      description: "Requires the `product:list` machine scope. Retrieves a paginated list of digital product files for a variant."
       parameters:
         - description: Last ID for cursor-based pagination
           in: query
@@ -3395,6 +3817,7 @@ paths:
         - Business Products
       operationId: createVariantDigitalProductFile
       summary: Create a variant digital product file upload record
+      description: "Requires the `product:update` machine scope."
       security:
         - bearerAuth: []
         - apiKeyAuth: []
@@ -3432,7 +3855,7 @@ paths:
           $ref: "#/components/responses/ForbiddenResponse"
         "404":
           $ref: "#/components/responses/NotFoundResponse"
-      description: Shows a single digital product file by ID.
+      description: "Requires the `product:read` machine scope. Shows a single digital product file by ID."
     delete:
       tags:
         - Business Products
@@ -3450,7 +3873,7 @@ paths:
           $ref: "#/components/responses/ForbiddenResponse"
         "404":
           $ref: "#/components/responses/NotFoundResponse"
-      description: Deletes a digital product file.
+      description: "Requires the `product:update` machine scope. Deletes a digital product file."
   /v3/product-taxonomies:
     get:
       tags:
@@ -3467,7 +3890,7 @@ paths:
           $ref: "#/components/responses/UnauthorizedResponse"
         "403":
           $ref: "#/components/responses/ForbiddenResponse"
-      description: Retrieves a paginated list of product taxonomies.
+      description: "Requires the `product:list` machine scope. Retrieves a paginated list of product taxonomies."
       parameters:
         - description: Page number
           in: query
@@ -3508,7 +3931,7 @@ paths:
           $ref: "#/components/responses/ForbiddenResponse"
         "404":
           $ref: "#/components/responses/NotFoundResponse"
-      description: Shows a single product taxonomy by ID.
+      description: "Requires the `product:read` machine scope. Shows a single product taxonomy by ID."
   /v3/variants/{id}/course:
     parameters:
       - $ref: "#/components/parameters/GenericId"
@@ -3517,6 +3940,7 @@ paths:
         - Business Products
       operationId: getVariantCourse
       summary: Get a variant course skeleton
+      description: "Requires the `product:read` machine scope."
       security:
         - bearerAuth: []
         - apiKeyAuth: []
@@ -3534,6 +3958,7 @@ paths:
         - Business Products
       operationId: updateVariantCourse
       summary: Update a variant course skeleton
+      description: "Requires the `product:update` machine scope."
       security:
         - bearerAuth: []
         - apiKeyAuth: []
@@ -3558,6 +3983,7 @@ paths:
         - Business Products
       operationId: createCourseSection
       summary: Create a course section for a variant
+      description: "Requires the `product:update` machine scope."
       security:
         - bearerAuth: []
         - apiKeyAuth: []
@@ -3582,6 +4008,7 @@ paths:
         - Business Products
       operationId: updateCourseSectionOrders
       summary: Update variant course section ordering
+      description: "Requires the `product:update` machine scope."
       security:
         - bearerAuth: []
         - apiKeyAuth: []
@@ -3606,6 +4033,7 @@ paths:
         - Business Products
       operationId: listVariantCustomers
       summary: List customers with access to a variant
+      description: "Requires the `product:read` machine scope."
       security:
         - bearerAuth: []
         - apiKeyAuth: []
@@ -3626,6 +4054,7 @@ paths:
         - Business Products
       operationId: getCourseSection
       summary: Get a course section
+      description: "Requires the `product:read` machine scope."
       security:
         - bearerAuth: []
         - apiKeyAuth: []
@@ -3643,6 +4072,7 @@ paths:
         - Business Products
       operationId: updateCourseSection
       summary: Update a course section
+      description: "Requires the `product:update` machine scope."
       security:
         - bearerAuth: []
         - apiKeyAuth: []
@@ -3664,6 +4094,7 @@ paths:
         - Business Products
       operationId: deleteCourseSection
       summary: Delete a course section
+      description: "Requires the `product:update` machine scope."
       security:
         - bearerAuth: []
         - apiKeyAuth: []
@@ -3684,6 +4115,7 @@ paths:
         - Business Products
       operationId: createCourseContent
       summary: Create a course content item
+      description: "Requires the `product:update` machine scope."
       security:
         - bearerAuth: []
         - apiKeyAuth: []
@@ -3708,6 +4140,7 @@ paths:
         - Business Products
       operationId: updateCourseContentOrders
       summary: Update course content ordering
+      description: "Requires the `product:update` machine scope."
       security:
         - bearerAuth: []
         - apiKeyAuth: []
@@ -3732,6 +4165,7 @@ paths:
         - Business Products
       operationId: getCourseContent
       summary: Get a course content item
+      description: "Requires the `product:read` machine scope."
       security:
         - bearerAuth: []
         - apiKeyAuth: []
@@ -3749,6 +4183,7 @@ paths:
         - Business Products
       operationId: updateCourseContent
       summary: Update a course content item
+      description: "Requires the `product:update` machine scope."
       security:
         - bearerAuth: []
         - apiKeyAuth: []
@@ -3770,6 +4205,7 @@ paths:
         - Business Products
       operationId: deleteCourseContent
       summary: Delete a course content item
+      description: "Requires the `product:update` machine scope."
       security:
         - bearerAuth: []
         - apiKeyAuth: []
@@ -3798,9 +4234,7 @@ paths:
           $ref: "#/components/responses/UnauthorizedResponse"
         "403":
           $ref: "#/components/responses/ForbiddenResponse"
-      description: Retrieves a paginated list of bundles with optional filtering. The
-        data is sorted by id in descending order and cannot be changed. Uses
-        cursor-based pagination with default page size of 25 and maximum of 25.
+      description: "Requires the `bundle:list` machine scope. Retrieves a paginated list of bundles with optional filtering. The data is sorted by id in descending order and cannot be changed. Uses cursor-based pagination with default page size of 25 and maximum of 25."
       parameters:
         - description: "Number of items per page (default: 25, max: 25)"
           in: query
@@ -3861,7 +4295,7 @@ paths:
           $ref: "#/components/responses/UnauthorizedResponse"
         "403":
           $ref: "#/components/responses/ForbiddenResponse"
-      description: Creates a new bundle with the provided data.
+      description: "Requires the `bundle:create` machine scope. Creates a new bundle with the provided data."
   /v3/bundles/simplified:
     get:
       tags:
@@ -3878,11 +4312,7 @@ paths:
           $ref: "#/components/responses/UnauthorizedResponse"
         "403":
           $ref: "#/components/responses/ForbiddenResponse"
-      description: Retrieves a paginated list of bundles with optional filtering. The
-        data is sorted by id in descending order and cannot be changed. Uses
-        cursor-based pagination with default page size of 25 and maximum of 25.
-        This endpoint returns a simplified version of the bundle data, including
-        only essential fields and active bundle price options.
+      description: "Requires the `bundle:list` machine scope. Retrieves a paginated list of bundles with optional filtering. The data is sorted by id in descending order and cannot be changed. Uses cursor-based pagination with default page size of 25 and maximum of 25. This endpoint returns a simplified version of the bundle data, including only essential fields and active bundle price options."
       parameters:
         - description: If provided, includes `is_owned_by_store` field in the bundle price
             options to indicate if the option is already included in the
@@ -3948,8 +4378,7 @@ paths:
           $ref: "#/components/responses/UnauthorizedResponse"
         "403":
           $ref: "#/components/responses/ForbiddenResponse"
-      description: Retrieves the total count of bundles for the authenticated
-        business. This endpoint does not support any filtering or pagination.
+      description: "Requires the `bundle:list` machine scope. Retrieves the total count of bundles for the authenticated business. This endpoint does not support any filtering or pagination."
       parameters:
         - description: "Number of items per page (default: 25, max: 25)"
           in: query
@@ -4011,7 +4440,7 @@ paths:
           $ref: "#/components/responses/ForbiddenResponse"
         "404":
           $ref: "#/components/responses/NotFoundResponse"
-      description: Retrieves a bundle by its ID.
+      description: "Requires the `bundle:read` machine scope. Retrieves a bundle by its ID."
     patch:
       tags:
         - Business Bundles
@@ -4033,7 +4462,7 @@ paths:
           $ref: "#/components/responses/ForbiddenResponse"
         "404":
           $ref: "#/components/responses/NotFoundResponse"
-      description: Updates an existing bundle with the provided data.
+      description: "Requires the `bundle:update` machine scope. Updates an existing bundle with the provided data."
     delete:
       tags:
         - Business Bundles
@@ -4051,7 +4480,7 @@ paths:
           $ref: "#/components/responses/ForbiddenResponse"
         "404":
           $ref: "#/components/responses/NotFoundResponse"
-      description: Deletes a bundle by its ID.
+      description: "Requires the `bundle:delete` machine scope. Deletes a bundle by its ID."
   /v3/bundles/{id}/duplicate:
     parameters:
       - $ref: "#/components/parameters/GenericId"
@@ -4072,10 +4501,7 @@ paths:
           $ref: "#/components/responses/ForbiddenResponse"
         "404":
           $ref: "#/components/responses/NotFoundResponse"
-      description: Creates a copy of an existing bundle including all bundlelines,
-        bundle price options, labels, and follow-up chats. The new bundle name
-        will be suffixed with '(Copy)'. Partnership settings and store
-        placements are NOT copied.
+      description: "Requires the `bundle:create` machine scope. Creates a copy of an existing bundle including all bundlelines, bundle price options, labels, and follow-up chats. The new bundle name will be suffixed with '(Copy)'. Partnership settings and store placements are NOT copied."
   /v3/bundles/{bundle_id}/relations:
     parameters:
       - $ref: "#/components/parameters/BundleId"
@@ -4096,8 +4522,7 @@ paths:
           $ref: "#/components/responses/ForbiddenResponse"
         "404":
           $ref: "#/components/responses/NotFoundResponse"
-      description: Retrieves a bundle along with its related entities such as active
-        bundle price options and their associated stores and form displays.
+      description: "Requires the `bundle:read` machine scope. Retrieves a bundle along with its related entities such as active bundle price options and their associated stores and form displays."
   /v3/bundles/{bundle_id}/partners:
     parameters:
       - $ref: "#/components/parameters/BundleId"
@@ -4118,10 +4543,7 @@ paths:
           $ref: "#/components/responses/ForbiddenResponse"
         "404":
           $ref: "#/components/responses/NotFoundResponse"
-      description: Retrieves a paginated list of partners associated with a specific
-        bundle. The data is sorted by id in descending order and cannot be
-        changed. Uses cursor-based pagination with default page size of 25 and
-        maximum of 25.
+      description: "Requires the `bundle:list` machine scope. Retrieves a paginated list of partners associated with a specific bundle. The data is sorted by id in descending order and cannot be changed. Uses cursor-based pagination with default page size of 25 and maximum of 25."
       parameters:
         - description: The ID of the last item from the previous page. Used for
             cursor-based pagination.
@@ -4159,8 +4581,7 @@ paths:
           $ref: "#/components/responses/ForbiddenResponse"
         "404":
           $ref: "#/components/responses/NotFoundResponse"
-      description: Associates a partner with a specific bundle using the provided
-        unique identifier.
+      description: "Requires the `bundle:update` machine scope. Associates a partner with a specific bundle using the provided unique identifier."
   /v3/bundles/{bundle_id}/partners/{id}:
     parameters:
       - $ref: "#/components/parameters/BundleId"
@@ -4182,7 +4603,7 @@ paths:
           $ref: "#/components/responses/ForbiddenResponse"
         "404":
           $ref: "#/components/responses/NotFoundResponse"
-      description: Dissociates a partner from a specific bundle by its ID.
+      description: "Requires the `bundle:update` machine scope. Dissociates a partner from a specific bundle by its ID."
   /v3/bundles/{bundle_id}/follow-up-chats/generate:
     parameters:
       - $ref: "#/components/parameters/BundleId"
@@ -4203,7 +4624,7 @@ paths:
           $ref: "#/components/responses/ForbiddenResponse"
         "404":
           $ref: "#/components/responses/NotFoundResponse"
-      description: Generates a new follow up chat for a bundle.
+      description: "Requires the `bundle:update` machine scope. Generates a new follow up chat for a bundle."
   /v3/bundles/{bundle_id}/follow-up-chats:
     parameters:
       - $ref: "#/components/parameters/BundleId"
@@ -4224,7 +4645,7 @@ paths:
           $ref: "#/components/responses/ForbiddenResponse"
         "404":
           $ref: "#/components/responses/NotFoundResponse"
-      description: Retrieves a paginated list of follow up chats for a bundle.
+      description: "Requires the `bundle:list` machine scope. Retrieves a paginated list of follow up chats for a bundle."
       parameters:
         - description: Last ID for cursor-based pagination
           in: query
@@ -4261,7 +4682,7 @@ paths:
           $ref: "#/components/responses/ForbiddenResponse"
         "404":
           $ref: "#/components/responses/NotFoundResponse"
-      description: Create a follow up chat template for a bundle.
+      description: "Requires the `bundle:update` machine scope. Create a follow up chat template for a bundle."
   /v3/bundles/{bundle_id}/follow-up-chats/{id}:
     parameters:
       - $ref: "#/components/parameters/BundleId"
@@ -4283,7 +4704,7 @@ paths:
           $ref: "#/components/responses/ForbiddenResponse"
         "404":
           $ref: "#/components/responses/NotFoundResponse"
-      description: Retrieves a follow up chat template by its ID.
+      description: "Requires the `bundle:read` machine scope. Retrieves a follow up chat template by its ID."
     patch:
       tags:
         - Business Bundles
@@ -4305,7 +4726,7 @@ paths:
           $ref: "#/components/responses/ForbiddenResponse"
         "404":
           $ref: "#/components/responses/NotFoundResponse"
-      description: Updates a follow up chat template.
+      description: "Requires the `bundle:update` machine scope. Updates a follow up chat template."
     delete:
       tags:
         - Business Bundles
@@ -4323,7 +4744,7 @@ paths:
           $ref: "#/components/responses/ForbiddenResponse"
         "404":
           $ref: "#/components/responses/NotFoundResponse"
-      description: Deletes a follow up chat template.
+      description: "Requires the `bundle:update` machine scope. Deletes a follow up chat template."
   /v3/bundles/{bundle_id}/bundle-price-options:
     parameters:
       - $ref: "#/components/parameters/BundleId"
@@ -4344,10 +4765,7 @@ paths:
           $ref: "#/components/responses/ForbiddenResponse"
         "404":
           $ref: "#/components/responses/NotFoundResponse"
-      description: Retrieves a paginated list of bundle price options associated with
-        a specific bundle. The data is sorted by id in descending order and
-        cannot be changed. Uses cursor-based pagination with default page size
-        of 25 and maximum of 25.
+      description: "Requires the `bundle:list` machine scope. Retrieves a paginated list of bundle price options associated with a specific bundle. The data is sorted by id in descending order and cannot be changed. Uses cursor-based pagination with default page size of 25 and maximum of 25."
       parameters:
         - description: The ID of the last item from the previous page. Used for
             cursor-based pagination.
@@ -4385,8 +4803,7 @@ paths:
           $ref: "#/components/responses/ForbiddenResponse"
         "404":
           $ref: "#/components/responses/NotFoundResponse"
-      description: Creates a new bundle price option associated with a specific bundle
-        using the provided data.
+      description: "Requires the `bundle:create` machine scope. Creates a new bundle price option associated with a specific bundle using the provided data."
   /v3/bundles/{bundle_id}/bundle-price-options/{id}:
     parameters:
       - $ref: "#/components/parameters/BundleId"
@@ -4412,8 +4829,7 @@ paths:
           $ref: "#/components/responses/ForbiddenResponse"
         "404":
           $ref: "#/components/responses/NotFoundResponse"
-      description: Updates an existing bundle price option associated with a specific
-        bundle using the provided data.
+      description: "Requires the `bundle:update` machine scope. Updates an existing bundle price option associated with a specific bundle using the provided data."
     delete:
       tags:
         - Business Bundles
@@ -4431,8 +4847,7 @@ paths:
           $ref: "#/components/responses/ForbiddenResponse"
         "404":
           $ref: "#/components/responses/NotFoundResponse"
-      description: Deletes a bundle price option associated with a specific bundle by
-        its ID.
+      description: "Requires the `bundle:delete` machine scope. Deletes a bundle price option associated with a specific bundle by its ID."
   /v3/bundles/{bundle_id}/bundle-price-options/{id}/relations:
     parameters:
       - $ref: "#/components/parameters/BundleId"
@@ -4454,14 +4869,14 @@ paths:
           $ref: "#/components/responses/ForbiddenResponse"
         "404":
           $ref: "#/components/responses/NotFoundResponse"
-      description: Retrieves a bundle price option along with its related entities
-        such as associated stores and form displays.
+      description: "Requires the `bundle:read` machine scope. Retrieves a bundle price option along with its related entities such as associated stores and form displays."
   /v3/customers:
     get:
       tags:
         - Business Customers
       operationId: listBusinessCustomers
       summary: List business customers
+      description: "Requires the `customer:list` machine scope."
       security:
         - bearerAuth: []
         - apiKeyAuth: []
@@ -4477,6 +4892,7 @@ paths:
         - Business Customers
       operationId: createBusinessCustomer
       summary: Create a business customer
+      description: "Requires the `customer:create` machine scope."
       security:
         - bearerAuth: []
         - apiKeyAuth: []
@@ -4497,6 +4913,7 @@ paths:
         - Business Customers
       operationId: countBusinessCustomers
       summary: Count business customers
+      description: "Requires the `customer:list` machine scope."
       security:
         - bearerAuth: []
         - apiKeyAuth: []
@@ -4513,6 +4930,7 @@ paths:
         - Business Customers
       operationId: uploadBusinessCustomers
       summary: Upload business customers from CSV
+      description: "Requires the `customer:create` machine scope."
       security:
         - bearerAuth: []
         - apiKeyAuth: []
@@ -4533,6 +4951,7 @@ paths:
         - Business Customers
       operationId: listBusinessCustomerTags
       summary: List business customer tags
+      description: "Requires the `customer:list` machine scope."
       security:
         - bearerAuth: []
         - apiKeyAuth: []
@@ -4551,6 +4970,7 @@ paths:
         - Business Customers
       operationId: getBusinessCustomer
       summary: Get a business customer
+      description: "Requires the `customer:read` machine scope."
       security:
         - bearerAuth: []
         - apiKeyAuth: []
@@ -4568,6 +4988,7 @@ paths:
         - Business Customers
       operationId: updateBusinessCustomer
       summary: Update a business customer
+      description: "Requires the `customer:update` machine scope."
       security:
         - bearerAuth: []
         - apiKeyAuth: []
@@ -4592,6 +5013,7 @@ paths:
         - Business Customers
       operationId: updateBusinessCustomerTags
       summary: Update tags on a business customer
+      description: "Requires the `customer:update` machine scope."
       security:
         - bearerAuth: []
         - apiKeyAuth: []
@@ -4616,6 +5038,7 @@ paths:
         - Business Customers
       operationId: listBusinessCustomerAddresses
       summary: List addresses for a business customer
+      description: "Requires the `customer:list` machine scope."
       security:
         - bearerAuth: []
         - apiKeyAuth: []
@@ -4633,6 +5056,7 @@ paths:
         - Business Customers
       operationId: createBusinessCustomerAddress
       summary: Create an address for a business customer
+      description: "Requires the `customer:update` machine scope."
       security:
         - bearerAuth: []
         - apiKeyAuth: []
@@ -4658,6 +5082,7 @@ paths:
         - Business Customers
       operationId: getBusinessCustomerAddress
       summary: Get a business customer address
+      description: "Requires the `customer:read` machine scope."
       security:
         - bearerAuth: []
         - apiKeyAuth: []
@@ -4675,6 +5100,7 @@ paths:
         - Business Customers
       operationId: updateBusinessCustomerAddress
       summary: Update a business customer address
+      description: "Requires the `customer:update` machine scope."
       security:
         - bearerAuth: []
         - apiKeyAuth: []
@@ -4696,6 +5122,7 @@ paths:
         - Business Customers
       operationId: deleteBusinessCustomerAddress
       summary: Delete a business customer address
+      description: "Requires the `customer:update` machine scope."
       security:
         - bearerAuth: []
         - apiKeyAuth: []
@@ -4714,6 +5141,7 @@ paths:
         - WABA
       operationId: listWabaCustomerTags
       summary: List WABA customer tags
+      description: "Requires the `waba_account:operate` machine scope."
       security:
         - bearerAuth: []
         - apiKeyAuth: []
@@ -4729,6 +5157,7 @@ paths:
         - WABA
       operationId: createWabaCustomerTag
       summary: Create a WABA customer tag
+      description: "Requires the `waba_account:operate` machine scope."
       security:
         - bearerAuth: []
         - apiKeyAuth: []
@@ -4751,6 +5180,7 @@ paths:
         - WABA
       operationId: getWabaCustomerTag
       summary: Get a WABA customer tag
+      description: "Requires the `waba_account:operate` machine scope."
       security:
         - bearerAuth: []
         - apiKeyAuth: []
@@ -4768,6 +5198,7 @@ paths:
         - WABA
       operationId: updateWabaCustomerTag
       summary: Update a WABA customer tag
+      description: "Requires the `waba_account:operate` machine scope."
       security:
         - bearerAuth: []
         - apiKeyAuth: []
@@ -4789,6 +5220,7 @@ paths:
         - WABA
       operationId: deleteWabaCustomerTag
       summary: Delete a WABA customer tag
+      description: "Requires the `waba_account:operate` machine scope."
       security:
         - bearerAuth: []
         - apiKeyAuth: []
@@ -4807,6 +5239,7 @@ paths:
         - WABA
       operationId: listWabaAccounts
       summary: List WABA accounts
+      description: "Requires the `waba_account:list` machine scope."
       security:
         - bearerAuth: []
         - apiKeyAuth: []
@@ -4823,6 +5256,7 @@ paths:
         - WABA
       operationId: loginWabaAccount
       summary: Complete WABA login
+      description: "Requires the `waba_account:create` machine scope."
       security:
         - bearerAuth: []
         - apiKeyAuth: []
@@ -4845,6 +5279,7 @@ paths:
         - WABA
       operationId: getWabaAccount
       summary: Get a WABA account
+      description: "Requires the `waba_account:read` machine scope."
       security:
         - bearerAuth: []
         - apiKeyAuth: []
@@ -4862,6 +5297,7 @@ paths:
         - WABA
       operationId: updateWabaAccount
       summary: Update a WABA account
+      description: "Requires the `waba_account:update` machine scope."
       security:
         - bearerAuth: []
         - apiKeyAuth: []
@@ -4883,6 +5319,7 @@ paths:
         - WABA
       operationId: deleteWabaAccount
       summary: Delete a WABA account
+      description: "Requires the `waba_account:delete` machine scope."
       security:
         - bearerAuth: []
         - apiKeyAuth: []
@@ -4903,6 +5340,7 @@ paths:
         - WABA
       operationId: syncWabaAccount
       summary: Sync a WABA account
+      description: "Requires the `waba_account:create` machine scope."
       security:
         - bearerAuth: []
         - apiKeyAuth: []
@@ -4923,6 +5361,7 @@ paths:
         - WABA
       operationId: createWabaDataset
       summary: Create a WABA dataset
+      description: "Requires the `waba_account:create` machine scope."
       security:
         - bearerAuth: []
         - apiKeyAuth: []
@@ -4943,6 +5382,7 @@ paths:
         - WABA
       operationId: registerWabaPhone
       summary: Register a WABA phone number
+      description: "Requires the `waba_account:create` machine scope."
       security:
         - bearerAuth: []
         - apiKeyAuth: []
@@ -4967,6 +5407,7 @@ paths:
         - WABA
       operationId: uploadWabaMedia
       summary: Upload WABA media
+      description: "Requires the `waba_account:operate` machine scope."
       security:
         - bearerAuth: []
         - apiKeyAuth: []
@@ -4991,6 +5432,7 @@ paths:
         - WABA
       operationId: listWabaMessageAttempts
       summary: List WABA message attempts
+      description: "Requires the `waba_template_message:send` machine scope."
       security:
         - bearerAuth: []
         - apiKeyAuth: []
@@ -5011,6 +5453,7 @@ paths:
         - WABA
       operationId: listWabaMessageTemplates
       summary: List WABA message templates
+      description: "Requires the `waba_template_message:send` machine scope."
       security:
         - bearerAuth: []
         - apiKeyAuth: []
@@ -5031,6 +5474,7 @@ paths:
         - WABA
       operationId: sendTemplateMessages
       summary: Send template messages from a WABA account
+      description: "Requires the `waba_template_message:send` machine scope."
       security:
         - bearerAuth: []
         - apiKeyAuth: []
@@ -5055,6 +5499,7 @@ paths:
         - WABA
       operationId: listQuickReplies
       summary: List WABA quick replies
+      description: "Requires the `waba_account:operate` machine scope."
       security:
         - bearerAuth: []
         - apiKeyAuth: []
@@ -5072,6 +5517,7 @@ paths:
         - WABA
       operationId: createQuickReply
       summary: Create a WABA quick reply
+      description: "Requires the `waba_account:operate` machine scope."
       security:
         - bearerAuth: []
         - apiKeyAuth: []
@@ -5097,6 +5543,7 @@ paths:
         - WABA
       operationId: updateQuickReply
       summary: Update a WABA quick reply
+      description: "Requires the `waba_account:operate` machine scope."
       security:
         - bearerAuth: []
         - apiKeyAuth: []
@@ -5118,6 +5565,7 @@ paths:
         - WABA
       operationId: deleteQuickReply
       summary: Delete a WABA quick reply
+      description: "Requires the `waba_account:operate` machine scope."
       security:
         - bearerAuth: []
         - apiKeyAuth: []
@@ -5138,6 +5586,7 @@ paths:
         - WABA
       operationId: listWabaCustomers
       summary: List WABA customers
+      description: "Requires the `waba_account:operate` machine scope."
       security:
         - bearerAuth: []
         - apiKeyAuth: []
@@ -5148,8 +5597,6 @@ paths:
           $ref: "#/components/responses/UnauthorizedResponse"
         "403":
           $ref: "#/components/responses/ForbiddenResponse"
-        "404":
-          $ref: "#/components/responses/NotFoundResponse"
   /v3/waba-accounts/{unique_id}/customers/{id}:
     parameters:
       - $ref: "#/components/parameters/UniqueId"
@@ -5159,6 +5606,7 @@ paths:
         - WABA
       operationId: updateWabaCustomer
       summary: Update a WABA customer
+      description: "Requires the `waba_account:operate` machine scope."
       security:
         - bearerAuth: []
         - apiKeyAuth: []
@@ -5184,6 +5632,7 @@ paths:
         - WABA
       operationId: sendWabaPurchase
       summary: Send a WABA purchase message
+      description: "Requires the `waba_account:operate` machine scope."
       security:
         - bearerAuth: []
         - apiKeyAuth: []
@@ -5209,6 +5658,7 @@ paths:
         - WABA
       operationId: listWabaMessages
       summary: List WABA customer messages
+      description: "Requires the `waba_account:operate` machine scope."
       security:
         - bearerAuth: []
         - apiKeyAuth: []
@@ -5226,6 +5676,7 @@ paths:
         - WABA
       operationId: sendWabaMessage
       summary: Send a WABA customer message
+      description: "Requires the `waba_account:operate` machine scope."
       security:
         - bearerAuth: []
         - apiKeyAuth: []
@@ -5252,6 +5703,7 @@ paths:
         - WABA
       operationId: getWabaMessage
       summary: Get a WABA customer message
+      description: "Requires the `waba_account:operate` machine scope."
       security:
         - bearerAuth: []
         - apiKeyAuth: []
@@ -5269,6 +5721,7 @@ paths:
         - WABA
       operationId: updateWabaMessage
       summary: Update a WABA customer message
+      description: "Requires the `waba_account:operate` machine scope."
       security:
         - bearerAuth: []
         - apiKeyAuth: []
@@ -5290,6 +5743,7 @@ paths:
         - WABA
       operationId: deleteWabaMessage
       summary: Delete a WABA customer message
+      description: "Requires the `waba_account:operate` machine scope."
       security:
         - bearerAuth: []
         - apiKeyAuth: []
@@ -5311,6 +5765,7 @@ paths:
         - WABA
       operationId: sendWabaTemplateMessage
       summary: Send a WABA template message to a customer
+      description: "Requires the `waba_account:operate` machine scope."
       security:
         - bearerAuth: []
         - apiKeyAuth: []
@@ -5333,6 +5788,7 @@ paths:
         - WhatsApp Integrations
       operationId: listWhatsappIntegrations
       summary: List WhatsApp integrations
+      description: "Requires the `whats_app_integration:list` machine scope."
       security:
         - bearerAuth: []
         - apiKeyAuth: []
@@ -5348,6 +5804,7 @@ paths:
         - WhatsApp Integrations
       operationId: createWhatsappIntegration
       summary: Create a WhatsApp integration
+      description: "Requires the `whats_app_integration:create` machine scope."
       security:
         - bearerAuth: []
         - apiKeyAuth: []
@@ -5370,6 +5827,7 @@ paths:
         - WhatsApp Integrations
       operationId: getWhatsappIntegration
       summary: Get a WhatsApp integration
+      description: "Requires the `whats_app_integration:read` machine scope."
       security:
         - bearerAuth: []
         - apiKeyAuth: []
@@ -5387,6 +5845,7 @@ paths:
         - WhatsApp Integrations
       operationId: updateWhatsappIntegration
       summary: Update a WhatsApp integration
+      description: "Requires the `whats_app_integration:update` machine scope."
       security:
         - bearerAuth: []
         - apiKeyAuth: []
@@ -5408,6 +5867,7 @@ paths:
         - WhatsApp Integrations
       operationId: deleteWhatsappIntegration
       summary: Delete a WhatsApp integration
+      description: "Requires the `whats_app_integration:delete` machine scope."
       security:
         - bearerAuth: []
         - apiKeyAuth: []
@@ -5428,6 +5888,7 @@ paths:
         - WhatsApp Integrations
       operationId: checkWhatsappIntegrationStatus
       summary: Check WhatsApp integration status
+      description: "Requires the `whats_app_integration:read` machine scope."
       security:
         - bearerAuth: []
         - apiKeyAuth: []
@@ -5450,8 +5911,7 @@ components:
       type: apiKey
       in: header
       name: authorization
-      description: "Send `Authorization: Bearer <api_key>` for machine-authenticated
-        business requests."
+      description: "Send `Authorization: Bearer <api_key>` for machine-authenticated business requests."
   parameters:
     StoreId:
       name: store_id
@@ -5460,6 +5920,20 @@ components:
       schema:
         type: string
       description: Store `unique_id`.
+    BusinessStoreId:
+      name: store_id
+      in: path
+      required: true
+      schema:
+        type: integer
+      description: Legacy numeric business store ID.
+    LocationId:
+      name: location_id
+      in: path
+      required: true
+      schema:
+        type: integer
+      description: Legacy numeric location ID.
     StorefrontPublicApiKey:
       name: X-Scalev-Storefront-Api-Key
       in: header
@@ -5963,6 +6437,12 @@ components:
       description: Success with no response body
     BadRequestResponse:
       description: Bad Request
+      content:
+        application/json:
+          schema:
+            $ref: "#/components/schemas/ApiErrorResponse"
+    PaymentRequiredResponse:
+      description: Payment Required
       content:
         application/json:
           schema:
