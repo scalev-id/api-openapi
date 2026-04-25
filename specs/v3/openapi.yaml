@@ -31,7 +31,7 @@ tags:
   - name: OAuth
     description: Public and machine OAuth token-management endpoints.
   - name: OAuth Billing
-    description: OAuth-only billing reservation endpoints for installed apps.
+    description: OAuth billing runtime, refund, and developer finance endpoints.
   - name: Customer Auth
     description: Public customer authentication and password-reset endpoints.
   - name: Customer Account
@@ -52,6 +52,8 @@ tags:
     description: Authenticated business location lookup endpoints.
   - name: Business Stores
     description: Authenticated business store lookup endpoints that use legacy numeric store IDs.
+  - name: Storefront Setup
+    description: Authenticated business setup endpoints for public storefront keys and CORS origins.
   - name: Shipping
     description: Authenticated business shipping lookup endpoints.
   - name: Business Products
@@ -67,7 +69,118 @@ tags:
       resources.
   - name: WhatsApp Integrations
     description: Authenticated WhatsApp integration management endpoints.
+  - name: Business Webhook Endpoints
+    description: Dashboard-only fallback webhook endpoint management for provider businesses.
 paths:
+  /v3/webhook-endpoints:
+    get:
+      tags:
+        - Business Webhook Endpoints
+      operationId: listWebhookEndpoints
+      summary: List webhook endpoints
+      description: "Dashboard-only v3 endpoint. Requires a dashboard business-user JWT with `business:manage_developer_settings`; OAuth tokens and business API keys are rejected."
+      security:
+        - bearerAuth: []
+      responses:
+        "200":
+          description: Webhook endpoint collection
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/WebhookEndpointCollectionResponseBody"
+        "401":
+          $ref: "#/components/responses/UnauthorizedResponse"
+        "403":
+          $ref: "#/components/responses/ForbiddenResponse"
+    post:
+      tags:
+        - Business Webhook Endpoints
+      operationId: createWebhookEndpoint
+      summary: Create a webhook endpoint
+      description: "Dashboard-only v3 endpoint. Active endpoints are validated by sending a signed `business.test_event`. A business can configure at most three fallback webhook endpoints."
+      security:
+        - bearerAuth: []
+      requestBody:
+        $ref: "#/components/requestBodies/WebhookEndpointRequestBody"
+      responses:
+        "201":
+          description: Webhook endpoint created
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/WebhookEndpoint"
+        "400":
+          $ref: "#/components/responses/BadRequestResponse"
+        "401":
+          $ref: "#/components/responses/UnauthorizedResponse"
+        "403":
+          $ref: "#/components/responses/ForbiddenResponse"
+  /v3/webhook-endpoints/{id}:
+    parameters:
+      - $ref: "#/components/parameters/GenericId"
+    get:
+      tags:
+        - Business Webhook Endpoints
+      operationId: getWebhookEndpoint
+      summary: Get a webhook endpoint
+      description: "Dashboard-only v3 endpoint. Returns one fallback webhook endpoint owned by the current business."
+      security:
+        - bearerAuth: []
+      responses:
+        "200":
+          description: Webhook endpoint
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/WebhookEndpoint"
+        "401":
+          $ref: "#/components/responses/UnauthorizedResponse"
+        "403":
+          $ref: "#/components/responses/ForbiddenResponse"
+        "404":
+          $ref: "#/components/responses/NotFoundResponse"
+    patch:
+      tags:
+        - Business Webhook Endpoints
+      operationId: updateWebhookEndpoint
+      summary: Update a webhook endpoint
+      description: "Dashboard-only v3 endpoint. Active endpoints are validated by sending a signed `business.test_event`."
+      security:
+        - bearerAuth: []
+      requestBody:
+        $ref: "#/components/requestBodies/WebhookEndpointRequestBody"
+      responses:
+        "200":
+          description: Webhook endpoint
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/WebhookEndpoint"
+        "400":
+          $ref: "#/components/responses/BadRequestResponse"
+        "401":
+          $ref: "#/components/responses/UnauthorizedResponse"
+        "403":
+          $ref: "#/components/responses/ForbiddenResponse"
+        "404":
+          $ref: "#/components/responses/NotFoundResponse"
+    delete:
+      tags:
+        - Business Webhook Endpoints
+      operationId: deleteWebhookEndpoint
+      summary: Delete a webhook endpoint
+      description: "Dashboard-only v3 endpoint. Deletes a fallback webhook endpoint owned by the current business."
+      security:
+        - bearerAuth: []
+      responses:
+        "204":
+          $ref: "#/components/responses/NoContentResponse"
+        "401":
+          $ref: "#/components/responses/UnauthorizedResponse"
+        "403":
+          $ref: "#/components/responses/ForbiddenResponse"
+        "404":
+          $ref: "#/components/responses/NotFoundResponse"
   /v3/stores/{store_id}/public/products:
     parameters:
       - $ref: "#/components/parameters/StoreId"
@@ -143,6 +256,26 @@ paths:
       responses:
         "200":
           $ref: "#/components/responses/CollectionResponse"
+        "404":
+          $ref: "#/components/responses/NotFoundResponse"
+  /v3/stores/{store_id}/public/variants/{variant_id}/availability:
+    parameters:
+      - $ref: "#/components/parameters/StoreId"
+      - $ref: "#/components/parameters/StorefrontPublicApiKey"
+      - $ref: "#/components/parameters/VariantId"
+    get:
+      tags:
+        - Storefront
+      operationId: getStorefrontVariantAvailability
+      summary: Get storefront variant inventory availability
+      description: "No OAuth machine scope. Public storefront endpoint."
+      responses:
+        "200":
+          description: Variant availability
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/VariantAvailability"
         "404":
           $ref: "#/components/responses/NotFoundResponse"
   /v3/stores/{store_id}/public/cart:
@@ -248,6 +381,55 @@ paths:
           $ref: "#/components/responses/BadRequestResponse"
         "404":
           $ref: "#/components/responses/NotFoundResponse"
+  /v3/stores/{store_id}/public/orders/{secret_slug}:
+    parameters:
+      - $ref: "#/components/parameters/StoreId"
+      - $ref: "#/components/parameters/StorefrontPublicApiKey"
+      - $ref: "#/components/parameters/SecretSlug"
+    get:
+      tags:
+        - Storefront
+      operationId: getStorefrontPublicOrder
+      summary: Get a public storefront order
+      description: "No OAuth machine scope. Public storefront endpoint."
+      responses:
+        "200":
+          $ref: "#/components/responses/SuccessResponse"
+        "404":
+          $ref: "#/components/responses/NotFoundResponse"
+    patch:
+      tags:
+        - Storefront
+      operationId: updateStorefrontPublicOrder
+      summary: Update a public storefront order
+      description: "No OAuth machine scope. Public storefront endpoint."
+      requestBody:
+        $ref: "#/components/requestBodies/GenericJsonRequestBody"
+      responses:
+        "200":
+          $ref: "#/components/responses/SuccessResponse"
+        "400":
+          $ref: "#/components/responses/BadRequestResponse"
+        "404":
+          $ref: "#/components/responses/NotFoundResponse"
+  /v3/stores/{store_id}/public/orders/{secret_slug}/payment:
+    parameters:
+      - $ref: "#/components/parameters/StoreId"
+      - $ref: "#/components/parameters/StorefrontPublicApiKey"
+      - $ref: "#/components/parameters/SecretSlug"
+    post:
+      tags:
+        - Storefront
+      operationId: createStorefrontPublicOrderPayment
+      summary: Create a payment for a public storefront order
+      description: "No OAuth machine scope. Public storefront endpoint."
+      responses:
+        "200":
+          $ref: "#/components/responses/CreateOrderPaymentResponse"
+        "400":
+          $ref: "#/components/responses/BadRequestResponse"
+        "404":
+          $ref: "#/components/responses/NotFoundResponse"
   /v3/stores/{store_id}/public/discount-codes/check:
     parameters:
       - $ref: "#/components/parameters/StoreId"
@@ -331,6 +513,34 @@ paths:
           $ref: "#/components/responses/SuccessResponse"
         "400":
           $ref: "#/components/responses/BadRequestResponse"
+  /v3/oauth/installation/status:
+    post:
+      tags:
+        - OAuth
+      operationId: getOAuthInstallationStatus
+      summary: Get installed-app status snapshot
+      description: "No OAuth installation scope. OAuth flow endpoint for app-backend installation status lookup."
+      requestBody:
+        $ref: "#/components/requestBodies/OAuthInstallationStatusRequestBody"
+      responses:
+        "200":
+          $ref: "#/components/responses/OAuthInstallationStatusResponse"
+        "400":
+          $ref: "#/components/responses/BadRequestResponse"
+  /v3/oauth/installation/launch-token/exchange:
+    post:
+      tags:
+        - OAuth
+      operationId: exchangeOAuthInstallationLaunchToken
+      summary: Exchange an installed-app dashboard launch token
+      description: "No OAuth installation scope. OAuth flow endpoint for exchanging a one-time Manage launch token for an installed-app status snapshot."
+      requestBody:
+        $ref: "#/components/requestBodies/OAuthInstallationLaunchTokenExchangeRequestBody"
+      responses:
+        "200":
+          $ref: "#/components/responses/OAuthInstallationStatusResponse"
+        "400":
+          $ref: "#/components/responses/BadRequestResponse"
   /v3/oauth/billing/reservations:
     post:
       tags:
@@ -369,6 +579,224 @@ paths:
           $ref: "#/components/responses/BadRequestResponse"
         "401":
           $ref: "#/components/responses/UnauthorizedResponse"
+  /v3/oauth/billing/refunds:
+    post:
+      tags:
+        - OAuth Billing
+      operationId: createOAuthBillingRefund
+      summary: Refund a captured OAuth billing charge
+      description: "No OAuth installation scope. OAuth flow endpoint. Requires an installed-app OAuth access token that owns the original authorized-business charge. Refunds are full post-capture reversals; reservation release remains the pre-capture flow."
+      security:
+        - bearerAuth: []
+      requestBody:
+        $ref: "#/components/requestBodies/OAuthBillingRefundRequestBody"
+      responses:
+        "200":
+          $ref: "#/components/responses/OAuthBillingRefundResponse"
+        "400":
+          $ref: "#/components/responses/BadRequestResponse"
+        "401":
+          $ref: "#/components/responses/UnauthorizedResponse"
+        "404":
+          $ref: "#/components/responses/NotFoundResponse"
+        "409":
+          $ref: "#/components/responses/ConflictResponse"
+  /v3/developer/oauth-billing/earnings:
+    get:
+      tags:
+        - OAuth Billing
+      operationId: getDeveloperOAuthBillingEarnings
+      summary: Get developer OAuth billing earnings balance
+      description: "Requires business auth with `business:manage_developer_settings`."
+      security:
+        - bearerAuth: []
+        - apiKeyAuth: []
+      responses:
+        "200":
+          $ref: "#/components/responses/OAuthBillingEarningsResponse"
+        "401":
+          $ref: "#/components/responses/UnauthorizedResponse"
+        "403":
+          $ref: "#/components/responses/ForbiddenResponse"
+  /v3/developer/oauth-billing/actions:
+    get:
+      tags:
+        - OAuth Billing
+      operationId: listDeveloperOAuthBillingActions
+      summary: List available OAuth billing actions
+      description: "Requires business auth with `business:manage_developer_settings`."
+      security:
+        - bearerAuth: []
+        - apiKeyAuth: []
+      responses:
+        "200":
+          $ref: "#/components/responses/OAuthBillingActionCollectionResponse"
+        "401":
+          $ref: "#/components/responses/UnauthorizedResponse"
+        "403":
+          $ref: "#/components/responses/ForbiddenResponse"
+  /v3/developer/oauth-billing/reservations:
+    get:
+      tags:
+        - OAuth Billing
+      operationId: listDeveloperOAuthBillingReservations
+      summary: List developer OAuth billing reservations
+      description: "Requires business auth with `business:manage_developer_settings`."
+      security:
+        - bearerAuth: []
+        - apiKeyAuth: []
+      parameters:
+        - $ref: "#/components/parameters/PageSize"
+        - $ref: "#/components/parameters/LastId"
+        - $ref: "#/components/parameters/OAuthApplicationIdQuery"
+        - $ref: "#/components/parameters/OAuthAuthorizedBusinessIdQuery"
+        - $ref: "#/components/parameters/MerchantBusinessIdQuery"
+        - $ref: "#/components/parameters/OAuthBillingTagQuery"
+        - $ref: "#/components/parameters/OAuthBillingActionKeyQuery"
+        - $ref: "#/components/parameters/OAuthBillingStatusQuery"
+        - $ref: "#/components/parameters/OAuthBillingIdempotencyKeyQuery"
+      responses:
+        "200":
+          $ref: "#/components/responses/OAuthBillingReservationCollectionResponse"
+        "401":
+          $ref: "#/components/responses/UnauthorizedResponse"
+        "403":
+          $ref: "#/components/responses/ForbiddenResponse"
+  /v3/developer/oauth-billing/reservations/{id}:
+    parameters:
+      - $ref: "#/components/parameters/GenericId"
+    get:
+      tags:
+        - OAuth Billing
+      operationId: getDeveloperOAuthBillingReservation
+      summary: Get a developer OAuth billing reservation
+      description: "Requires business auth with `business:manage_developer_settings`."
+      security:
+        - bearerAuth: []
+        - apiKeyAuth: []
+      responses:
+        "200":
+          $ref: "#/components/responses/OAuthBillingReservationResponse"
+        "401":
+          $ref: "#/components/responses/UnauthorizedResponse"
+        "403":
+          $ref: "#/components/responses/ForbiddenResponse"
+        "404":
+          $ref: "#/components/responses/NotFoundResponse"
+  /v3/developer/oauth-billing/charges:
+    get:
+      tags:
+        - OAuth Billing
+      operationId: listDeveloperOAuthBillingCharges
+      summary: List developer OAuth billing charges
+      description: "Requires business auth with `business:manage_developer_settings`."
+      security:
+        - bearerAuth: []
+        - apiKeyAuth: []
+      parameters:
+        - $ref: "#/components/parameters/PageSize"
+        - $ref: "#/components/parameters/LastId"
+        - $ref: "#/components/parameters/OAuthApplicationIdQuery"
+        - $ref: "#/components/parameters/OAuthAuthorizedBusinessIdQuery"
+        - $ref: "#/components/parameters/MerchantBusinessIdQuery"
+        - $ref: "#/components/parameters/OAuthBillingTagQuery"
+        - $ref: "#/components/parameters/OAuthBillingActionKeyQuery"
+        - $ref: "#/components/parameters/OAuthBillingIdempotencyKeyQuery"
+        - $ref: "#/components/parameters/OAuthBillingRequestIdQuery"
+      responses:
+        "200":
+          $ref: "#/components/responses/OAuthBillingChargeCollectionResponse"
+        "401":
+          $ref: "#/components/responses/UnauthorizedResponse"
+        "403":
+          $ref: "#/components/responses/ForbiddenResponse"
+  /v3/developer/oauth-billing/charges/{id}:
+    parameters:
+      - $ref: "#/components/parameters/GenericId"
+    get:
+      tags:
+        - OAuth Billing
+      operationId: getDeveloperOAuthBillingCharge
+      summary: Get a developer OAuth billing charge
+      description: "Requires business auth with `business:manage_developer_settings`."
+      security:
+        - bearerAuth: []
+        - apiKeyAuth: []
+      responses:
+        "200":
+          $ref: "#/components/responses/OAuthBillingChargeResponse"
+        "401":
+          $ref: "#/components/responses/UnauthorizedResponse"
+        "403":
+          $ref: "#/components/responses/ForbiddenResponse"
+        "404":
+          $ref: "#/components/responses/NotFoundResponse"
+  /v3/developer/oauth-billing/ledger:
+    get:
+      tags:
+        - OAuth Billing
+      operationId: listDeveloperOAuthBillingLedger
+      summary: List developer OAuth billing earnings ledger entries
+      description: "Requires business auth with `business:manage_developer_settings`."
+      security:
+        - bearerAuth: []
+        - apiKeyAuth: []
+      parameters:
+        - $ref: "#/components/parameters/PageSize"
+        - $ref: "#/components/parameters/LastId"
+        - $ref: "#/components/parameters/OAuthApplicationIdQuery"
+        - $ref: "#/components/parameters/OAuthBillingEntryTypeQuery"
+      responses:
+        "200":
+          $ref: "#/components/responses/OAuthBillingLedgerCollectionResponse"
+        "401":
+          $ref: "#/components/responses/UnauthorizedResponse"
+        "403":
+          $ref: "#/components/responses/ForbiddenResponse"
+  /v3/developer/oauth-billing/settlements:
+    get:
+      tags:
+        - OAuth Billing
+      operationId: listDeveloperOAuthBillingSettlements
+      summary: List developer OAuth billing settlements
+      description: "Requires business auth with `business:manage_developer_settings`."
+      security:
+        - bearerAuth: []
+        - apiKeyAuth: []
+      parameters:
+        - $ref: "#/components/parameters/PageSize"
+        - $ref: "#/components/parameters/LastId"
+        - $ref: "#/components/parameters/OAuthBillingSettlementStatusQuery"
+      responses:
+        "200":
+          $ref: "#/components/responses/OAuthBillingSettlementCollectionResponse"
+        "401":
+          $ref: "#/components/responses/UnauthorizedResponse"
+        "403":
+          $ref: "#/components/responses/ForbiddenResponse"
+  /v3/developer/oauth-billing/withdrawals:
+    post:
+      tags:
+        - OAuth Billing
+      operationId: createDeveloperOAuthBillingWithdrawal
+      summary: Withdraw developer OAuth billing earnings
+      description: "Requires business auth with `business:manage_developer_settings`. Xendit is the only supported settlement rail."
+      security:
+        - bearerAuth: []
+        - apiKeyAuth: []
+      requestBody:
+        $ref: "#/components/requestBodies/OAuthBillingWithdrawalRequestBody"
+      responses:
+        "200":
+          $ref: "#/components/responses/OAuthBillingSettlementResponse"
+        "400":
+          $ref: "#/components/responses/BadRequestResponse"
+        "401":
+          $ref: "#/components/responses/UnauthorizedResponse"
+        "402":
+          $ref: "#/components/responses/PaymentRequiredResponse"
+        "403":
+          $ref: "#/components/responses/ForbiddenResponse"
   /v3/stores/{store_id}/public/auth/otp/send:
     post:
       tags:
@@ -495,6 +923,25 @@ paths:
           $ref: "#/components/responses/SuccessResponse"
         "401":
           $ref: "#/components/responses/UnauthorizedResponse"
+    patch:
+      tags:
+        - Customer Account
+      operationId: updateCustomerMe
+      summary: Update the authenticated customer profile
+      description: "No OAuth machine scope. Customer-authenticated storefront endpoint. Customer email is read-only in public v1."
+      security:
+        - bearerAuth: []
+      parameters:
+        - $ref: "#/components/parameters/StoreId"
+      requestBody:
+        $ref: "#/components/requestBodies/CustomerProfileUpdateRequestBody"
+      responses:
+        "200":
+          $ref: "#/components/responses/SuccessResponse"
+        "400":
+          $ref: "#/components/responses/BadRequestResponse"
+        "401":
+          $ref: "#/components/responses/UnauthorizedResponse"
   /v3/stores/{store_id}/customers/me/set-new-password:
     post:
       tags:
@@ -515,6 +962,108 @@ paths:
           $ref: "#/components/responses/BadRequestResponse"
         "401":
           $ref: "#/components/responses/UnauthorizedResponse"
+  /v3/stores/{store_id}/customers/me/addresses:
+    parameters:
+      - $ref: "#/components/parameters/StoreId"
+    get:
+      tags:
+        - Customer Account
+      operationId: listCustomerMeAddresses
+      summary: List authenticated customer addresses
+      description: "No OAuth machine scope. Customer-authenticated storefront endpoint."
+      security:
+        - bearerAuth: []
+      responses:
+        "200":
+          description: Customer address list
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/CustomerAddressListResponse"
+        "401":
+          $ref: "#/components/responses/UnauthorizedResponse"
+    post:
+      tags:
+        - Customer Account
+      operationId: createCustomerMeAddress
+      summary: Create an authenticated customer address
+      description: "No OAuth machine scope. Customer-authenticated storefront endpoint."
+      security:
+        - bearerAuth: []
+      requestBody:
+        $ref: "#/components/requestBodies/CustomerAddressRequestBody"
+      responses:
+        "200":
+          description: Customer address
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/CustomerAddress"
+        "400":
+          $ref: "#/components/responses/BadRequestResponse"
+        "401":
+          $ref: "#/components/responses/UnauthorizedResponse"
+  /v3/stores/{store_id}/customers/me/addresses/{address_id}:
+    parameters:
+      - $ref: "#/components/parameters/StoreId"
+      - $ref: "#/components/parameters/AddressId"
+    get:
+      tags:
+        - Customer Account
+      operationId: getCustomerMeAddress
+      summary: Get an authenticated customer address
+      description: "No OAuth machine scope. Customer-authenticated storefront endpoint."
+      security:
+        - bearerAuth: []
+      responses:
+        "200":
+          description: Customer address
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/CustomerAddress"
+        "401":
+          $ref: "#/components/responses/UnauthorizedResponse"
+        "404":
+          $ref: "#/components/responses/NotFoundResponse"
+    patch:
+      tags:
+        - Customer Account
+      operationId: updateCustomerMeAddress
+      summary: Update an authenticated customer address
+      description: "No OAuth machine scope. Customer-authenticated storefront endpoint."
+      security:
+        - bearerAuth: []
+      requestBody:
+        $ref: "#/components/requestBodies/CustomerAddressRequestBody"
+      responses:
+        "200":
+          description: Customer address
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/CustomerAddress"
+        "400":
+          $ref: "#/components/responses/BadRequestResponse"
+        "401":
+          $ref: "#/components/responses/UnauthorizedResponse"
+        "404":
+          $ref: "#/components/responses/NotFoundResponse"
+    delete:
+      tags:
+        - Customer Account
+      operationId: deleteCustomerMeAddress
+      summary: Delete an authenticated customer address
+      description: "No OAuth machine scope. Customer-authenticated storefront endpoint."
+      security:
+        - bearerAuth: []
+      responses:
+        "204":
+          $ref: "#/components/responses/NoContentResponse"
+        "401":
+          $ref: "#/components/responses/UnauthorizedResponse"
+        "404":
+          $ref: "#/components/responses/NotFoundResponse"
   /v3/stores/{store_id}/customers/me/cart:
     get:
       tags:
@@ -988,7 +1537,7 @@ paths:
         - Business Stores
       operationId: listBusinessStoresSimplified
       summary: List stores in simplified business format
-      description: "Requires the `store:list` machine scope."
+      description: "Requires the `store:read` machine scope."
       security:
         - bearerAuth: []
         - apiKeyAuth: []
@@ -1012,6 +1561,150 @@ paths:
           $ref: "#/components/responses/UnauthorizedResponse"
         "403":
           $ref: "#/components/responses/ForbiddenResponse"
+  /v3/stores/{store_id}/public-api-keys:
+    parameters:
+      - $ref: "#/components/parameters/BusinessStoreId"
+    get:
+      tags:
+        - Storefront Setup
+      operationId: listStorefrontPublicApiKeys
+      summary: List storefront public API keys
+      description: "Requires the `store:read` machine scope. Uses the authenticated business store ID."
+      security:
+        - bearerAuth: []
+        - apiKeyAuth: []
+      responses:
+        "200":
+          description: Storefront public API key list
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/StorefrontPublicApiKeyListResponse"
+        "401":
+          $ref: "#/components/responses/UnauthorizedResponse"
+        "403":
+          $ref: "#/components/responses/ForbiddenResponse"
+        "404":
+          $ref: "#/components/responses/NotFoundResponse"
+    post:
+      tags:
+        - Storefront Setup
+      operationId: createStorefrontPublicApiKey
+      summary: Create a storefront public API key
+      description: "Requires the `store:update` machine scope. Uses the authenticated business store ID."
+      security:
+        - bearerAuth: []
+        - apiKeyAuth: []
+      responses:
+        "200":
+          description: Storefront public API key
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/StorefrontPublicApiKey"
+        "400":
+          $ref: "#/components/responses/BadRequestResponse"
+        "401":
+          $ref: "#/components/responses/UnauthorizedResponse"
+        "403":
+          $ref: "#/components/responses/ForbiddenResponse"
+        "404":
+          $ref: "#/components/responses/NotFoundResponse"
+  /v3/stores/{store_id}/public-api-keys/{id}:
+    parameters:
+      - $ref: "#/components/parameters/BusinessStoreId"
+      - $ref: "#/components/parameters/GenericId"
+    delete:
+      tags:
+        - Storefront Setup
+      operationId: revokeStorefrontPublicApiKey
+      summary: Revoke a storefront public API key
+      description: "Requires the `store:update` machine scope. Uses the authenticated business store ID."
+      security:
+        - bearerAuth: []
+        - apiKeyAuth: []
+      responses:
+        "204":
+          $ref: "#/components/responses/NoContentResponse"
+        "401":
+          $ref: "#/components/responses/UnauthorizedResponse"
+        "403":
+          $ref: "#/components/responses/ForbiddenResponse"
+        "404":
+          $ref: "#/components/responses/NotFoundResponse"
+  /v3/stores/{store_id}/storefront/allowed-origins:
+    parameters:
+      - $ref: "#/components/parameters/BusinessStoreId"
+    get:
+      tags:
+        - Storefront Setup
+      operationId: listStorefrontAllowedOrigins
+      summary: List storefront allowed origins
+      description: "Requires the `store:read` machine scope. Uses the authenticated business store ID."
+      security:
+        - bearerAuth: []
+        - apiKeyAuth: []
+      responses:
+        "200":
+          description: Storefront allowed origin list
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/StorefrontAllowedOriginListResponse"
+        "401":
+          $ref: "#/components/responses/UnauthorizedResponse"
+        "403":
+          $ref: "#/components/responses/ForbiddenResponse"
+        "404":
+          $ref: "#/components/responses/NotFoundResponse"
+    post:
+      tags:
+        - Storefront Setup
+      operationId: createStorefrontAllowedOrigin
+      summary: Create a storefront allowed origin
+      description: "Requires the `store:update` machine scope. Uses the authenticated business store ID."
+      security:
+        - bearerAuth: []
+        - apiKeyAuth: []
+      requestBody:
+        $ref: "#/components/requestBodies/StorefrontAllowedOriginRequestBody"
+      responses:
+        "200":
+          description: Storefront allowed origin
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/StorefrontAllowedOrigin"
+        "400":
+          $ref: "#/components/responses/BadRequestResponse"
+        "401":
+          $ref: "#/components/responses/UnauthorizedResponse"
+        "403":
+          $ref: "#/components/responses/ForbiddenResponse"
+        "404":
+          $ref: "#/components/responses/NotFoundResponse"
+  /v3/stores/{store_id}/storefront/allowed-origins/{id}:
+    parameters:
+      - $ref: "#/components/parameters/BusinessStoreId"
+      - $ref: "#/components/parameters/GenericId"
+    delete:
+      tags:
+        - Storefront Setup
+      operationId: revokeStorefrontAllowedOrigin
+      summary: Revoke a storefront allowed origin
+      description: "Requires the `store:update` machine scope. Uses the authenticated business store ID."
+      security:
+        - bearerAuth: []
+        - apiKeyAuth: []
+      responses:
+        "204":
+          $ref: "#/components/responses/NoContentResponse"
+        "401":
+          $ref: "#/components/responses/UnauthorizedResponse"
+        "403":
+          $ref: "#/components/responses/ForbiddenResponse"
+        "404":
+          $ref: "#/components/responses/NotFoundResponse"
   /v3/stores/{store_id}/products:
     parameters:
       - $ref: "#/components/parameters/BusinessStoreId"
@@ -1146,6 +1839,24 @@ paths:
         required: true
         schema:
           type: string
+    get:
+      tags:
+        - Business Stores
+      operationId: getBusinessStoreBundlePriceOption
+      summary: Get a bundle price option for a business store
+      description: "Requires the `bundle:read` machine scope."
+      security:
+        - bearerAuth: []
+        - apiKeyAuth: []
+      responses:
+        "200":
+          $ref: "#/components/responses/SuccessResponse"
+        "401":
+          $ref: "#/components/responses/UnauthorizedResponse"
+        "403":
+          $ref: "#/components/responses/ForbiddenResponse"
+        "404":
+          $ref: "#/components/responses/NotFoundResponse"
     delete:
       tags:
         - Business Stores
@@ -1190,6 +1901,28 @@ paths:
           $ref: "#/components/responses/ForbiddenResponse"
         "404":
           $ref: "#/components/responses/NotFoundResponse"
+  /v3/stores/{store_id}/variants/{variant_id}:
+    parameters:
+      - $ref: "#/components/parameters/BusinessStoreId"
+      - $ref: "#/components/parameters/VariantId"
+    get:
+      tags:
+        - Business Stores
+      operationId: getBusinessStoreVariant
+      summary: Get a variant for a business store
+      description: "Requires the `product:read` machine scope."
+      security:
+        - bearerAuth: []
+        - apiKeyAuth: []
+      responses:
+        "200":
+          $ref: "#/components/responses/SuccessResponse"
+        "401":
+          $ref: "#/components/responses/UnauthorizedResponse"
+        "403":
+          $ref: "#/components/responses/ForbiddenResponse"
+        "404":
+          $ref: "#/components/responses/NotFoundResponse"
   /v3/stores/{store_id}/product-knowledge:
     parameters:
       - $ref: "#/components/parameters/BusinessStoreId"
@@ -1198,7 +1931,7 @@ paths:
         - Business Stores
       operationId: searchBusinessStoreProductKnowledge
       summary: Search store-scoped product knowledge
-      description: "Requires the `store:list` machine scope."
+      description: "Requires the `store:read` machine scope."
       security:
         - bearerAuth: []
         - apiKeyAuth: []
@@ -1244,7 +1977,7 @@ paths:
         - Business Stores
       operationId: listBusinessStorePaymentMethods
       summary: List enabled payment methods for a business store
-      description: "Requires the `store:list` machine scope."
+      description: "Requires the `store:read` machine scope."
       security:
         - bearerAuth: []
         - apiKeyAuth: []
@@ -1787,7 +2520,7 @@ paths:
           schema:
             type: string
         - description: "Comma-separated list of columns to include. Available columns:
-            secret_slug, final_variants, store, origin_address,
+            secret_slug, public_order_url, payment_url, final_variants, store, origin_address,
             address_location, handler_phone, order_id, destination_address,
             quantity, product_price, total_weight, courier_service,
             shipping_cost, payment_method, gross_revenue, shipment_receipt,
@@ -5245,7 +5978,7 @@ paths:
         - apiKeyAuth: []
       responses:
         "200":
-          $ref: "#/components/responses/CollectionResponse"
+          $ref: "#/components/responses/WabaAccountCollectionResponse"
         "401":
           $ref: "#/components/responses/UnauthorizedResponse"
         "403":
@@ -5285,7 +6018,7 @@ paths:
         - apiKeyAuth: []
       responses:
         "200":
-          $ref: "#/components/responses/SuccessResponse"
+          $ref: "#/components/responses/WabaAccountResponse"
         "401":
           $ref: "#/components/responses/UnauthorizedResponse"
         "403":
@@ -5305,7 +6038,7 @@ paths:
         $ref: "#/components/requestBodies/GenericJsonRequestBody"
       responses:
         "200":
-          $ref: "#/components/responses/SuccessResponse"
+          $ref: "#/components/responses/WabaAccountResponse"
         "400":
           $ref: "#/components/responses/BadRequestResponse"
         "401":
@@ -5346,7 +6079,7 @@ paths:
         - apiKeyAuth: []
       responses:
         "200":
-          $ref: "#/components/responses/SuccessResponse"
+          $ref: "#/components/responses/WabaAccountResponse"
         "401":
           $ref: "#/components/responses/UnauthorizedResponse"
         "403":
@@ -5367,7 +6100,7 @@ paths:
         - apiKeyAuth: []
       responses:
         "200":
-          $ref: "#/components/responses/SuccessResponse"
+          $ref: "#/components/responses/WabaAccountResponse"
         "401":
           $ref: "#/components/responses/UnauthorizedResponse"
         "403":
@@ -5390,7 +6123,7 @@ paths:
         $ref: "#/components/requestBodies/GenericJsonRequestBody"
       responses:
         "200":
-          $ref: "#/components/responses/SuccessResponse"
+          $ref: "#/components/responses/WabaAccountResponse"
         "400":
           $ref: "#/components/responses/BadRequestResponse"
         "401":
@@ -5658,7 +6391,7 @@ paths:
         - WABA
       operationId: listWabaMessages
       summary: List WABA customer messages
-      description: "Requires the `waba_account:operate` machine scope."
+      description: "Requires the `waba_account:operate` machine scope. Message payloads expose `sender_tag` and no longer expose `sender_type`."
       security:
         - bearerAuth: []
         - apiKeyAuth: []
@@ -5676,10 +6409,12 @@ paths:
         - WABA
       operationId: sendWabaMessage
       summary: Send a WABA customer message
-      description: "Requires the `waba_account:operate` machine scope."
+      description: "Requires the `waba_account:operate` machine scope. Message payloads expose `sender_tag` and no longer expose `sender_type`."
       security:
         - bearerAuth: []
         - apiKeyAuth: []
+      parameters:
+        - $ref: "#/components/parameters/WabaSendMode"
       requestBody:
         $ref: "#/components/requestBodies/GenericJsonRequestBody"
       responses:
@@ -5703,7 +6438,7 @@ paths:
         - WABA
       operationId: getWabaMessage
       summary: Get a WABA customer message
-      description: "Requires the `waba_account:operate` machine scope."
+      description: "Requires the `waba_account:operate` machine scope. Message payloads expose `sender_tag` and no longer expose `sender_type`."
       security:
         - bearerAuth: []
         - apiKeyAuth: []
@@ -5721,7 +6456,7 @@ paths:
         - WABA
       operationId: updateWabaMessage
       summary: Update a WABA customer message
-      description: "Requires the `waba_account:operate` machine scope."
+      description: "Requires the `waba_account:operate` machine scope. Message payloads expose `sender_tag` and no longer expose `sender_type`."
       security:
         - bearerAuth: []
         - apiKeyAuth: []
@@ -5750,6 +6485,62 @@ paths:
       responses:
         "204":
           $ref: "#/components/responses/NoContentResponse"
+        "401":
+          $ref: "#/components/responses/UnauthorizedResponse"
+        "403":
+          $ref: "#/components/responses/ForbiddenResponse"
+        "404":
+          $ref: "#/components/responses/NotFoundResponse"
+  /v3/waba-accounts/{waba_unique_id}/customers/{wa_user_id}/messages/{wamid}/typing-indicator:
+    parameters:
+      - $ref: "#/components/parameters/WabaUniqueId"
+      - $ref: "#/components/parameters/WaUserId"
+      - $ref: "#/components/parameters/Wamid"
+    post:
+      tags:
+        - WABA
+      operationId: sendWabaTypingIndicator
+      summary: Send a WABA typing indicator
+      description: "Requires the `waba_account:operate` machine scope. Sends Meta's typing indicator for an existing inbound message, which also marks that message as read."
+      security:
+        - bearerAuth: []
+        - apiKeyAuth: []
+      parameters:
+        - $ref: "#/components/parameters/WabaSendMode"
+      responses:
+        "200":
+          description: Typing indicator accepted
+          content:
+            application/json:
+              schema:
+                type: object
+                required:
+                  - success
+                  - wamid
+                  - status
+                  - typing_indicator
+                properties:
+                  success:
+                    type: boolean
+                    example: true
+                  wamid:
+                    type: string
+                    example: wamid.HBgLMTY1MDM4Nzk0MzkVAgARGBJDQjZCMzlEQUE4OTJBMTE4RTUA
+                  status:
+                    type: string
+                    enum:
+                      - read
+                  typing_indicator:
+                    type: object
+                    required:
+                      - type
+                    properties:
+                      type:
+                        type: string
+                        enum:
+                          - text
+        "400":
+          $ref: "#/components/responses/BadRequestResponse"
         "401":
           $ref: "#/components/responses/UnauthorizedResponse"
         "403":
@@ -5941,6 +6732,15 @@ components:
       schema:
         type: string
       description: Publishable storefront public API key for the target store.
+    WabaSendMode:
+      name: X-Scalev-Waba-Send-Mode
+      in: header
+      required: false
+      schema:
+        type: string
+        enum:
+          - mock
+      description: Local/dev simulation override for WABA sends. When set to `mock` outside production, Nexus records a submitted outbound message without sending to Meta Graph. Ignored in production.
     ProductSlug:
       name: slug
       in: path
@@ -5977,6 +6777,12 @@ components:
       required: true
       schema:
         type: string
+    AddressId:
+      name: address_id
+      in: path
+      required: true
+      schema:
+        type: string
     ChatId:
       name: chat_id
       in: path
@@ -6001,6 +6807,95 @@ components:
       required: true
       schema:
         type: string
+    PageSize:
+      name: page_size
+      in: query
+      required: false
+      schema:
+        type: integer
+        minimum: 1
+      description: Cursor page size.
+    LastId:
+      name: last_id
+      in: query
+      required: false
+      schema:
+        type: string
+      description: Cursor ID from the previous page.
+    OAuthApplicationIdQuery:
+      name: oauth_application_id
+      in: query
+      required: false
+      schema:
+        type: integer
+      description: Filter by OAuth application ID.
+    OAuthAuthorizedBusinessIdQuery:
+      name: oauth_authorized_business_id
+      in: query
+      required: false
+      schema:
+        type: integer
+      description: Filter by OAuth authorized business/install ID.
+    MerchantBusinessIdQuery:
+      name: merchant_business_id
+      in: query
+      required: false
+      schema:
+        type: integer
+      description: Filter by merchant business ID.
+    OAuthBillingTagQuery:
+      name: billing_tag
+      in: query
+      required: false
+      schema:
+        type: string
+      description: Filter by OAuth billing tag.
+    OAuthBillingActionKeyQuery:
+      name: action_key
+      in: query
+      required: false
+      schema:
+        type: string
+      description: Filter by OAuth billing action key.
+    OAuthBillingStatusQuery:
+      name: billing_status
+      in: query
+      required: false
+      schema:
+        type: string
+      description: Filter by reservation billing status.
+    OAuthBillingIdempotencyKeyQuery:
+      name: billing_idempotency_key
+      in: query
+      required: false
+      schema:
+        type: string
+      description: Filter by billing idempotency key.
+    OAuthBillingRequestIdQuery:
+      name: request_id
+      in: query
+      required: false
+      schema:
+        type: string
+      description: Filter by machine API request ID.
+    OAuthBillingEntryTypeQuery:
+      name: entry_type
+      in: query
+      required: false
+      schema:
+        type: string
+        enum:
+          - accrual
+          - withdrawal
+          - adjustment
+      description: Filter by developer earnings ledger entry type.
+    OAuthBillingSettlementStatusQuery:
+      name: status
+      in: query
+      required: false
+      schema:
+        type: string
+      description: Filter by settlement status.
     ProductId:
       name: product_id
       in: path
@@ -6063,12 +6958,30 @@ components:
       schema:
         type: string
   requestBodies:
+    WebhookEndpointRequestBody:
+      required: true
+      content:
+        application/json:
+          schema:
+            $ref: "#/components/schemas/WebhookEndpointRequest"
     GenericJsonRequestBody:
       required: false
       content:
         application/json:
           schema:
             $ref: "#/components/schemas/GenericJsonObject"
+    OAuthInstallationStatusRequestBody:
+      required: true
+      content:
+        application/json:
+          schema:
+            $ref: "#/components/schemas/OAuthInstallationStatusRequest"
+    OAuthInstallationLaunchTokenExchangeRequestBody:
+      required: true
+      content:
+        application/json:
+          schema:
+            $ref: "#/components/schemas/OAuthInstallationLaunchTokenExchangeRequest"
     GenericUploadRequestBody:
       required: true
       content:
@@ -6124,6 +7037,18 @@ components:
         application/json:
           schema:
             $ref: "#/components/schemas/CustomerOtpVerifyRequest"
+    CustomerProfileUpdateRequestBody:
+      required: true
+      content:
+        application/json:
+          schema:
+            $ref: "#/components/schemas/CustomerProfileUpdateRequest"
+    CustomerAddressRequestBody:
+      required: true
+      content:
+        application/json:
+          schema:
+            $ref: "#/components/schemas/CustomerAddressRequest"
     JwtRefreshRequestBody:
       required: true
       content:
@@ -6408,6 +7333,24 @@ components:
         application/json:
           schema:
             $ref: "#/components/schemas/BundlePriceOptionRequest"
+    StorefrontAllowedOriginRequestBody:
+      required: true
+      content:
+        application/json:
+          schema:
+            $ref: "#/components/schemas/StorefrontAllowedOriginRequest"
+    OAuthBillingRefundRequestBody:
+      required: true
+      content:
+        application/json:
+          schema:
+            $ref: "#/components/schemas/OAuthBillingRefundRequest"
+    OAuthBillingWithdrawalRequestBody:
+      required: true
+      content:
+        application/json:
+          schema:
+            $ref: "#/components/schemas/OAuthBillingWithdrawalRequest"
   responses:
     SuccessResponse:
       description: Success
@@ -6415,6 +7358,18 @@ components:
         application/json:
           schema:
             $ref: "#/components/schemas/RawObjectResponseBody"
+    WabaAccountResponse:
+      description: WABA account
+      content:
+        application/json:
+          schema:
+            $ref: "#/components/schemas/WabaAccount"
+    WabaAccountCollectionResponse:
+      description: WABA account collection
+      content:
+        application/json:
+          schema:
+            $ref: "#/components/schemas/WabaAccountCollectionResponseBody"
     CreatedResponse:
       description: Created
       content:
@@ -6465,6 +7420,78 @@ components:
         application/json:
           schema:
             $ref: "#/components/schemas/ApiErrorResponse"
+    ConflictResponse:
+      description: Conflict
+      content:
+        application/json:
+          schema:
+            $ref: "#/components/schemas/ApiErrorResponse"
+    OAuthBillingEarningsResponse:
+      description: Developer OAuth billing earnings balance
+      content:
+        application/json:
+          schema:
+            $ref: "#/components/schemas/OAuthBillingEarnings"
+    OAuthBillingActionCollectionResponse:
+      description: OAuth billing action collection
+      content:
+        application/json:
+          schema:
+            $ref: "#/components/schemas/OAuthBillingActionCollectionResponseBody"
+    OAuthBillingReservationResponse:
+      description: OAuth billing reservation
+      content:
+        application/json:
+          schema:
+            $ref: "#/components/schemas/OAuthBillingReservation"
+    OAuthBillingReservationCollectionResponse:
+      description: OAuth billing reservation collection
+      content:
+        application/json:
+          schema:
+            $ref: "#/components/schemas/OAuthBillingReservationCollectionResponseBody"
+    OAuthBillingChargeResponse:
+      description: OAuth billing charge
+      content:
+        application/json:
+          schema:
+            $ref: "#/components/schemas/OAuthBillingCharge"
+    OAuthBillingChargeCollectionResponse:
+      description: OAuth billing charge collection
+      content:
+        application/json:
+          schema:
+            $ref: "#/components/schemas/OAuthBillingChargeCollectionResponseBody"
+    OAuthBillingLedgerCollectionResponse:
+      description: OAuth billing earnings ledger collection
+      content:
+        application/json:
+          schema:
+            $ref: "#/components/schemas/OAuthBillingLedgerCollectionResponseBody"
+    OAuthBillingSettlementResponse:
+      description: OAuth billing settlement
+      content:
+        application/json:
+          schema:
+            $ref: "#/components/schemas/OAuthBillingSettlement"
+    OAuthBillingSettlementCollectionResponse:
+      description: OAuth billing settlement collection
+      content:
+        application/json:
+          schema:
+            $ref: "#/components/schemas/OAuthBillingSettlementCollectionResponseBody"
+    OAuthBillingRefundResponse:
+      description: OAuth billing refund
+      content:
+        application/json:
+          schema:
+            $ref: "#/components/schemas/OAuthBillingRefundResponseBody"
+    OAuthInstallationStatusResponse:
+      description: OAuth installation status snapshot
+      content:
+        application/json:
+          schema:
+            $ref: "#/components/schemas/OAuthInstallationStatusResponseBody"
     ListCustomerSubscriptionsResponse:
       description: Subscriptions list
       content:
@@ -7053,6 +8080,539 @@ components:
         - type: string
         - type: number
         - type: boolean
+    WebhookEndpoint:
+      type: object
+      required:
+        - id
+        - url
+        - status
+        - events
+        - inserted_at
+        - updated_at
+      properties:
+        id:
+          type: integer
+        url:
+          type: string
+          format: uri
+        status:
+          type: string
+          enum:
+            - active
+            - inactive
+        events:
+          type: array
+          items:
+            type: string
+        inserted_at:
+          type: string
+          format: date-time
+        updated_at:
+          type: string
+          format: date-time
+      additionalProperties: false
+    WebhookEndpointRequest:
+      type: object
+      properties:
+        url:
+          type: string
+          format: uri
+        status:
+          type: string
+          enum:
+            - active
+            - inactive
+        events:
+          type: array
+          items:
+            type: string
+      additionalProperties: false
+    WebhookEndpointCollectionResponseBody:
+      type: object
+      required:
+        - data
+        - is_paginated
+      properties:
+        data:
+          type: array
+          items:
+            $ref: "#/components/schemas/WebhookEndpoint"
+        is_paginated:
+          type: boolean
+          enum:
+            - false
+      additionalProperties: false
+    OAuthBillingEarnings:
+      type: object
+      required:
+        - balance
+        - currency
+      properties:
+        balance:
+          type: integer
+        currency:
+          type: string
+          enum:
+            - IDR
+      additionalProperties: false
+    OAuthBillingAction:
+      type: object
+      required:
+        - action_key
+        - label
+        - description
+        - endpoint_templates
+        - required_scopes
+        - reservation_required
+        - capture_rule
+      properties:
+        action_key:
+          type: string
+        label:
+          type: string
+        description:
+          type: string
+        endpoint_templates:
+          type: array
+          items:
+            type: string
+        required_scopes:
+          type: array
+          items:
+            type: string
+        reservation_required:
+          type: boolean
+        capture_rule:
+          type: string
+      additionalProperties: false
+    OAuthBillingActionCollectionResponseBody:
+      type: object
+      required:
+        - data
+        - is_paginated
+      properties:
+        data:
+          type: array
+          items:
+            $ref: "#/components/schemas/OAuthBillingAction"
+        is_paginated:
+          type: boolean
+          enum:
+            - false
+      additionalProperties: false
+    OAuthBillingReservation:
+      type: object
+      properties:
+        id:
+          type: string
+          format: uuid
+        timestamp:
+          type: string
+          format: date-time
+        expires_at:
+          type: string
+          format: date-time
+          nullable: true
+        released_at:
+          type: string
+          format: date-time
+          nullable: true
+        captured_at:
+          type: string
+          format: date-time
+          nullable: true
+        billing_status:
+          type: string
+        billing_tag:
+          type: string
+        billing_idempotency_key:
+          type: string
+        action_key:
+          type: string
+        amount:
+          type: integer
+        currency:
+          type: string
+        released_reason:
+          type: string
+          nullable: true
+        charge_id:
+          type: string
+          format: uuid
+          nullable: true
+        metadata:
+          type: object
+          additionalProperties: true
+        capture_context:
+          $ref: "#/components/schemas/OAuthBillingCaptureContext"
+        oauth_application_id:
+          type: integer
+        oauth_authorized_business_id:
+          type: integer
+        merchant_business_id:
+          type: integer
+        developer_business_id:
+          type: integer
+      additionalProperties: false
+    OAuthBillingReservationCollectionResponseBody:
+      allOf:
+        - $ref: "#/components/schemas/PaginatedCollectionResponseBody"
+        - type: object
+          properties:
+            data:
+              type: array
+              items:
+                $ref: "#/components/schemas/OAuthBillingReservation"
+    OAuthBillingCharge:
+      type: object
+      properties:
+        id:
+          type: string
+          format: uuid
+        timestamp:
+          type: string
+          format: date-time
+        captured_at:
+          type: string
+          format: date-time
+          nullable: true
+        billing_tag:
+          type: string
+        billing_idempotency_key:
+          type: string
+        action_key:
+          type: string
+        gross_amount:
+          type: integer
+        platform_fee_bps:
+          type: integer
+        platform_fee_amount:
+          type: integer
+        developer_net_amount:
+          type: integer
+        currency:
+          type: string
+        reservation_id:
+          type: string
+          format: uuid
+        request_id:
+          type: string
+          nullable: true
+        metadata:
+          type: object
+          additionalProperties: true
+        capture_context:
+          $ref: "#/components/schemas/OAuthBillingCaptureContext"
+        oauth_application_id:
+          type: integer
+        oauth_authorized_business_id:
+          type: integer
+        merchant_business_id:
+          type: integer
+        developer_business_id:
+          type: integer
+      additionalProperties: false
+    OAuthBillingChargeCollectionResponseBody:
+      allOf:
+        - $ref: "#/components/schemas/PaginatedCollectionResponseBody"
+        - type: object
+          properties:
+            data:
+              type: array
+              items:
+                $ref: "#/components/schemas/OAuthBillingCharge"
+    OAuthBillingEarningsEntry:
+      type: object
+      properties:
+        id:
+          type: string
+          format: uuid
+        timestamp:
+          type: string
+          format: date-time
+        entry_type:
+          type: string
+        amount:
+          type: integer
+        currency:
+          type: string
+        balance_before:
+          type: integer
+        balance_after:
+          type: integer
+        description:
+          type: string
+        charge_id:
+          type: string
+          format: uuid
+          nullable: true
+        settlement_id:
+          type: string
+          format: uuid
+          nullable: true
+        business_id:
+          type: integer
+        oauth_application_id:
+          type: integer
+          nullable: true
+        capture_context:
+          $ref: "#/components/schemas/OAuthBillingCaptureContext"
+        metadata:
+          type: object
+          additionalProperties: true
+      additionalProperties: false
+    OAuthBillingLedgerCollectionResponseBody:
+      allOf:
+        - $ref: "#/components/schemas/PaginatedCollectionResponseBody"
+        - type: object
+          properties:
+            data:
+              type: array
+              items:
+                $ref: "#/components/schemas/OAuthBillingEarningsEntry"
+    OAuthBillingSettlement:
+      type: object
+      properties:
+        id:
+          type: string
+          format: uuid
+        timestamp:
+          type: string
+          format: date-time
+        settlement_rail:
+          type: string
+          enum:
+            - xendit
+        status:
+          type: string
+        amount:
+          type: integer
+        currency:
+          type: string
+        balance_before:
+          type: integer
+        balance_after:
+          type: integer
+        description:
+          type: string
+        xendit_transfer_id:
+          type: string
+          nullable: true
+        business_id:
+          type: integer
+        metadata:
+          type: object
+          additionalProperties: true
+      additionalProperties: false
+    OAuthBillingSettlementCollectionResponseBody:
+      allOf:
+        - $ref: "#/components/schemas/PaginatedCollectionResponseBody"
+        - type: object
+          properties:
+            data:
+              type: array
+              items:
+                $ref: "#/components/schemas/OAuthBillingSettlement"
+    OAuthBillingWithdrawalRequest:
+      type: object
+      required:
+        - amount
+      properties:
+        amount:
+          type: integer
+          minimum: 1
+        settlement_rail:
+          type: string
+          enum:
+            - xendit
+          default: xendit
+      additionalProperties: false
+    OAuthBillingMerchantContext:
+      type: object
+      description: Safe merchant-facing OAuth app billing summary returned on Volt transaction payloads. Platform fee, developer net, raw request/response bodies, headers, customer message text, and raw webhook payloads are intentionally excluded.
+      properties:
+        application_id:
+          type: integer
+          nullable: true
+        application_name:
+          type: string
+          nullable: true
+        billing_tag:
+          type: string
+          nullable: true
+        action_key:
+          type: string
+          nullable: true
+        action_label:
+          type: string
+          nullable: true
+        reservation_id:
+          type: string
+          nullable: true
+        charge_id:
+          type: string
+          nullable: true
+        request_id:
+          type: string
+          nullable: true
+        billing_idempotency_key:
+          type: string
+          nullable: true
+        merchant_business_id:
+          type: integer
+          nullable: true
+        developer_business_id:
+          type: integer
+          nullable: true
+        oauth_authorized_business_id:
+          type: integer
+          nullable: true
+        amount:
+          type: integer
+          nullable: true
+        currency:
+          type: string
+          nullable: true
+        response_status:
+          type: integer
+          nullable: true
+      additionalProperties: false
+    OAuthBillingCaptureContext:
+      type: object
+      description: Safe OAuth app billing capture summary returned on developer-facing billing reservation, billing charge, and developer earnings ledger payloads. Raw request/response bodies, headers, customer message text, and raw webhook payloads are intentionally excluded.
+      properties:
+        application_id:
+          type: integer
+          nullable: true
+        application_name:
+          type: string
+          nullable: true
+        billing_tag:
+          type: string
+          nullable: true
+        action_key:
+          type: string
+          nullable: true
+        action_label:
+          type: string
+          nullable: true
+        reservation_id:
+          type: string
+          nullable: true
+        charge_id:
+          type: string
+          nullable: true
+        request_id:
+          type: string
+          nullable: true
+        billing_idempotency_key:
+          type: string
+          nullable: true
+        merchant_business_id:
+          type: integer
+          nullable: true
+        developer_business_id:
+          type: integer
+          nullable: true
+        oauth_authorized_business_id:
+          type: integer
+          nullable: true
+        gross_amount:
+          type: integer
+          nullable: true
+        platform_fee_amount:
+          type: integer
+          nullable: true
+        developer_net_amount:
+          type: integer
+          nullable: true
+        currency:
+          type: string
+          nullable: true
+        response_status:
+          type: integer
+          nullable: true
+      additionalProperties: false
+    OAuthBillingRefundRequest:
+      type: object
+      description: Either `billing_reservation_id` or `billing_charge_id` is required. If both are supplied, they must identify the same captured charge. Refunds are full post-capture reversals.
+      required:
+        - refund_idempotency_key
+        - reason_code
+        - reason
+      properties:
+        billing_reservation_id:
+          type: string
+          format: uuid
+          nullable: true
+        billing_charge_id:
+          type: string
+          format: uuid
+          nullable: true
+        refund_idempotency_key:
+          type: string
+          minLength: 1
+          maxLength: 255
+        reason_code:
+          type: string
+          minLength: 1
+          maxLength: 100
+        reason:
+          type: string
+          minLength: 1
+          maxLength: 1000
+        metadata:
+          type: object
+          additionalProperties: true
+      additionalProperties: false
+    OAuthBillingRefundResponseBody:
+      type: object
+      required:
+        - refund_id
+        - billing_charge_id
+        - billing_reservation_id
+        - refund_status
+        - amount
+        - currency
+        - reason_code
+        - reason
+        - merchant_volt_transaction_id
+        - developer_earnings_entry_id
+        - inserted_at
+      properties:
+        refund_id:
+          type: string
+          format: uuid
+        billing_charge_id:
+          type: string
+          format: uuid
+        billing_reservation_id:
+          type: string
+          format: uuid
+        refund_status:
+          type: string
+          enum:
+            - succeeded
+        amount:
+          type: integer
+        currency:
+          type: string
+          enum:
+            - IDR
+        reason_code:
+          type: string
+        reason:
+          type: string
+        merchant_volt_transaction_id:
+          type: string
+          format: uuid
+        developer_earnings_entry_id:
+          type: string
+          format: uuid
+        inserted_at:
+          type: string
+          format: date-time
+      additionalProperties: false
     RawObjectResponseBody:
       type: object
       additionalProperties: true
@@ -7115,6 +8675,216 @@ components:
     GenericJsonObject:
       type: object
       additionalProperties: true
+    WabaAccountCollectionResponseBody:
+      type: object
+      required:
+        - data
+        - is_paginated
+      properties:
+        data:
+          type: array
+          items:
+            $ref: "#/components/schemas/WabaAccount"
+        is_paginated:
+          type: boolean
+          enum:
+            - false
+      additionalProperties: false
+    WabaAccount:
+      type: object
+      required:
+        - id
+        - unique_id
+        - waba_id
+        - phone_number_id
+        - display_phone_number
+        - store
+      properties:
+        id:
+          type: integer
+        unique_id:
+          type: string
+          example: waba_abc123
+        waba_id:
+          type: string
+        phone_number_id:
+          type: string
+        display_phone_number:
+          type: string
+        verified_name:
+          type: string
+          nullable: true
+        is_webhooks_subscribed:
+          type: boolean
+        is_pin_enabled:
+          type: boolean
+          nullable: true
+        status:
+          type: string
+          nullable: true
+        phone_status:
+          type: string
+          nullable: true
+        store:
+          description: Assigned store. `null` when the WABA account is unassigned.
+          type: object
+          nullable: true
+          allOf:
+            - $ref: "#/components/schemas/WabaAccountStore"
+        dataset_id:
+          type: string
+          nullable: true
+        marketing_messages_onboarding_status:
+          type: string
+          nullable: true
+        is_on_biz_app:
+          type: boolean
+        runtime_owner:
+          type: string
+          nullable: true
+        updates:
+          type: array
+          nullable: true
+          items:
+            type: object
+            additionalProperties: true
+        inserted_at:
+          type: string
+          format: date-time
+        updated_at:
+          type: string
+          format: date-time
+      additionalProperties: true
+    WabaAccountStore:
+      type: object
+      required:
+        - id
+        - unique_id
+        - name
+      properties:
+        id:
+          type: integer
+        unique_id:
+          type: string
+          example: store_abc123
+        name:
+          type: string
+        logo:
+          type: string
+          nullable: true
+      additionalProperties: true
+    OAuthInstallationStatusRequest:
+      type: object
+      required:
+        - token
+        - token_type
+        - client_id
+        - client_secret
+      properties:
+        token:
+          type: string
+          description: OAuth access or refresh token reference for installation lookup.
+        token_type:
+          type: string
+          enum:
+            - access
+            - refresh
+        client_id:
+          type: string
+        client_secret:
+          type: string
+      additionalProperties: false
+    OAuthInstallationLaunchTokenExchangeRequest:
+      type: object
+      required:
+        - launch_token
+        - client_id
+        - client_secret
+      properties:
+        launch_token:
+          type: string
+          description: Opaque one-time launch token from the Scalev dashboard Manage URL.
+        client_id:
+          type: string
+        client_secret:
+          type: string
+      additionalProperties: false
+    OAuthInstallationStatusBillingTag:
+      type: object
+      required:
+        - billing_tag_id
+        - tag_code
+        - label
+        - price
+        - currency
+        - action_key
+      properties:
+        billing_tag_id:
+          type: string
+          format: uuid
+        tag_code:
+          type: string
+        label:
+          type: string
+        price:
+          type: integer
+        currency:
+          type: string
+        action_key:
+          type: string
+      additionalProperties: false
+    OAuthInstallationStatusApplication:
+      type: object
+      properties:
+        name:
+          type: string
+          nullable: true
+      additionalProperties: false
+    OAuthInstallationStatusResponseBody:
+      type: object
+      required:
+        - authorized_business_id
+        - client_id
+        - is_active
+        - is_enabled
+        - granted_scopes
+        - webhook_status
+        - granted_webhook_events
+        - approved_billing_tags
+      properties:
+        authorized_business_id:
+          type: integer
+        client_id:
+          type: string
+        is_active:
+          type: boolean
+        is_enabled:
+          type: boolean
+        granted_scopes:
+          type: array
+          items:
+            type: string
+        webhook_status:
+          type: string
+          enum:
+            - active
+            - inactive
+        granted_webhook_events:
+          type: array
+          items:
+            type: string
+        approved_billing_tags:
+          type: array
+          items:
+            $ref: "#/components/schemas/OAuthInstallationStatusBillingTag"
+        application:
+          $ref: "#/components/schemas/OAuthInstallationStatusApplication"
+        manage_launch_available:
+          type: boolean
+        updated_at:
+          type: string
+          format: date-time
+      additionalProperties: false
     GenericUploadRequest:
       type: object
       additionalProperties: true
@@ -7225,6 +8995,236 @@ components:
           items:
             type: string
       additionalProperties: true
+    VariantAvailability:
+      type: object
+      required:
+        - variant_id
+        - available
+        - available_qty
+        - stock_status
+      properties:
+        variant_id:
+          oneOf:
+            - type: integer
+            - type: string
+        available:
+          type: boolean
+        available_qty:
+          type: integer
+          minimum: 0
+          nullable: true
+          description: Null for non-inventory variants with unlimited availability.
+        stock_status:
+          type: string
+          enum:
+            - in_stock
+            - low_stock
+            - out_of_stock
+      additionalProperties: false
+    CustomerProfileUpdateRequest:
+      type: object
+      description: Customer self-profile fields accepted in public v1. Email is read-only.
+      properties:
+        name:
+          type: string
+        phone:
+          type: string
+        date_of_birth:
+          type: string
+          format: date
+        sex:
+          type: string
+        is_unsubscribe:
+          type: boolean
+      additionalProperties: false
+    CustomerAddressRequest:
+      type: object
+      properties:
+        name:
+          type: string
+        phone:
+          type: string
+        email:
+          type: string
+          format: email
+        location_id:
+          oneOf:
+            - type: integer
+            - type: string
+        address:
+          type: string
+        postal_code:
+          type: string
+        notes:
+          type: string
+      additionalProperties: true
+    CustomerAddress:
+      type: object
+      properties:
+        id:
+          oneOf:
+            - type: integer
+            - type: string
+        name:
+          type: string
+          nullable: true
+        phone:
+          type: string
+          nullable: true
+        email:
+          type: string
+          format: email
+          nullable: true
+        location:
+          type: object
+          nullable: true
+          properties:
+            id:
+              type: integer
+            subdistrict_name:
+              type: string
+            city_name:
+              type: string
+            province_name:
+              type: string
+          additionalProperties: true
+        address:
+          type: string
+          nullable: true
+        postal_code:
+          type: string
+          nullable: true
+        notes:
+          type: string
+          nullable: true
+      additionalProperties: false
+    CustomerAddressListResponse:
+      type: object
+      required:
+        - data
+        - is_paginated
+      properties:
+        data:
+          type: array
+          items:
+            $ref: "#/components/schemas/CustomerAddress"
+        is_paginated:
+          type: boolean
+          enum:
+            - true
+        has_next:
+          type: boolean
+        last_id:
+          oneOf:
+            - type: integer
+            - type: string
+        page_size:
+          type: integer
+      additionalProperties: true
+    StorefrontPublicApiKey:
+      type: object
+      required:
+        - id
+        - status
+        - store_id
+      properties:
+        id:
+          type: string
+          format: uuid
+        token:
+          type: string
+          nullable: true
+          description: Present only while the key is active.
+        status:
+          type: string
+          enum:
+            - active
+            - revoked
+        store_id:
+          type: integer
+        created_by:
+          type: object
+          nullable: true
+          additionalProperties: true
+        inserted_at:
+          type: string
+          format: date-time
+        updated_at:
+          type: string
+          format: date-time
+      additionalProperties: false
+    StorefrontPublicApiKeyListResponse:
+      type: object
+      required:
+        - data
+        - is_paginated
+      properties:
+        data:
+          type: array
+          items:
+            $ref: "#/components/schemas/StorefrontPublicApiKey"
+        is_paginated:
+          type: boolean
+          enum:
+            - false
+      additionalProperties: false
+    StorefrontAllowedOriginRequest:
+      type: object
+      required:
+        - origin
+      properties:
+        origin:
+          type: string
+          format: uri
+          description: Exact `http` or `https` origin with no path, query, or fragment.
+      additionalProperties: false
+    StorefrontAllowedOrigin:
+      type: object
+      required:
+        - id
+        - origin
+        - status
+        - store_id
+      properties:
+        id:
+          type: string
+          format: uuid
+        origin:
+          type: string
+          format: uri
+        status:
+          type: string
+          enum:
+            - active
+            - revoked
+        store_id:
+          type: integer
+        created_by:
+          type: object
+          nullable: true
+          additionalProperties: true
+        inserted_at:
+          type: string
+          format: date-time
+        updated_at:
+          type: string
+          format: date-time
+      additionalProperties: false
+    StorefrontAllowedOriginListResponse:
+      type: object
+      required:
+        - data
+        - is_paginated
+      properties:
+        data:
+          type: array
+          items:
+            $ref: "#/components/schemas/StorefrontAllowedOrigin"
+        is_paginated:
+          type: boolean
+          enum:
+            - false
+      additionalProperties: false
     SubscriptionVariantChangeRequest:
       type: object
       required:
@@ -9052,6 +11052,16 @@ components:
           description: Secret slug for the order
           nullable: true
           type: string
+        public_order_url:
+          description: Public order URL built from metadata.custom_domain_full_url and secret_slug.
+          nullable: true
+          type: string
+          format: uri
+        payment_url:
+          description: Payment URL built from public_order_url with /success appended.
+          nullable: true
+          type: string
+          format: uri
         agent_context:
           additionalProperties: true
           description: Untrusted agent or app attribution metadata
@@ -10633,6 +12643,16 @@ components:
         secret_slug:
           description: Secret slug of the order
           type: string
+        public_order_url:
+          description: Public order URL built from metadata.custom_domain_full_url and secret_slug.
+          nullable: true
+          type: string
+          format: uri
+        payment_url:
+          description: Payment URL built from public_order_url with /success appended.
+          nullable: true
+          type: string
+          format: uri
         agent_context:
           additionalProperties: true
           description: Untrusted agent or app attribution metadata
@@ -11021,6 +13041,16 @@ components:
         order_id:
           description: Order ID in string format
           type: string
+        public_order_url:
+          description: Public order URL built from metadata.custom_domain_full_url and secret_slug.
+          nullable: true
+          type: string
+          format: uri
+        payment_url:
+          description: Payment URL built from public_order_url with /success appended.
+          nullable: true
+          type: string
+          format: uri
         payment_status:
           description: Order payment status
           enum:
@@ -11117,6 +13147,16 @@ components:
         order_id:
           description: Order ID in string format
           type: string
+        public_order_url:
+          description: Public order URL built from metadata.custom_domain_full_url and secret_slug.
+          nullable: true
+          type: string
+          format: uri
+        payment_url:
+          description: Payment URL built from public_order_url with /success appended.
+          nullable: true
+          type: string
+          format: uri
         payment_status:
           description: Order payment status
           enum:
@@ -11186,6 +13226,16 @@ components:
         order_id:
           description: Order ID in string format
           type: string
+        public_order_url:
+          description: Public order URL built from metadata.custom_domain_full_url and secret_slug.
+          nullable: true
+          type: string
+          format: uri
+        payment_url:
+          description: Payment URL built from public_order_url with /success appended.
+          nullable: true
+          type: string
+          format: uri
         shipment_receipt:
           description: Shipment receipt URL
           nullable: true
@@ -11249,6 +13299,16 @@ components:
               order_id:
                 description: Order ID in string format
                 type: string
+              public_order_url:
+                description: Public order URL built from metadata.custom_domain_full_url and secret_slug.
+                nullable: true
+                type: string
+                format: uri
+              payment_url:
+                description: Payment URL built from public_order_url with /success appended.
+                nullable: true
+                type: string
+                format: uri
               payment_status:
                 description: Order payment status
                 enum:
@@ -11573,6 +13633,16 @@ components:
           type: boolean
         order_id:
           type: string
+        public_order_url:
+          description: Public order URL built from metadata.custom_domain_full_url and secret_slug.
+          nullable: true
+          type: string
+          format: uri
+        payment_url:
+          description: Payment URL built from public_order_url with /success appended.
+          nullable: true
+          type: string
+          format: uri
       title: OrderAvailableActions
       type: object
     OrderChat:
@@ -11637,6 +13707,16 @@ components:
         order_id:
           description: Order ID in string format
           type: string
+        public_order_url:
+          description: Public order URL built from metadata.custom_domain_full_url and secret_slug.
+          nullable: true
+          type: string
+          format: uri
+        payment_url:
+          description: Payment URL built from public_order_url with /success appended.
+          nullable: true
+          type: string
+          format: uri
         payment_status:
           description: Order payment status
           enum:
@@ -11772,6 +13852,16 @@ components:
         id:
           description: Order primary key
           type: integer
+        public_order_url:
+          description: Public order URL built from metadata.custom_domain_full_url and secret_slug.
+          nullable: true
+          type: string
+          format: uri
+        payment_url:
+          description: Payment URL built from public_order_url with /success appended.
+          nullable: true
+          type: string
+          format: uri
         message_history:
           description: Message history associated with the order
           items:
