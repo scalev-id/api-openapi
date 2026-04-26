@@ -18,7 +18,7 @@ info:
   license:
     name: Proprietary
 servers:
-  - url: https://api.myscalev.com
+  - url: https://api.scalev.com
     description: Production
 security: []
 tags:
@@ -51,9 +51,11 @@ tags:
   - name: Locations
     description: Authenticated business location lookup endpoints.
   - name: Business Stores
-    description: Authenticated business store lookup endpoints that use legacy numeric store IDs.
+    description: Authenticated business store lookup endpoints that use legacy
+      numeric store IDs.
   - name: Storefront Setup
-    description: Authenticated business setup endpoints for public storefront keys and CORS origins.
+    description: Authenticated business setup endpoints for public storefront keys
+      and CORS origins.
   - name: Shipping
     description: Authenticated business shipping lookup endpoints.
   - name: Business Products
@@ -70,7 +72,8 @@ tags:
   - name: WhatsApp Integrations
     description: Authenticated WhatsApp integration management endpoints.
   - name: Business Webhook Endpoints
-    description: Dashboard-only fallback webhook endpoint management for provider businesses.
+    description: Dashboard-only fallback webhook endpoint management for provider
+      businesses.
 paths:
   /v3/webhook-endpoints:
     get:
@@ -78,7 +81,9 @@ paths:
         - Business Webhook Endpoints
       operationId: listWebhookEndpoints
       summary: List webhook endpoints
-      description: "Dashboard-only v3 endpoint. Requires a dashboard business-user JWT with `business:manage_developer_settings`; OAuth tokens and business API keys are rejected."
+      description: "Dashboard-only v3 endpoint. Requires a dashboard business-user JWT
+        with `business:manage_developer_settings`; OAuth tokens and business API
+        keys are rejected."
       security:
         - bearerAuth: []
       responses:
@@ -97,7 +102,9 @@ paths:
         - Business Webhook Endpoints
       operationId: createWebhookEndpoint
       summary: Create a webhook endpoint
-      description: "Dashboard-only v3 endpoint. Active endpoints are validated by sending a signed `business.test_event`. A business can configure at most three fallback webhook endpoints."
+      description: "Dashboard-only v3 endpoint. Active endpoints are validated by
+        sending a signed `business.test_event`. A business can configure at most
+        three fallback webhook endpoints."
       security:
         - bearerAuth: []
       requestBody:
@@ -123,7 +130,8 @@ paths:
         - Business Webhook Endpoints
       operationId: getWebhookEndpoint
       summary: Get a webhook endpoint
-      description: "Dashboard-only v3 endpoint. Returns one fallback webhook endpoint owned by the current business."
+      description: "Dashboard-only v3 endpoint. Returns one fallback webhook endpoint
+        owned by the current business."
       security:
         - bearerAuth: []
       responses:
@@ -144,7 +152,8 @@ paths:
         - Business Webhook Endpoints
       operationId: updateWebhookEndpoint
       summary: Update a webhook endpoint
-      description: "Dashboard-only v3 endpoint. Active endpoints are validated by sending a signed `business.test_event`."
+      description: "Dashboard-only v3 endpoint. Active endpoints are validated by
+        sending a signed `business.test_event`."
       security:
         - bearerAuth: []
       requestBody:
@@ -169,7 +178,8 @@ paths:
         - Business Webhook Endpoints
       operationId: deleteWebhookEndpoint
       summary: Delete a webhook endpoint
-      description: "Dashboard-only v3 endpoint. Deletes a fallback webhook endpoint owned by the current business."
+      description: "Dashboard-only v3 endpoint. Deletes a fallback webhook endpoint
+        owned by the current business."
       security:
         - bearerAuth: []
       responses:
@@ -519,7 +529,8 @@ paths:
         - OAuth
       operationId: getOAuthInstallationStatus
       summary: Get installed-app status snapshot
-      description: "No OAuth installation scope. OAuth flow endpoint for app-backend installation status lookup."
+      description: "No OAuth installation scope. OAuth flow endpoint for app-backend
+        installation status lookup."
       requestBody:
         $ref: "#/components/requestBodies/OAuthInstallationStatusRequestBody"
       responses:
@@ -533,9 +544,11 @@ paths:
         - OAuth
       operationId: exchangeOAuthInstallationLaunchToken
       summary: Exchange an installed-app dashboard launch token
-      description: "No OAuth installation scope. OAuth flow endpoint for exchanging a one-time Manage launch token for an installed-app status snapshot."
+      description: "No OAuth installation scope. OAuth flow endpoint for exchanging a
+        one-time Manage launch token for an installed-app status snapshot."
       requestBody:
-        $ref: "#/components/requestBodies/OAuthInstallationLaunchTokenExchangeRequestBody"
+        $ref: "#/components/requestBodies/OAuthInstallationLaunchTokenExchangeRequestBo\
+          dy"
       responses:
         "200":
           $ref: "#/components/responses/OAuthInstallationStatusResponse"
@@ -547,7 +560,9 @@ paths:
         - OAuth Billing
       operationId: createOAuthBillingReservation
       summary: Create an OAuth billing reservation
-      description: "No OAuth installation scope. OAuth flow endpoint. Requires an installed-app OAuth access token. JWT and business API key auth do not apply on this route."
+      description: "No OAuth installation scope. OAuth flow endpoint. Requires an
+        installed-app OAuth access token. JWT and business API key auth do not
+        apply on this route."
       security:
         - bearerAuth: []
       requestBody:
@@ -569,7 +584,9 @@ paths:
         - OAuth Billing
       operationId: releaseOAuthBillingReservation
       summary: Release an OAuth billing reservation
-      description: "No OAuth installation scope. OAuth flow endpoint. Requires an installed-app OAuth access token. JWT and business API key auth do not apply on this route."
+      description: "No OAuth installation scope. OAuth flow endpoint. Requires an
+        installed-app OAuth access token. JWT and business API key auth do not
+        apply on this route."
       security:
         - bearerAuth: []
       responses:
@@ -585,7 +602,10 @@ paths:
         - OAuth Billing
       operationId: createOAuthBillingRefund
       summary: Refund a captured OAuth billing charge
-      description: "No OAuth installation scope. OAuth flow endpoint. Requires an installed-app OAuth access token that owns the original authorized-business charge. Refunds are full post-capture reversals; reservation release remains the pre-capture flow."
+      description: "No OAuth installation scope. OAuth flow endpoint. Requires an
+        installed-app OAuth access token that owns the original
+        authorized-business charge. Refunds are full post-capture reversals;
+        reservation release remains the pre-capture flow."
       security:
         - bearerAuth: []
       requestBody:
@@ -647,7 +667,8 @@ paths:
         - apiKeyAuth: []
       parameters:
         - $ref: "#/components/parameters/PageSize"
-        - $ref: "#/components/parameters/LastId"
+        - $ref: "#/components/parameters/NextCursor"
+        - $ref: "#/components/parameters/PreviousCursor"
         - $ref: "#/components/parameters/OAuthApplicationIdQuery"
         - $ref: "#/components/parameters/OAuthAuthorizedBusinessIdQuery"
         - $ref: "#/components/parameters/MerchantBusinessIdQuery"
@@ -695,7 +716,8 @@ paths:
         - apiKeyAuth: []
       parameters:
         - $ref: "#/components/parameters/PageSize"
-        - $ref: "#/components/parameters/LastId"
+        - $ref: "#/components/parameters/NextCursor"
+        - $ref: "#/components/parameters/PreviousCursor"
         - $ref: "#/components/parameters/OAuthApplicationIdQuery"
         - $ref: "#/components/parameters/OAuthAuthorizedBusinessIdQuery"
         - $ref: "#/components/parameters/MerchantBusinessIdQuery"
@@ -743,7 +765,8 @@ paths:
         - apiKeyAuth: []
       parameters:
         - $ref: "#/components/parameters/PageSize"
-        - $ref: "#/components/parameters/LastId"
+        - $ref: "#/components/parameters/NextCursor"
+        - $ref: "#/components/parameters/PreviousCursor"
         - $ref: "#/components/parameters/OAuthApplicationIdQuery"
         - $ref: "#/components/parameters/OAuthBillingEntryTypeQuery"
       responses:
@@ -765,7 +788,8 @@ paths:
         - apiKeyAuth: []
       parameters:
         - $ref: "#/components/parameters/PageSize"
-        - $ref: "#/components/parameters/LastId"
+        - $ref: "#/components/parameters/NextCursor"
+        - $ref: "#/components/parameters/PreviousCursor"
         - $ref: "#/components/parameters/OAuthBillingSettlementStatusQuery"
       responses:
         "200":
@@ -780,7 +804,8 @@ paths:
         - OAuth Billing
       operationId: createDeveloperOAuthBillingWithdrawal
       summary: Withdraw developer OAuth billing earnings
-      description: "Requires business auth with `business:manage_developer_settings`. Xendit is the only supported settlement rail."
+      description: "Requires business auth with `business:manage_developer_settings`.
+        Xendit is the only supported settlement rail."
       security:
         - bearerAuth: []
         - apiKeyAuth: []
@@ -927,7 +952,8 @@ paths:
         - Customer Account
       operationId: updateCustomerMe
       summary: Update the authenticated customer profile
-      description: "Customer-authenticated storefront endpoint. Customer email is read-only in public v1."
+      description: "Customer-authenticated storefront endpoint. Customer email is
+        read-only in public v1."
       security:
         - bearerAuth: []
       parameters:
@@ -1295,12 +1321,17 @@ paths:
             example: 25
             maximum: 25
             type: integer
-        - description: Last subscription UUID for cursor-based pagination
+        - description: Opaque cursor for the next page.
           in: query
-          name: last_id
+          name: next_cursor
           required: false
           schema:
-            format: uuid
+            type: string
+        - description: Opaque cursor for the previous page.
+          in: query
+          name: previous_cursor
+          required: false
+          schema:
             type: string
         - description: Filter by subscription status (unactivated, active, canceled,
             expired)
@@ -1320,7 +1351,10 @@ paths:
           $ref: "#/components/responses/ListCustomerSubscriptionsResponse"
         "401":
           $ref: "#/components/responses/UnauthorizedResponse"
-      description: "Customer-authenticated storefront endpoint. Retrieves a paginated list of subscriptions. The data is sorted by id in descending order. Uses cursor-based pagination with default page size of 25 and maximum of 25."
+      description: "Customer-authenticated storefront endpoint. Retrieves a paginated
+        list of subscriptions. The data is sorted by id in descending order.
+        Uses cursor-based pagination with default page size of 25 and maximum of
+        25."
   /v3/stores/{store_id}/customers/me/subscriptions/{id}:
     parameters:
       - $ref: "#/components/parameters/SubscriptionId"
@@ -1339,7 +1373,8 @@ paths:
           $ref: "#/components/responses/UnauthorizedResponse"
         "404":
           $ref: "#/components/responses/NotFoundResponse"
-      description: "Customer-authenticated storefront endpoint. Retrieves detailed information about a specific subscription identified by its ID."
+      description: "Customer-authenticated storefront endpoint. Retrieves detailed
+        information about a specific subscription identified by its ID."
   /v3/stores/{store_id}/customers/me/subscriptions/{id}/cancel:
     parameters:
       - $ref: "#/components/parameters/SubscriptionId"
@@ -1358,7 +1393,10 @@ paths:
           $ref: "#/components/responses/UnauthorizedResponse"
         "404":
           $ref: "#/components/responses/NotFoundResponse"
-      description: "Customer-authenticated storefront endpoint. Cancels a subscription at period end. The subscription must be active and not already marked for cancellation. All active subscription items will be marked for cancellation as well. Any pending/scheduled actions will be canceled."
+      description: "Customer-authenticated storefront endpoint. Cancels a subscription
+        at period end. The subscription must be active and not already marked
+        for cancellation. All active subscription items will be marked for
+        cancellation as well. Any pending/scheduled actions will be canceled."
   /v3/stores/{store_id}/customers/me/subscriptions/{id}/resume:
     parameters:
       - $ref: "#/components/parameters/SubscriptionId"
@@ -1377,7 +1415,12 @@ paths:
           $ref: "#/components/responses/UnauthorizedResponse"
         "404":
           $ref: "#/components/responses/NotFoundResponse"
-      description: "Customer-authenticated storefront endpoint. Resumes a subscription that was scheduled for cancellation at period end. The subscription must be active and have is_cancel_at_period_end = true. All subscription items scheduled for cancellation will also be resumed. If the subscription is approaching renewal, a new renewal action will be created."
+      description: "Customer-authenticated storefront endpoint. Resumes a subscription
+        that was scheduled for cancellation at period end. The subscription must
+        be active and have is_cancel_at_period_end = true. All subscription
+        items scheduled for cancellation will also be resumed. If the
+        subscription is approaching renewal, a new renewal action will be
+        created."
   /v3/stores/{store_id}/customers/me/subscription-items/{id}/upgrade:
     parameters:
       - $ref: "#/components/parameters/SubscriptionItemId"
@@ -1396,7 +1439,10 @@ paths:
           $ref: "#/components/responses/UnauthorizedResponse"
         "404":
           $ref: "#/components/responses/NotFoundResponse"
-      description: "Customer-authenticated storefront endpoint. Retrieves a list of variants with higher prices than the current variant of the subscription item. Only active subscription items that are not scheduled for cancellation are eligible."
+      description: "Customer-authenticated storefront endpoint. Retrieves a list of
+        variants with higher prices than the current variant of the subscription
+        item. Only active subscription items that are not scheduled for
+        cancellation are eligible."
     post:
       tags:
         - Customer Subscriptions
@@ -1415,7 +1461,10 @@ paths:
           $ref: "#/components/responses/UnauthorizedResponse"
         "404":
           $ref: "#/components/responses/NotFoundResponse"
-      description: "Customer-authenticated storefront endpoint. Upgrades a subscription item to a higher-priced variant. Creates a subscription action with type 'upgrade' and executes it within the same transaction. The variant_id must be present in the list of upgrade variants."
+      description: "Customer-authenticated storefront endpoint. Upgrades a
+        subscription item to a higher-priced variant. Creates a subscription
+        action with type 'upgrade' and executes it within the same transaction.
+        The variant_id must be present in the list of upgrade variants."
   /v3/stores/{store_id}/customers/me/subscription-items/{id}/downgrade:
     parameters:
       - $ref: "#/components/parameters/SubscriptionItemId"
@@ -1434,7 +1483,10 @@ paths:
           $ref: "#/components/responses/UnauthorizedResponse"
         "404":
           $ref: "#/components/responses/NotFoundResponse"
-      description: "Customer-authenticated storefront endpoint. Retrieves a list of variants with lower prices than the current variant of the subscription item. Only active subscription items that are not scheduled for cancellation are eligible."
+      description: "Customer-authenticated storefront endpoint. Retrieves a list of
+        variants with lower prices than the current variant of the subscription
+        item. Only active subscription items that are not scheduled for
+        cancellation are eligible."
     post:
       tags:
         - Customer Subscriptions
@@ -1453,7 +1505,11 @@ paths:
           $ref: "#/components/responses/UnauthorizedResponse"
         "404":
           $ref: "#/components/responses/NotFoundResponse"
-      description: "Customer-authenticated storefront endpoint. Downgrades a subscription item to a lower-priced variant. Creates a subscription action with type 'downgrade' and executes it within the same transaction. The variant_id must be present in the list of downgrade variants."
+      description: "Customer-authenticated storefront endpoint. Downgrades a
+        subscription item to a lower-priced variant. Creates a subscription
+        action with type 'downgrade' and executes it within the same
+        transaction. The variant_id must be present in the list of downgrade
+        variants."
   /v3/stores/{store_id}/customers/me/variants/{uuid}/course:
     parameters:
       - $ref: "#/components/parameters/Uuid"
@@ -1547,12 +1603,18 @@ paths:
           required: false
           schema:
             type: integer
-        - description: Cursor for ID-based pagination.
+        - description: Opaque cursor for the next page.
           in: query
-          name: last_id
+          name: next_cursor
           required: false
           schema:
-            type: integer
+            type: string
+        - description: Opaque cursor for the previous page.
+          in: query
+          name: previous_cursor
+          required: false
+          schema:
+            type: string
       responses:
         "200":
           $ref: "#/components/responses/PaginatedCollectionResponse"
@@ -1568,7 +1630,8 @@ paths:
         - Storefront Setup
       operationId: listStorefrontPublicApiKeys
       summary: List storefront public API keys
-      description: "Requires the `store:read` scope. Uses the authenticated business store ID."
+      description: "Requires the `store:read` scope. Uses the authenticated business
+        store ID."
       security:
         - bearerAuth: []
         - apiKeyAuth: []
@@ -1590,7 +1653,8 @@ paths:
         - Storefront Setup
       operationId: createStorefrontPublicApiKey
       summary: Create a storefront public API key
-      description: "Requires the `store:update` scope. Uses the authenticated business store ID."
+      description: "Requires the `store:update` scope. Uses the authenticated business
+        store ID."
       security:
         - bearerAuth: []
         - apiKeyAuth: []
@@ -1618,7 +1682,8 @@ paths:
         - Storefront Setup
       operationId: revokeStorefrontPublicApiKey
       summary: Revoke a storefront public API key
-      description: "Requires the `store:update` scope. Uses the authenticated business store ID."
+      description: "Requires the `store:update` scope. Uses the authenticated business
+        store ID."
       security:
         - bearerAuth: []
         - apiKeyAuth: []
@@ -1639,7 +1704,8 @@ paths:
         - Storefront Setup
       operationId: listStorefrontAllowedOrigins
       summary: List storefront allowed origins
-      description: "Requires the `store:read` scope. Uses the authenticated business store ID."
+      description: "Requires the `store:read` scope. Uses the authenticated business
+        store ID."
       security:
         - bearerAuth: []
         - apiKeyAuth: []
@@ -1661,7 +1727,8 @@ paths:
         - Storefront Setup
       operationId: createStorefrontAllowedOrigin
       summary: Create a storefront allowed origin
-      description: "Requires the `store:update` scope. Uses the authenticated business store ID."
+      description: "Requires the `store:update` scope. Uses the authenticated business
+        store ID."
       security:
         - bearerAuth: []
         - apiKeyAuth: []
@@ -1691,7 +1758,8 @@ paths:
         - Storefront Setup
       operationId: revokeStorefrontAllowedOrigin
       summary: Revoke a storefront allowed origin
-      description: "Requires the `store:update` scope. Uses the authenticated business store ID."
+      description: "Requires the `store:update` scope. Uses the authenticated business
+        store ID."
       security:
         - bearerAuth: []
         - apiKeyAuth: []
@@ -1723,12 +1791,18 @@ paths:
           required: false
           schema:
             type: integer
-        - description: Cursor for ID-based pagination.
+        - description: Opaque cursor for the next page.
           in: query
-          name: last_id
+          name: next_cursor
           required: false
           schema:
-            type: integer
+            type: string
+        - description: Opaque cursor for the previous page.
+          in: query
+          name: previous_cursor
+          required: false
+          schema:
+            type: string
       responses:
         "200":
           $ref: "#/components/responses/PaginatedCollectionResponse"
@@ -1757,12 +1831,18 @@ paths:
           required: false
           schema:
             type: integer
-        - description: Cursor for ID-based pagination.
+        - description: Opaque cursor for the next page.
           in: query
-          name: last_id
+          name: next_cursor
           required: false
           schema:
-            type: integer
+            type: string
+        - description: Opaque cursor for the previous page.
+          in: query
+          name: previous_cursor
+          required: false
+          schema:
+            type: string
       responses:
         "200":
           $ref: "#/components/responses/PaginatedCollectionResponse"
@@ -2008,12 +2088,18 @@ paths:
           required: false
           schema:
             type: integer
-        - description: Cursor for ID-based pagination.
+        - description: Opaque cursor for the next page.
           in: query
-          name: last_id
+          name: next_cursor
           required: false
           schema:
-            type: integer
+            type: string
+        - description: Opaque cursor for the previous page.
+          in: query
+          name: previous_cursor
+          required: false
+          schema:
+            type: string
       responses:
         "200":
           $ref: "#/components/responses/PaginatedCollectionResponse"
@@ -2042,12 +2128,18 @@ paths:
           required: false
           schema:
             type: integer
-        - description: Cursor for ID-based pagination.
+        - description: Opaque cursor for the next page.
           in: query
-          name: last_id
+          name: next_cursor
           required: false
           schema:
-            type: integer
+            type: string
+        - description: Opaque cursor for the previous page.
+          in: query
+          name: previous_cursor
+          required: false
+          schema:
+            type: string
       responses:
         "200":
           $ref: "#/components/responses/PaginatedCollectionResponse"
@@ -2076,12 +2168,18 @@ paths:
           required: false
           schema:
             type: integer
-        - description: Cursor for ID-based pagination.
+        - description: Opaque cursor for the next page.
           in: query
-          name: last_id
+          name: next_cursor
           required: false
           schema:
-            type: integer
+            type: string
+        - description: Opaque cursor for the previous page.
+          in: query
+          name: previous_cursor
+          required: false
+          schema:
+            type: string
       responses:
         "200":
           $ref: "#/components/responses/PaginatedCollectionResponse"
@@ -2107,25 +2205,30 @@ paths:
           $ref: "#/components/responses/UnauthorizedResponse"
         "403":
           $ref: "#/components/responses/ForbiddenResponse"
-      description: "Requires the `order:create` scope. Retrieve a list of locations with search and pagination."
+      description: "Requires the `order:create` scope. Retrieve a cursor-paginated
+        list of locations with optional search."
       parameters:
-        - description: Page number for pagination
-          in: query
-          name: page
-          required: false
-          schema:
-            default: 1
-            minimum: 1
-            type: integer
-        - description: Number of items per page
+        - description: Number of items per page.
           in: query
           name: page_size
           required: false
           schema:
-            default: 10
-            maximum: 100
+            default: 25
+            maximum: 25
             minimum: 1
             type: integer
+        - description: Opaque cursor for the next page.
+          in: query
+          name: next_cursor
+          required: false
+          schema:
+            type: string
+        - description: Opaque cursor for the previous page.
+          in: query
+          name: previous_cursor
+          required: false
+          schema:
+            type: string
         - description: Search term for location names
           in: query
           name: search
@@ -2171,7 +2274,9 @@ paths:
           $ref: "#/components/responses/UnauthorizedResponse"
         "403":
           $ref: "#/components/responses/ForbiddenResponse"
-      description: "Requires the `order:create` scope. Retrieve shipping cost estimates based on origin, destination, courier services, and package weight."
+      description: "Requires the `order:create` scope. Retrieve shipping cost
+        estimates based on origin, destination, courier services, and package
+        weight."
   /v3/shipping-costs/search-courier-service:
     post:
       tags:
@@ -2192,7 +2297,9 @@ paths:
           $ref: "#/components/responses/UnauthorizedResponse"
         "403":
           $ref: "#/components/responses/ForbiddenResponse"
-      description: "Requires the `order:create` scope. Retrieve available courier services based on warehouse, destination, payment method, and package weight."
+      description: "Requires the `order:create` scope. Retrieve available courier
+        services based on warehouse, destination, payment method, and package
+        weight."
   /v3/shipping-costs/search-warehouse:
     post:
       tags:
@@ -2213,7 +2320,8 @@ paths:
           $ref: "#/components/responses/UnauthorizedResponse"
         "403":
           $ref: "#/components/responses/ForbiddenResponse"
-      description: "Requires the `order:create` scope. Search for warehouses based on order details, store, destination, and product variants."
+      description: "Requires the `order:create` scope. Search for warehouses based on
+        order details, store, destination, and product variants."
   /v3/orders:
     get:
       tags:
@@ -2230,7 +2338,10 @@ paths:
           $ref: "#/components/responses/UnauthorizedResponse"
         "403":
           $ref: "#/components/responses/ForbiddenResponse"
-      description: "Requires the `order:list` scope. Retrieves a paginated list of orders with optional filtering. The data is sorted by created_at in descending order and cannot be changed. Uses cursor-based pagination with default page size of 25 and maximum of 25."
+      description: "Requires the `order:list` scope. Retrieves a paginated list of
+        orders with optional filtering. The data is sorted by created_at in
+        descending order and cannot be changed. Uses cursor-based pagination
+        with default page size of 25 and maximum of 25."
       parameters:
         - description: "Number of items per page (default: 25, max: 25)"
           in: query
@@ -2240,12 +2351,18 @@ paths:
             example: 25
             maximum: 25
             type: integer
-        - description: Last order ID for cursor-based pagination
+        - description: Opaque cursor for the next page.
           in: query
-          name: last_id
+          name: next_cursor
           required: false
           schema:
-            type: integer
+            type: string
+        - description: Opaque cursor for the previous page.
+          in: query
+          name: previous_cursor
+          required: false
+          schema:
+            type: string
         - description: Search term to filter orders by order ID, customer name, email, or
             phone number
           in: query
@@ -2519,12 +2636,12 @@ paths:
           schema:
             type: string
         - description: "Comma-separated list of columns to include. Available columns:
-            secret_slug, public_order_url, payment_url, final_variants, store, origin_address,
-            address_location, handler_phone, order_id, destination_address,
-            quantity, product_price, total_weight, courier_service,
-            shipping_cost, payment_method, gross_revenue, shipment_receipt,
-            courier_additional_info, payment_status, status, customer,
-            draft_time, orderlines, is_dropshipping, dropshipper_name,
+            secret_slug, public_order_url, payment_url, final_variants, store,
+            origin_address, address_location, handler_phone, order_id,
+            destination_address, quantity, product_price, total_weight,
+            courier_service, shipping_cost, payment_method, gross_revenue,
+            shipment_receipt, courier_additional_info, payment_status, status,
+            customer, draft_time, orderlines, is_dropshipping, dropshipper_name,
             dropshipper_phone, unique_code_discount, tags, awb_status,
             awb_ca_status, follow_up_chats, follow_up_chat_type,
             message_history, metadata, notes, courier_aggregator_code,
@@ -2564,7 +2681,8 @@ paths:
           $ref: "#/components/responses/UnauthorizedResponse"
         "403":
           $ref: "#/components/responses/ForbiddenResponse"
-      description: "Requires the `order:create` scope. Create a new order with the provided details."
+      description: "Requires the `order:create` scope. Create a new order with the
+        provided details."
   /v3/orders/statistics:
     get:
       tags:
@@ -2581,7 +2699,10 @@ paths:
           $ref: "#/components/responses/UnauthorizedResponse"
         "403":
           $ref: "#/components/responses/ForbiddenResponse"
-      description: "Requires the `order:statistics:list` scope. Retrieves descriptive statistics about orders, such as total orders, total revenue, and other aggregated data. Can be filtered using the same parameters as the orders list endpoint."
+      description: "Requires the `order:statistics:list` scope. Retrieves descriptive
+        statistics about orders, such as total orders, total revenue, and other
+        aggregated data. Can be filtered using the same parameters as the orders
+        list endpoint."
       parameters:
         - description: Type of datetime for statistics (defaults to 'created_at')
           in: query
@@ -2710,7 +2831,8 @@ paths:
           $ref: "#/components/responses/UnauthorizedResponse"
         "403":
           $ref: "#/components/responses/ForbiddenResponse"
-      description: "Requires the `order:change_status` scope. Change the status of multiple orders."
+      description: "Requires the `order:change_status` scope. Change the status of
+        multiple orders."
   /v3/orders/delete:
     post:
       tags:
@@ -2773,7 +2895,14 @@ paths:
           $ref: "#/components/responses/UnauthorizedResponse"
         "403":
           $ref: "#/components/responses/ForbiddenResponse"
-      description: "Requires the `order:change_status` scope. Upload a CSV file to change status of multiple orders. Template file can be downloaded from the link here: https://app.scalev.id/example/update_status_template.csv. (1) Leave blank the 'shipment_receipt' field if you don't want to change the receipt/tracking number. Note: this will not change receipts/tracking numbers that are automatically generated by Scalev through the 'Request Pickup' menu. (2) Leave blank the 'day', 'month', and 'year' fields if you want to use the time of upload."
+      description: "Requires the `order:change_status` scope. Upload a CSV file to
+        change status of multiple orders. Template file can be downloaded from
+        the link here: https://app.scalev.id/example/update_status_template.csv.
+        (1) Leave blank the 'shipment_receipt' field if you don't want to change
+        the receipt/tracking number. Note: this will not change
+        receipts/tracking numbers that are automatically generated by Scalev
+        through the 'Request Pickup' menu. (2) Leave blank the 'day', 'month',
+        and 'year' fields if you want to use the time of upload."
   /v3/orders/upload-receipt:
     post:
       tags:
@@ -2794,7 +2923,10 @@ paths:
           $ref: "#/components/responses/UnauthorizedResponse"
         "403":
           $ref: "#/components/responses/ForbiddenResponse"
-      description: "Requires the `order:update` scope. Upload file to update shipment receipts (tracking IDs) for multiple orders. Template file can be downloaded from the link here: https://app.scalev.id/example/receipt_template.csv."
+      description: "Requires the `order:update` scope. Upload file to update shipment
+        receipts (tracking IDs) for multiple orders. Template file can be
+        downloaded from the link here:
+        https://app.scalev.id/example/receipt_template.csv."
   /v3/orders/upload:
     post:
       tags:
@@ -2815,7 +2947,18 @@ paths:
           $ref: "#/components/responses/UnauthorizedResponse"
         "403":
           $ref: "#/components/responses/ForbiddenResponse"
-      description: "Requires the `order:create` scope. Upload orders from CSV file. (1) Archive mode. Choose this mode if you want to import old data from another platform you've been using. You can directly create products that you made on your previous platform. Orders that are created will immediately have 'Completed' status. Download template for Archive mode here: https://app.scalev.id/example/template_archive.csv. (2) Regular mode. Choose this mode if you want to enter current data that you wish to input in bulk, not one by one via order input. It will take inventory into account if your products have inventory enabled. Successfully created orders will have 'Created', 'Pending', or 'Confirmed' status, depending on the completeness of the data. Download template for Regular mode here: https://app.scalev.id/example/template_regular.csv."
+      description: "Requires the `order:create` scope. Upload orders from CSV file.
+        (1) Archive mode. Choose this mode if you want to import old data from
+        another platform you've been using. You can directly create products
+        that you made on your previous platform. Orders that are created will
+        immediately have 'Completed' status. Download template for Archive mode
+        here: https://app.scalev.id/example/template_archive.csv. (2) Regular
+        mode. Choose this mode if you want to enter current data that you wish
+        to input in bulk, not one by one via order input. It will take inventory
+        into account if your products have inventory enabled. Successfully
+        created orders will have 'Created', 'Pending', or 'Confirmed' status,
+        depending on the completeness of the data. Download template for Regular
+        mode here: https://app.scalev.id/example/template_regular.csv."
   /v3/orders/generate-awb:
     post:
       tags:
@@ -2836,7 +2979,8 @@ paths:
           $ref: "#/components/responses/UnauthorizedResponse"
         "403":
           $ref: "#/components/responses/ForbiddenResponse"
-      description: "Requires the `order:create_awb` scope. Generate Air Waybill for multiple orders."
+      description: "Requires the `order:create_awb` scope. Generate Air Waybill for
+        multiple orders."
   /v3/orders/cancel-awb:
     post:
       tags:
@@ -2857,7 +3001,8 @@ paths:
           $ref: "#/components/responses/UnauthorizedResponse"
         "403":
           $ref: "#/components/responses/ForbiddenResponse"
-      description: "Requires the `order:create_awb` scope. Cancel Air Waybill for multiple orders."
+      description: "Requires the `order:create_awb` scope. Cancel Air Waybill for
+        multiple orders."
   /v3/orders/tags:
     get:
       tags:
@@ -2874,7 +3019,8 @@ paths:
           $ref: "#/components/responses/UnauthorizedResponse"
         "403":
           $ref: "#/components/responses/ForbiddenResponse"
-      description: "Requires the `order:list` scope. Retrieve a list of tags associated with orders."
+      description: "Requires the `order:list` scope. Retrieve a list of tags
+        associated with orders."
       parameters:
         - description: Search term to filter tags by name
           in: query
@@ -2898,7 +3044,8 @@ paths:
           $ref: "#/components/responses/UnauthorizedResponse"
         "403":
           $ref: "#/components/responses/ForbiddenResponse"
-      description: "Requires the `order:list` scope. Retrieve a list of unique UTM source values from orders."
+      description: "Requires the `order:list` scope. Retrieve a list of unique UTM
+        source values from orders."
       parameters:
         - description: Search term to filter UTM sources
           in: query
@@ -2922,7 +3069,8 @@ paths:
           $ref: "#/components/responses/UnauthorizedResponse"
         "403":
           $ref: "#/components/responses/ForbiddenResponse"
-      description: "Requires the `order:list` scope. Retrieve a list of unique UTM medium values from orders."
+      description: "Requires the `order:list` scope. Retrieve a list of unique UTM
+        medium values from orders."
       parameters:
         - description: Search term to filter UTM mediums
           in: query
@@ -2946,7 +3094,8 @@ paths:
           $ref: "#/components/responses/UnauthorizedResponse"
         "403":
           $ref: "#/components/responses/ForbiddenResponse"
-      description: "Requires the `order:list` scope. Retrieve a list of unique UTM campaign values from orders."
+      description: "Requires the `order:list` scope. Retrieve a list of unique UTM
+        campaign values from orders."
       parameters:
         - description: Search term to filter UTM campaigns
           in: query
@@ -2970,7 +3119,8 @@ paths:
           $ref: "#/components/responses/UnauthorizedResponse"
         "403":
           $ref: "#/components/responses/ForbiddenResponse"
-      description: "Requires the `order:list` scope. Retrieve a list of unique UTM content values from orders."
+      description: "Requires the `order:list` scope. Retrieve a list of unique UTM
+        content values from orders."
       parameters:
         - description: Search term to filter UTM contents
           in: query
@@ -2994,7 +3144,8 @@ paths:
           $ref: "#/components/responses/UnauthorizedResponse"
         "403":
           $ref: "#/components/responses/ForbiddenResponse"
-      description: "Requires the `order:list` scope. Retrieve a list of unique UTM term values from orders."
+      description: "Requires the `order:list` scope. Retrieve a list of unique UTM
+        term values from orders."
       parameters:
         - description: Search term to filter UTM terms
           in: query
@@ -3022,7 +3173,8 @@ paths:
           $ref: "#/components/responses/ForbiddenResponse"
         "404":
           $ref: "#/components/responses/NotFoundResponse"
-      description: "Requires the `order:read` scope. Retrieve order details using payment gateway reference ID."
+      description: "Requires the `order:read` scope. Retrieve order details using
+        payment gateway reference ID."
   /v3/orders/pg-reference-ids:
     get:
       tags:
@@ -3039,7 +3191,8 @@ paths:
           $ref: "#/components/responses/UnauthorizedResponse"
         "403":
           $ref: "#/components/responses/ForbiddenResponse"
-      description: "Requires the `order:list` scope. Retrieve orders using multiple payment gateway reference IDs."
+      description: "Requires the `order:list` scope. Retrieve orders using multiple
+        payment gateway reference IDs."
       parameters:
         - description: Comma-separated payment gateway reference IDs
           in: query
@@ -3067,7 +3220,8 @@ paths:
           $ref: "#/components/responses/ForbiddenResponse"
         "404":
           $ref: "#/components/responses/NotFoundResponse"
-      description: "Requires the `order:read` scope. Retrieve detailed information about a specific order."
+      description: "Requires the `order:read` scope. Retrieve detailed information
+        about a specific order."
     patch:
       tags:
         - Orders
@@ -3110,7 +3264,8 @@ paths:
           $ref: "#/components/responses/ForbiddenResponse"
         "404":
           $ref: "#/components/responses/NotFoundResponse"
-      description: "Requires the `order:read` scope. Retrieve flags to determine available actions for an order."
+      description: "Requires the `order:read` scope. Retrieve flags to determine
+        available actions for an order."
   /v3/orders/{id}/chats:
     parameters:
       - $ref: "#/components/parameters/OrderId"
@@ -3131,7 +3286,8 @@ paths:
           $ref: "#/components/responses/ForbiddenResponse"
         "404":
           $ref: "#/components/responses/NotFoundResponse"
-      description: "Requires the `order:read` scope. Retrieve chat text messages associated with an order."
+      description: "Requires the `order:read` scope. Retrieve chat text messages
+        associated with an order."
   /v3/orders/{id}/chats/{chat_id}:
     parameters:
       - $ref: "#/components/parameters/OrderId"
@@ -3217,7 +3373,8 @@ paths:
           $ref: "#/components/responses/ForbiddenResponse"
         "404":
           $ref: "#/components/responses/NotFoundResponse"
-      description: "Requires the `order:update` scope. Add a new message to order message history."
+      description: "Requires the `order:update` scope. Add a new message to order
+        message history."
   /v3/orders/{id}/payment:
     parameters:
       - $ref: "#/components/parameters/OrderId"
@@ -3240,7 +3397,8 @@ paths:
           $ref: "#/components/responses/ForbiddenResponse"
         "404":
           $ref: "#/components/responses/NotFoundResponse"
-      description: "Requires the `order:update` scope. Create a payment request / intent for an order."
+      description: "Requires the `order:update` scope. Create a payment request /
+        intent for an order."
   /v3/orders/{id}/customer:
     parameters:
       - $ref: "#/components/parameters/OrderId"
@@ -3265,7 +3423,8 @@ paths:
           $ref: "#/components/responses/ForbiddenResponse"
         "404":
           $ref: "#/components/responses/NotFoundResponse"
-      description: "Requires the `order:update` scope. Update the customer associated with an order."
+      description: "Requires the `order:update` scope. Update the customer associated
+        with an order."
   /v3/orders/{id}/shipment:
     parameters:
       - $ref: "#/components/parameters/OrderId"
@@ -3290,7 +3449,8 @@ paths:
           $ref: "#/components/responses/ForbiddenResponse"
         "404":
           $ref: "#/components/responses/NotFoundResponse"
-      description: "Requires the `order:update` scope. Update shipment-related data for an order."
+      description: "Requires the `order:update` scope. Update shipment-related data
+        for an order."
   /v3/orders/{id}/shipment-receipt:
     parameters:
       - $ref: "#/components/parameters/OrderId"
@@ -3315,7 +3475,8 @@ paths:
           $ref: "#/components/responses/ForbiddenResponse"
         "404":
           $ref: "#/components/responses/NotFoundResponse"
-      description: "Requires the `order:update` scope. Update shipment receipt / tracking ID for an order."
+      description: "Requires the `order:update` scope. Update shipment receipt /
+        tracking ID for an order."
   /v3/orders/{id}/shipment-status-history:
     parameters:
       - $ref: "#/components/parameters/OrderId"
@@ -3340,7 +3501,8 @@ paths:
           $ref: "#/components/responses/ForbiddenResponse"
         "404":
           $ref: "#/components/responses/NotFoundResponse"
-      description: "Requires the `order:update` scope. Create a new shipment status history entry for an order."
+      description: "Requires the `order:update` scope. Create a new shipment status
+        history entry for an order."
   /v3/orders/{id}/update-tags:
     parameters:
       - $ref: "#/components/parameters/OrderId"
@@ -3388,7 +3550,8 @@ paths:
           $ref: "#/components/responses/ForbiddenResponse"
         "404":
           $ref: "#/components/responses/NotFoundResponse"
-      description: "Requires the `order:update` scope. Trigger purchase event for analytics and tracking."
+      description: "Requires the `order:update` scope. Trigger purchase event for
+        analytics and tracking."
   /v3/orders/{id}/duplicate:
     parameters:
       - $ref: "#/components/parameters/OrderId"
@@ -3413,7 +3576,8 @@ paths:
           $ref: "#/components/responses/ForbiddenResponse"
         "404":
           $ref: "#/components/responses/NotFoundResponse"
-      description: "Requires the `order:create` scope. Create a duplicate of an order and cancel the original."
+      description: "Requires the `order:create` scope. Create a duplicate of an order
+        and cancel the original."
   /v3/orders/{id}/check-payment:
     parameters:
       - $ref: "#/components/parameters/OrderId"
@@ -3455,7 +3619,8 @@ paths:
           $ref: "#/components/responses/ForbiddenResponse"
         "404":
           $ref: "#/components/responses/NotFoundResponse"
-      description: "Requires the `order:read` scope. Check the settlement status of an order."
+      description: "Requires the `order:read` scope. Check the settlement status of an
+        order."
   /v3/orders/{id}/send-product-digital:
     parameters:
       - $ref: "#/components/parameters/OrderId"
@@ -3476,7 +3641,8 @@ paths:
           $ref: "#/components/responses/ForbiddenResponse"
         "404":
           $ref: "#/components/responses/NotFoundResponse"
-      description: "Requires the `order:read` scope. Send email containing links to download digital products to customer."
+      description: "Requires the `order:read` scope. Send email containing links to
+        download digital products to customer."
   /v3/orders/{id}/send-lms-access:
     parameters:
       - $ref: "#/components/parameters/OrderId"
@@ -3514,7 +3680,10 @@ paths:
           $ref: "#/components/responses/UnauthorizedResponse"
         "403":
           $ref: "#/components/responses/ForbiddenResponse"
-      description: "Requires the `product:list` scope. Retrieves a paginated list of products with optional filtering. The data is sorted by id in descending order and cannot be changed. Uses cursor-based pagination with default page size of 25 and maximum of 25."
+      description: "Requires the `product:list` scope. Retrieves a paginated list of
+        products with optional filtering. The data is sorted by id in descending
+        order and cannot be changed. Uses cursor-based pagination with default
+        page size of 25 and maximum of 25."
       parameters:
         - description: "Number of items per page (default: 25, max: 25)"
           in: query
@@ -3524,12 +3693,18 @@ paths:
             example: 25
             maximum: 25
             type: integer
-        - description: Last order ID for cursor-based pagination
+        - description: Opaque cursor for the next page.
           in: query
-          name: last_id
+          name: next_cursor
           required: false
           schema:
-            type: integer
+            type: string
+        - description: Opaque cursor for the previous page.
+          in: query
+          name: previous_cursor
+          required: false
+          schema:
+            type: string
         - description: Search term to filter products by name (case-insensitive, partial
             match)
           in: query
@@ -3632,7 +3807,8 @@ paths:
           $ref: "#/components/responses/UnauthorizedResponse"
         "403":
           $ref: "#/components/responses/ForbiddenResponse"
-      description: "Requires the `product:create` scope. Creates a new product with the provided data."
+      description: "Requires the `product:create` scope. Creates a new product with
+        the provided data."
   /v3/products/simplified:
     get:
       tags:
@@ -3649,7 +3825,10 @@ paths:
           $ref: "#/components/responses/UnauthorizedResponse"
         "403":
           $ref: "#/components/responses/ForbiddenResponse"
-      description: "Requires the `product:list` scope. Retrieves a simplified paginated list of products with optional filtering. The data is sorted by id in descending order and cannot be changed. Uses cursor-based pagination with default page size of 25 and maximum of 25."
+      description: "Requires the `product:list` scope. Retrieves a simplified
+        paginated list of products with optional filtering. The data is sorted
+        by id in descending order and cannot be changed. Uses cursor-based
+        pagination with default page size of 25 and maximum of 25."
       parameters:
         - description: If provided, includes `is_owned_by_store` field in the bundle price
             options to indicate if the option is already included in the
@@ -3667,12 +3846,18 @@ paths:
             example: 25
             maximum: 25
             type: integer
-        - description: Last order ID for cursor-based pagination
+        - description: Opaque cursor for the next page.
           in: query
-          name: last_id
+          name: next_cursor
           required: false
           schema:
-            type: integer
+            type: string
+        - description: Opaque cursor for the previous page.
+          in: query
+          name: previous_cursor
+          required: false
+          schema:
+            type: string
         - description: Search term to filter products by name (case-insensitive, partial
             match)
           in: query
@@ -3782,12 +3967,18 @@ paths:
             example: 25
             maximum: 25
             type: integer
-        - description: Last order ID for cursor-based pagination
+        - description: Opaque cursor for the next page.
           in: query
-          name: last_id
+          name: next_cursor
           required: false
           schema:
-            type: integer
+            type: string
+        - description: Opaque cursor for the previous page.
+          in: query
+          name: previous_cursor
+          required: false
+          schema:
+            type: string
         - description: Search term to filter products by name (case-insensitive, partial
             match)
           in: query
@@ -3891,7 +4082,8 @@ paths:
           $ref: "#/components/responses/ForbiddenResponse"
         "404":
           $ref: "#/components/responses/NotFoundResponse"
-      description: "Requires the `product:read` scope. Retrieves the details of a single product, including its variants and other associated data."
+      description: "Requires the `product:read` scope. Retrieves the details of a
+        single product, including its variants and other associated data."
     patch:
       tags:
         - Business Products
@@ -3913,7 +4105,8 @@ paths:
           $ref: "#/components/responses/ForbiddenResponse"
         "404":
           $ref: "#/components/responses/NotFoundResponse"
-      description: "Requires the `product:update` scope. Updates the details of a product, including its variants."
+      description: "Requires the `product:update` scope. Updates the details of a
+        product, including its variants."
     delete:
       tags:
         - Business Products
@@ -3931,7 +4124,8 @@ paths:
           $ref: "#/components/responses/ForbiddenResponse"
         "404":
           $ref: "#/components/responses/NotFoundResponse"
-      description: "Requires the `product:delete` scope. Deletes a product and all its associated data."
+      description: "Requires the `product:delete` scope. Deletes a product and all its
+        associated data."
   /v3/products/{id}/duplicate:
     parameters:
       - $ref: "#/components/parameters/GenericId"
@@ -3952,7 +4146,11 @@ paths:
           $ref: "#/components/responses/ForbiddenResponse"
         "404":
           $ref: "#/components/responses/NotFoundResponse"
-      description: "Requires the `product:create` scope. Creates a copy of an existing product including all variants, digital files, course structure (for courses), labels, follow-up chats, and email automation settings. The new product name will be suffixed with '(Copy)'. Partnership settings and store associations are NOT copied."
+      description: "Requires the `product:create` scope. Creates a copy of an existing
+        product including all variants, digital files, course structure (for
+        courses), labels, follow-up chats, and email automation settings. The
+        new product name will be suffixed with '(Copy)'. Partnership settings
+        and store associations are NOT copied."
   /v3/products/{product_id}/partnership:
     parameters:
       - $ref: "#/components/parameters/ProductId"
@@ -4023,7 +4221,8 @@ paths:
           $ref: "#/components/responses/ForbiddenResponse"
         "404":
           $ref: "#/components/responses/NotFoundResponse"
-      description: "Requires the `product:read` scope. Shows the relations of a product, including variants, stores, bundles, and pages."
+      description: "Requires the `product:read` scope. Shows the relations of a
+        product, including variants, stores, bundles, and pages."
   /v3/products/{product_id}/partners:
     parameters:
       - $ref: "#/components/parameters/ProductId"
@@ -4044,14 +4243,21 @@ paths:
           $ref: "#/components/responses/ForbiddenResponse"
         "404":
           $ref: "#/components/responses/NotFoundResponse"
-      description: "Requires the `product:list` scope. Retrieves a paginated list of product partners."
+      description: "Requires the `product:list` scope. Retrieves a paginated list of
+        product partners."
       parameters:
-        - description: Last ID for cursor-based pagination
+        - description: Opaque cursor for the next page.
           in: query
-          name: last_id
+          name: next_cursor
           required: false
           schema:
-            type: integer
+            type: string
+        - description: Opaque cursor for the previous page.
+          in: query
+          name: previous_cursor
+          required: false
+          schema:
+            type: string
         - description: "Number of items per page (default: 25, max: 25)"
           in: query
           name: page_size
@@ -4124,14 +4330,21 @@ paths:
           $ref: "#/components/responses/ForbiddenResponse"
         "404":
           $ref: "#/components/responses/NotFoundResponse"
-      description: "Requires the `product:list` scope. Retrieves a paginated list of product-level knowledge items. The data is sorted by id in ascending order."
+      description: "Requires the `product:list` scope. Retrieves a paginated list of
+        product-level knowledge items. The data is sorted by id in ascending
+        order."
       parameters:
-        - description: Last ID for cursor-based pagination (UUIDv7)
+        - description: Opaque cursor for the next page.
           in: query
-          name: last_id
+          name: next_cursor
           required: false
           schema:
-            format: uuid
+            type: string
+        - description: Opaque cursor for the previous page.
+          in: query
+          name: previous_cursor
+          required: false
+          schema:
             type: string
         - description: "Number of items per page (default: 25, max: 25)"
           in: query
@@ -4162,7 +4375,8 @@ paths:
           $ref: "#/components/responses/ForbiddenResponse"
         "404":
           $ref: "#/components/responses/NotFoundResponse"
-      description: "Requires the `product:update` scope. Creates a new product-level knowledge item."
+      description: "Requires the `product:update` scope. Creates a new product-level
+        knowledge item."
   /v3/products/{product_id}/knowledge-items/{id}:
     parameters:
       - $ref: "#/components/parameters/ProductId"
@@ -4184,7 +4398,8 @@ paths:
           $ref: "#/components/responses/ForbiddenResponse"
         "404":
           $ref: "#/components/responses/NotFoundResponse"
-      description: "Requires the `product:read` scope. Retrieves a single product-level knowledge item by ID."
+      description: "Requires the `product:read` scope. Retrieves a single
+        product-level knowledge item by ID."
     patch:
       tags:
         - Business Products
@@ -4206,7 +4421,8 @@ paths:
           $ref: "#/components/responses/ForbiddenResponse"
         "404":
           $ref: "#/components/responses/NotFoundResponse"
-      description: "Requires the `product:update` scope. Updates an existing product-level knowledge item."
+      description: "Requires the `product:update` scope. Updates an existing
+        product-level knowledge item."
     delete:
       tags:
         - Business Products
@@ -4224,7 +4440,8 @@ paths:
           $ref: "#/components/responses/ForbiddenResponse"
         "404":
           $ref: "#/components/responses/NotFoundResponse"
-      description: "Requires the `product:update` scope. Deletes a product-level knowledge item."
+      description: "Requires the `product:update` scope. Deletes a product-level
+        knowledge item."
   /v3/products/{product_id}/follow-up-chats/generate:
     parameters:
       - $ref: "#/components/parameters/ProductId"
@@ -4245,7 +4462,8 @@ paths:
           $ref: "#/components/responses/ForbiddenResponse"
         "404":
           $ref: "#/components/responses/NotFoundResponse"
-      description: "Requires the `product:update` scope. Generates a new follow up chat for a product."
+      description: "Requires the `product:update` scope. Generates a new follow up
+        chat for a product."
   /v3/products/{product_id}/follow-up-chats:
     parameters:
       - $ref: "#/components/parameters/ProductId"
@@ -4266,14 +4484,21 @@ paths:
           $ref: "#/components/responses/ForbiddenResponse"
         "404":
           $ref: "#/components/responses/NotFoundResponse"
-      description: "Requires the `product:list` scope. Retrieves a paginated list of follow up chats for a product."
+      description: "Requires the `product:list` scope. Retrieves a paginated list of
+        follow up chats for a product."
       parameters:
-        - description: Last ID for cursor-based pagination
+        - description: Opaque cursor for the next page.
           in: query
-          name: last_id
+          name: next_cursor
           required: false
           schema:
-            type: integer
+            type: string
+        - description: Opaque cursor for the previous page.
+          in: query
+          name: previous_cursor
+          required: false
+          schema:
+            type: string
         - description: "Number of items per page (default: 25, max: 25)"
           in: query
           name: page_size
@@ -4303,7 +4528,8 @@ paths:
           $ref: "#/components/responses/ForbiddenResponse"
         "404":
           $ref: "#/components/responses/NotFoundResponse"
-      description: "Requires the `product:update` scope. Create a follow up chat template for a product."
+      description: "Requires the `product:update` scope. Create a follow up chat
+        template for a product."
   /v3/products/{product_id}/follow-up-chats/{id}:
     parameters:
       - $ref: "#/components/parameters/ProductId"
@@ -4325,7 +4551,8 @@ paths:
           $ref: "#/components/responses/ForbiddenResponse"
         "404":
           $ref: "#/components/responses/NotFoundResponse"
-      description: "Requires the `product:read` scope. Shows a single follow up chat template by ID."
+      description: "Requires the `product:read` scope. Shows a single follow up chat
+        template by ID."
     patch:
       tags:
         - Business Products
@@ -4386,7 +4613,8 @@ paths:
           $ref: "#/components/responses/ForbiddenResponse"
         "404":
           $ref: "#/components/responses/NotFoundResponse"
-      description: "Requires the `product:read` scope. Shows a single product variant by ID."
+      description: "Requires the `product:read` scope. Shows a single product variant
+        by ID."
   /v3/variants/{variant_id}/knowledge-items:
     parameters:
       - $ref: "#/components/parameters/VariantId"
@@ -4407,14 +4635,21 @@ paths:
           $ref: "#/components/responses/ForbiddenResponse"
         "404":
           $ref: "#/components/responses/NotFoundResponse"
-      description: "Requires the `product:list` scope. Retrieves a paginated list of variant-level knowledge items. The data is sorted by id in ascending order."
+      description: "Requires the `product:list` scope. Retrieves a paginated list of
+        variant-level knowledge items. The data is sorted by id in ascending
+        order."
       parameters:
-        - description: Last ID for cursor-based pagination (UUIDv7)
+        - description: Opaque cursor for the next page.
           in: query
-          name: last_id
+          name: next_cursor
           required: false
           schema:
-            format: uuid
+            type: string
+        - description: Opaque cursor for the previous page.
+          in: query
+          name: previous_cursor
+          required: false
+          schema:
             type: string
         - description: "Number of items per page (default: 25, max: 25)"
           in: query
@@ -4445,7 +4680,8 @@ paths:
           $ref: "#/components/responses/ForbiddenResponse"
         "404":
           $ref: "#/components/responses/NotFoundResponse"
-      description: "Requires the `product:update` scope. Creates a new variant-level knowledge item."
+      description: "Requires the `product:update` scope. Creates a new variant-level
+        knowledge item."
   /v3/variants/{variant_id}/knowledge-items/{id}:
     parameters:
       - $ref: "#/components/parameters/VariantId"
@@ -4467,7 +4703,8 @@ paths:
           $ref: "#/components/responses/ForbiddenResponse"
         "404":
           $ref: "#/components/responses/NotFoundResponse"
-      description: "Requires the `product:read` scope. Retrieves a single variant-level knowledge item by ID."
+      description: "Requires the `product:read` scope. Retrieves a single
+        variant-level knowledge item by ID."
     patch:
       tags:
         - Business Products
@@ -4489,7 +4726,8 @@ paths:
           $ref: "#/components/responses/ForbiddenResponse"
         "404":
           $ref: "#/components/responses/NotFoundResponse"
-      description: "Requires the `product:update` scope. Updates an existing variant-level knowledge item."
+      description: "Requires the `product:update` scope. Updates an existing
+        variant-level knowledge item."
     delete:
       tags:
         - Business Products
@@ -4507,7 +4745,8 @@ paths:
           $ref: "#/components/responses/ForbiddenResponse"
         "404":
           $ref: "#/components/responses/NotFoundResponse"
-      description: "Requires the `product:update` scope. Deletes a variant-level knowledge item."
+      description: "Requires the `product:update` scope. Deletes a variant-level
+        knowledge item."
   /v3/variants/{variant_id}/digital-product-files:
     parameters:
       - $ref: "#/components/parameters/VariantId"
@@ -4528,14 +4767,21 @@ paths:
           $ref: "#/components/responses/ForbiddenResponse"
         "404":
           $ref: "#/components/responses/NotFoundResponse"
-      description: "Requires the `product:list` scope. Retrieves a paginated list of digital product files for a variant."
+      description: "Requires the `product:list` scope. Retrieves a paginated list of
+        digital product files for a variant."
       parameters:
-        - description: Last ID for cursor-based pagination
+        - description: Opaque cursor for the next page.
           in: query
-          name: last_id
+          name: next_cursor
           required: false
           schema:
-            type: integer
+            type: string
+        - description: Opaque cursor for the previous page.
+          in: query
+          name: previous_cursor
+          required: false
+          schema:
+            type: string
         - description: "Number of items per page (default: 25, max: 25)"
           in: query
           name: page_size
@@ -4587,7 +4833,8 @@ paths:
           $ref: "#/components/responses/ForbiddenResponse"
         "404":
           $ref: "#/components/responses/NotFoundResponse"
-      description: "Requires the `product:read` scope. Shows a single digital product file by ID."
+      description: "Requires the `product:read` scope. Shows a single digital product
+        file by ID."
     delete:
       tags:
         - Business Products
@@ -4622,20 +4869,30 @@ paths:
           $ref: "#/components/responses/UnauthorizedResponse"
         "403":
           $ref: "#/components/responses/ForbiddenResponse"
-      description: "Requires the `product:list` scope. Retrieves a paginated list of product taxonomies."
+      description: "Requires the `product:list` scope. Retrieves a cursor-paginated
+        list of product taxonomies sorted by full_path in ascending order."
       parameters:
-        - description: Page number
-          in: query
-          name: page
-          required: false
-          schema:
-            type: integer
         - description: Number of items per page
           in: query
           name: page_size
           required: false
           schema:
             type: integer
+            default: 25
+            maximum: 25
+            minimum: 1
+        - description: Opaque cursor for the next page.
+          in: query
+          name: next_cursor
+          required: false
+          schema:
+            type: string
+        - description: Opaque cursor for the previous page.
+          in: query
+          name: previous_cursor
+          required: false
+          schema:
+            type: string
         - description: Search term to filter taxonomies by name (case-insensitive, partial
             match)
           in: query
@@ -4663,7 +4920,8 @@ paths:
           $ref: "#/components/responses/ForbiddenResponse"
         "404":
           $ref: "#/components/responses/NotFoundResponse"
-      description: "Requires the `product:read` scope. Shows a single product taxonomy by ID."
+      description: "Requires the `product:read` scope. Shows a single product taxonomy
+        by ID."
   /v3/variants/{id}/course:
     parameters:
       - $ref: "#/components/parameters/GenericId"
@@ -4966,7 +5224,10 @@ paths:
           $ref: "#/components/responses/UnauthorizedResponse"
         "403":
           $ref: "#/components/responses/ForbiddenResponse"
-      description: "Requires the `bundle:list` scope. Retrieves a paginated list of bundles with optional filtering. The data is sorted by id in descending order and cannot be changed. Uses cursor-based pagination with default page size of 25 and maximum of 25."
+      description: "Requires the `bundle:list` scope. Retrieves a paginated list of
+        bundles with optional filtering. The data is sorted by id in descending
+        order and cannot be changed. Uses cursor-based pagination with default
+        page size of 25 and maximum of 25."
       parameters:
         - description: "Number of items per page (default: 25, max: 25)"
           in: query
@@ -4976,12 +5237,18 @@ paths:
             example: 25
             maximum: 25
             type: integer
-        - description: Last order ID for cursor-based pagination
+        - description: Opaque cursor for the next page.
           in: query
-          name: last_id
+          name: next_cursor
           required: false
           schema:
-            type: integer
+            type: string
+        - description: Opaque cursor for the previous page.
+          in: query
+          name: previous_cursor
+          required: false
+          schema:
+            type: string
         - description: Search term to filter bundles by name (case-insensitive, partial
             match)
           in: query
@@ -5027,7 +5294,8 @@ paths:
           $ref: "#/components/responses/UnauthorizedResponse"
         "403":
           $ref: "#/components/responses/ForbiddenResponse"
-      description: "Requires the `bundle:create` scope. Creates a new bundle with the provided data."
+      description: "Requires the `bundle:create` scope. Creates a new bundle with the
+        provided data."
   /v3/bundles/simplified:
     get:
       tags:
@@ -5044,7 +5312,12 @@ paths:
           $ref: "#/components/responses/UnauthorizedResponse"
         "403":
           $ref: "#/components/responses/ForbiddenResponse"
-      description: "Requires the `bundle:list` scope. Retrieves a paginated list of bundles with optional filtering. The data is sorted by id in descending order and cannot be changed. Uses cursor-based pagination with default page size of 25 and maximum of 25. This endpoint returns a simplified version of the bundle data, including only essential fields and active bundle price options."
+      description: "Requires the `bundle:list` scope. Retrieves a paginated list of
+        bundles with optional filtering. The data is sorted by id in descending
+        order and cannot be changed. Uses cursor-based pagination with default
+        page size of 25 and maximum of 25. This endpoint returns a simplified
+        version of the bundle data, including only essential fields and active
+        bundle price options."
       parameters:
         - description: If provided, includes `is_owned_by_store` field in the bundle price
             options to indicate if the option is already included in the
@@ -5062,12 +5335,18 @@ paths:
             example: 25
             maximum: 25
             type: integer
-        - description: Last order ID for cursor-based pagination
+        - description: Opaque cursor for the next page.
           in: query
-          name: last_id
+          name: next_cursor
           required: false
           schema:
-            type: integer
+            type: string
+        - description: Opaque cursor for the previous page.
+          in: query
+          name: previous_cursor
+          required: false
+          schema:
+            type: string
         - description: Search term to filter bundles by name (case-insensitive, partial
             match)
           in: query
@@ -5110,7 +5389,9 @@ paths:
           $ref: "#/components/responses/UnauthorizedResponse"
         "403":
           $ref: "#/components/responses/ForbiddenResponse"
-      description: "Requires the `bundle:list` scope. Retrieves the total count of bundles for the authenticated business. This endpoint does not support any filtering or pagination."
+      description: "Requires the `bundle:list` scope. Retrieves the total count of
+        bundles for the authenticated business. This endpoint does not support
+        any filtering or pagination."
       parameters:
         - description: "Number of items per page (default: 25, max: 25)"
           in: query
@@ -5120,12 +5401,18 @@ paths:
             example: 25
             maximum: 25
             type: integer
-        - description: Last order ID for cursor-based pagination
+        - description: Opaque cursor for the next page.
           in: query
-          name: last_id
+          name: next_cursor
           required: false
           schema:
-            type: integer
+            type: string
+        - description: Opaque cursor for the previous page.
+          in: query
+          name: previous_cursor
+          required: false
+          schema:
+            type: string
         - description: Search term to filter bundles by name (case-insensitive, partial
             match)
           in: query
@@ -5194,7 +5481,8 @@ paths:
           $ref: "#/components/responses/ForbiddenResponse"
         "404":
           $ref: "#/components/responses/NotFoundResponse"
-      description: "Requires the `bundle:update` scope. Updates an existing bundle with the provided data."
+      description: "Requires the `bundle:update` scope. Updates an existing bundle
+        with the provided data."
     delete:
       tags:
         - Business Bundles
@@ -5233,7 +5521,10 @@ paths:
           $ref: "#/components/responses/ForbiddenResponse"
         "404":
           $ref: "#/components/responses/NotFoundResponse"
-      description: "Requires the `bundle:create` scope. Creates a copy of an existing bundle including all bundlelines, bundle price options, labels, and follow-up chats. The new bundle name will be suffixed with '(Copy)'. Partnership settings and store placements are NOT copied."
+      description: "Requires the `bundle:create` scope. Creates a copy of an existing
+        bundle including all bundlelines, bundle price options, labels, and
+        follow-up chats. The new bundle name will be suffixed with '(Copy)'.
+        Partnership settings and store placements are NOT copied."
   /v3/bundles/{bundle_id}/relations:
     parameters:
       - $ref: "#/components/parameters/BundleId"
@@ -5254,7 +5545,9 @@ paths:
           $ref: "#/components/responses/ForbiddenResponse"
         "404":
           $ref: "#/components/responses/NotFoundResponse"
-      description: "Requires the `bundle:read` scope. Retrieves a bundle along with its related entities such as active bundle price options and their associated stores and form displays."
+      description: "Requires the `bundle:read` scope. Retrieves a bundle along with
+        its related entities such as active bundle price options and their
+        associated stores and form displays."
   /v3/bundles/{bundle_id}/partners:
     parameters:
       - $ref: "#/components/parameters/BundleId"
@@ -5275,15 +5568,23 @@ paths:
           $ref: "#/components/responses/ForbiddenResponse"
         "404":
           $ref: "#/components/responses/NotFoundResponse"
-      description: "Requires the `bundle:list` scope. Retrieves a paginated list of partners associated with a specific bundle. The data is sorted by id in descending order and cannot be changed. Uses cursor-based pagination with default page size of 25 and maximum of 25."
+      description: "Requires the `bundle:list` scope. Retrieves a paginated list of
+        partners associated with a specific bundle. The data is sorted by id in
+        descending order and cannot be changed. Uses cursor-based pagination
+        with default page size of 25 and maximum of 25."
       parameters:
-        - description: The ID of the last item from the previous page. Used for
-            cursor-based pagination.
+        - description: Opaque cursor for the next page.
           in: query
-          name: last_id
+          name: next_cursor
           required: false
           schema:
-            type: integer
+            type: string
+        - description: Opaque cursor for the previous page.
+          in: query
+          name: previous_cursor
+          required: false
+          schema:
+            type: string
         - description: Number of items to return per page. Default is 25, maximum is 25.
           in: query
           name: page_size
@@ -5313,7 +5614,8 @@ paths:
           $ref: "#/components/responses/ForbiddenResponse"
         "404":
           $ref: "#/components/responses/NotFoundResponse"
-      description: "Requires the `bundle:update` scope. Associates a partner with a specific bundle using the provided unique identifier."
+      description: "Requires the `bundle:update` scope. Associates a partner with a
+        specific bundle using the provided unique identifier."
   /v3/bundles/{bundle_id}/partners/{id}:
     parameters:
       - $ref: "#/components/parameters/BundleId"
@@ -5335,7 +5637,8 @@ paths:
           $ref: "#/components/responses/ForbiddenResponse"
         "404":
           $ref: "#/components/responses/NotFoundResponse"
-      description: "Requires the `bundle:update` scope. Dissociates a partner from a specific bundle by its ID."
+      description: "Requires the `bundle:update` scope. Dissociates a partner from a
+        specific bundle by its ID."
   /v3/bundles/{bundle_id}/follow-up-chats/generate:
     parameters:
       - $ref: "#/components/parameters/BundleId"
@@ -5356,7 +5659,8 @@ paths:
           $ref: "#/components/responses/ForbiddenResponse"
         "404":
           $ref: "#/components/responses/NotFoundResponse"
-      description: "Requires the `bundle:update` scope. Generates a new follow up chat for a bundle."
+      description: "Requires the `bundle:update` scope. Generates a new follow up chat
+        for a bundle."
   /v3/bundles/{bundle_id}/follow-up-chats:
     parameters:
       - $ref: "#/components/parameters/BundleId"
@@ -5377,14 +5681,21 @@ paths:
           $ref: "#/components/responses/ForbiddenResponse"
         "404":
           $ref: "#/components/responses/NotFoundResponse"
-      description: "Requires the `bundle:list` scope. Retrieves a paginated list of follow up chats for a bundle."
+      description: "Requires the `bundle:list` scope. Retrieves a paginated list of
+        follow up chats for a bundle."
       parameters:
-        - description: Last ID for cursor-based pagination
+        - description: Opaque cursor for the next page.
           in: query
-          name: last_id
+          name: next_cursor
           required: false
           schema:
-            type: integer
+            type: string
+        - description: Opaque cursor for the previous page.
+          in: query
+          name: previous_cursor
+          required: false
+          schema:
+            type: string
         - description: "Number of items per page (default: 25, max: 25)"
           in: query
           name: page_size
@@ -5414,7 +5725,8 @@ paths:
           $ref: "#/components/responses/ForbiddenResponse"
         "404":
           $ref: "#/components/responses/NotFoundResponse"
-      description: "Requires the `bundle:update` scope. Create a follow up chat template for a bundle."
+      description: "Requires the `bundle:update` scope. Create a follow up chat
+        template for a bundle."
   /v3/bundles/{bundle_id}/follow-up-chats/{id}:
     parameters:
       - $ref: "#/components/parameters/BundleId"
@@ -5436,7 +5748,8 @@ paths:
           $ref: "#/components/responses/ForbiddenResponse"
         "404":
           $ref: "#/components/responses/NotFoundResponse"
-      description: "Requires the `bundle:read` scope. Retrieves a follow up chat template by its ID."
+      description: "Requires the `bundle:read` scope. Retrieves a follow up chat
+        template by its ID."
     patch:
       tags:
         - Business Bundles
@@ -5497,15 +5810,23 @@ paths:
           $ref: "#/components/responses/ForbiddenResponse"
         "404":
           $ref: "#/components/responses/NotFoundResponse"
-      description: "Requires the `bundle:list` scope. Retrieves a paginated list of bundle price options associated with a specific bundle. The data is sorted by id in descending order and cannot be changed. Uses cursor-based pagination with default page size of 25 and maximum of 25."
+      description: "Requires the `bundle:list` scope. Retrieves a paginated list of
+        bundle price options associated with a specific bundle. The data is
+        sorted by id in descending order and cannot be changed. Uses
+        cursor-based pagination with default page size of 25 and maximum of 25."
       parameters:
-        - description: The ID of the last item from the previous page. Used for
-            cursor-based pagination.
+        - description: Opaque cursor for the next page.
           in: query
-          name: last_id
+          name: next_cursor
           required: false
           schema:
-            type: integer
+            type: string
+        - description: Opaque cursor for the previous page.
+          in: query
+          name: previous_cursor
+          required: false
+          schema:
+            type: string
         - description: Number of items to return per page. Default is 25, maximum is 25.
           in: query
           name: page_size
@@ -5535,7 +5856,8 @@ paths:
           $ref: "#/components/responses/ForbiddenResponse"
         "404":
           $ref: "#/components/responses/NotFoundResponse"
-      description: "Requires the `bundle:create` scope. Creates a new bundle price option associated with a specific bundle using the provided data."
+      description: "Requires the `bundle:create` scope. Creates a new bundle price
+        option associated with a specific bundle using the provided data."
   /v3/bundles/{bundle_id}/bundle-price-options/{id}:
     parameters:
       - $ref: "#/components/parameters/BundleId"
@@ -5561,7 +5883,8 @@ paths:
           $ref: "#/components/responses/ForbiddenResponse"
         "404":
           $ref: "#/components/responses/NotFoundResponse"
-      description: "Requires the `bundle:update` scope. Updates an existing bundle price option associated with a specific bundle using the provided data."
+      description: "Requires the `bundle:update` scope. Updates an existing bundle
+        price option associated with a specific bundle using the provided data."
     delete:
       tags:
         - Business Bundles
@@ -5579,7 +5902,8 @@ paths:
           $ref: "#/components/responses/ForbiddenResponse"
         "404":
           $ref: "#/components/responses/NotFoundResponse"
-      description: "Requires the `bundle:delete` scope. Deletes a bundle price option associated with a specific bundle by its ID."
+      description: "Requires the `bundle:delete` scope. Deletes a bundle price option
+        associated with a specific bundle by its ID."
   /v3/bundles/{bundle_id}/bundle-price-options/{id}/relations:
     parameters:
       - $ref: "#/components/parameters/BundleId"
@@ -5601,7 +5925,9 @@ paths:
           $ref: "#/components/responses/ForbiddenResponse"
         "404":
           $ref: "#/components/responses/NotFoundResponse"
-      description: "Requires the `bundle:read` scope. Retrieves a bundle price option along with its related entities such as associated stores and form displays."
+      description: "Requires the `bundle:read` scope. Retrieves a bundle price option
+        along with its related entities such as associated stores and form
+        displays."
   /v3/customers:
     get:
       tags:
@@ -6390,7 +6716,8 @@ paths:
         - WABA
       operationId: listWabaMessages
       summary: List WABA customer messages
-      description: "Requires the `waba_account:operate` scope. Message payloads expose `sender_tag` and no longer expose `sender_type`."
+      description: "Requires the `waba_account:operate` scope. Message payloads expose
+        `sender_tag` and no longer expose `sender_type`."
       security:
         - bearerAuth: []
         - apiKeyAuth: []
@@ -6408,7 +6735,8 @@ paths:
         - WABA
       operationId: sendWabaMessage
       summary: Send a WABA customer message
-      description: "Requires the `waba_account:operate` scope. Message payloads expose `sender_tag` and no longer expose `sender_type`."
+      description: "Requires the `waba_account:operate` scope. Message payloads expose
+        `sender_tag` and no longer expose `sender_type`."
       security:
         - bearerAuth: []
         - apiKeyAuth: []
@@ -6437,7 +6765,8 @@ paths:
         - WABA
       operationId: getWabaMessage
       summary: Get a WABA customer message
-      description: "Requires the `waba_account:operate` scope. Message payloads expose `sender_tag` and no longer expose `sender_type`."
+      description: "Requires the `waba_account:operate` scope. Message payloads expose
+        `sender_tag` and no longer expose `sender_type`."
       security:
         - bearerAuth: []
         - apiKeyAuth: []
@@ -6455,7 +6784,8 @@ paths:
         - WABA
       operationId: updateWabaMessage
       summary: Update a WABA customer message
-      description: "Requires the `waba_account:operate` scope. Message payloads expose `sender_tag` and no longer expose `sender_type`."
+      description: "Requires the `waba_account:operate` scope. Message payloads expose
+        `sender_tag` and no longer expose `sender_type`."
       security:
         - bearerAuth: []
         - apiKeyAuth: []
@@ -6500,7 +6830,9 @@ paths:
         - WABA
       operationId: sendWabaTypingIndicator
       summary: Send a WABA typing indicator
-      description: "Requires the `waba_account:operate` scope. Sends Meta's typing indicator for an existing inbound message, which also marks that message as read."
+      description: "Requires the `waba_account:operate` scope. Sends Meta's typing
+        indicator for an existing inbound message, which also marks that message
+        as read."
       security:
         - bearerAuth: []
         - apiKeyAuth: []
@@ -6701,7 +7033,8 @@ components:
       type: apiKey
       in: header
       name: authorization
-      description: "Send `Authorization: Bearer <api_key>` for machine-authenticated business requests."
+      description: "Send `Authorization: Bearer <api_key>` for machine-authenticated
+        business requests."
   parameters:
     StoreId:
       name: store_id
@@ -6739,7 +7072,9 @@ components:
         type: string
         enum:
           - mock
-      description: Local/dev simulation override for WABA sends. When set to `mock` outside production, Nexus records a submitted outbound message without sending to Meta Graph. Ignored in production.
+      description: Local/dev simulation override for WABA sends. When set to `mock`
+        outside production, Nexus records a submitted outbound message without
+        sending to Meta Graph. Ignored in production.
     ProductSlug:
       name: slug
       in: path
@@ -6814,13 +7149,20 @@ components:
         type: integer
         minimum: 1
       description: Cursor page size.
-    LastId:
-      name: last_id
+    NextCursor:
+      name: next_cursor
       in: query
       required: false
       schema:
         type: string
-      description: Cursor ID from the previous page.
+      description: Opaque cursor for the next page.
+    PreviousCursor:
+      name: previous_cursor
+      in: query
+      required: false
+      schema:
+        type: string
+      description: Opaque cursor for the previous page.
     OAuthApplicationIdQuery:
       name: oauth_application_id
       in: query
@@ -8428,7 +8770,10 @@ components:
       additionalProperties: false
     OAuthBillingMerchantContext:
       type: object
-      description: Safe merchant-facing OAuth app billing summary returned on Volt transaction payloads. Platform fee, developer net, raw request/response bodies, headers, customer message text, and raw webhook payloads are intentionally excluded.
+      description: Safe merchant-facing OAuth app billing summary returned on Volt
+        transaction payloads. Platform fee, developer net, raw request/response
+        bodies, headers, customer message text, and raw webhook payloads are
+        intentionally excluded.
       properties:
         application_id:
           type: integer
@@ -8478,7 +8823,10 @@ components:
       additionalProperties: false
     OAuthBillingCaptureContext:
       type: object
-      description: Safe OAuth app billing capture summary returned on developer-facing billing reservation, billing charge, and developer earnings ledger payloads. Raw request/response bodies, headers, customer message text, and raw webhook payloads are intentionally excluded.
+      description: Safe OAuth app billing capture summary returned on developer-facing
+        billing reservation, billing charge, and developer earnings ledger
+        payloads. Raw request/response bodies, headers, customer message text,
+        and raw webhook payloads are intentionally excluded.
       properties:
         application_id:
           type: integer
@@ -8534,7 +8882,9 @@ components:
       additionalProperties: false
     OAuthBillingRefundRequest:
       type: object
-      description: Either `billing_reservation_id` or `billing_charge_id` is required. If both are supplied, they must identify the same captured charge. Refunds are full post-capture reversals.
+      description: Either `billing_reservation_id` or `billing_charge_id` is required.
+        If both are supplied, they must identify the same captured charge.
+        Refunds are full post-capture reversals.
       required:
         - refund_idempotency_key
         - reason_code
@@ -8648,13 +8998,15 @@ components:
           example: true
         has_next:
           type: boolean
-        last_id:
-          oneOf:
-            - type: integer
-            - type: string
+        has_previous:
+          type: boolean
+        next_cursor:
+          nullable: true
+          type: string
+        previous_cursor:
+          nullable: true
+          type: string
         page_size:
-          type: integer
-        page:
           type: integer
       additionalProperties: true
       description: Paginated list payload for v3.
@@ -9113,10 +9465,14 @@ components:
             - true
         has_next:
           type: boolean
-        last_id:
-          oneOf:
-            - type: integer
-            - type: string
+        has_previous:
+          type: boolean
+        next_cursor:
+          nullable: true
+          type: string
+        previous_cursor:
+          nullable: true
+          type: string
         page_size:
           type: integer
       additionalProperties: true
@@ -9456,9 +9812,12 @@ components:
           example: false
           nullable: false
           type: boolean
-        last_id:
-          example: 123e4567-e89b-12d3-a456-426614174000
-          format: uuid
+        has_previous:
+          type: boolean
+        next_cursor:
+          nullable: true
+          type: string
+        previous_cursor:
           nullable: true
           type: string
         page_size:
@@ -10026,11 +10385,6 @@ components:
         page_size:
           default: 25
           example: 25
-          nullable: false
-          type: integer
-        page:
-          default: 1
-          example: 1
           nullable: false
           type: integer
       additionalProperties: true
@@ -11052,7 +11406,8 @@ components:
           nullable: true
           type: string
         public_order_url:
-          description: Public order URL built from metadata.custom_domain_full_url and secret_slug.
+          description: Public order URL built from metadata.custom_domain_full_url and
+            secret_slug.
           nullable: true
           type: string
           format: uri
@@ -11105,32 +11460,6 @@ components:
               description: Xendit code for the financial entity
               type: string
           title: FinancialEntity
-          type: object
-        page:
-          properties:
-            id:
-              description: Page ID
-              type: integer
-            is_published:
-              description: Is the page published?
-              type: boolean
-            name:
-              description: Name of the page
-              type: string
-            published_at:
-              description: Publication date of the page
-              format: date-time
-              type: string
-            slug:
-              description: Slug for the page URL
-              type: string
-            store_id:
-              description: ID of the store the page belongs to
-              type: integer
-            unique_id:
-              description: Unique identifier for the page
-              type: string
-          title: PageSimple
           type: object
         is_purchase_fb:
           description: Is the order a Facebook purchase
@@ -11295,10 +11624,14 @@ components:
           example: false
           nullable: false
           type: boolean
-        last_id:
-          example: 99
+        has_previous:
+          type: boolean
+        next_cursor:
           nullable: true
-          type: integer
+          type: string
+        previous_cursor:
+          nullable: true
+          type: string
         page_size:
           default: 25
           example: 25
@@ -12643,7 +12976,8 @@ components:
           description: Secret slug of the order
           type: string
         public_order_url:
-          description: Public order URL built from metadata.custom_domain_full_url and secret_slug.
+          description: Public order URL built from metadata.custom_domain_full_url and
+            secret_slug.
           nullable: true
           type: string
           format: uri
@@ -12706,32 +13040,6 @@ components:
               description: Xendit code for the financial entity
               type: string
           title: FinancialEntity
-          type: object
-        page:
-          properties:
-            id:
-              description: Page ID
-              type: integer
-            is_published:
-              description: Is the page published?
-              type: boolean
-            name:
-              description: Name of the page
-              type: string
-            published_at:
-              description: Publication date of the page
-              format: date-time
-              type: string
-            slug:
-              description: Slug for the page URL
-              type: string
-            store_id:
-              description: ID of the store the page belongs to
-              type: integer
-            unique_id:
-              description: Unique identifier for the page
-              type: string
-          title: PageSimple
           type: object
         product_price_bt:
           description: Total product price before discounts minus tax
@@ -13041,7 +13349,8 @@ components:
           description: Order ID in string format
           type: string
         public_order_url:
-          description: Public order URL built from metadata.custom_domain_full_url and secret_slug.
+          description: Public order URL built from metadata.custom_domain_full_url and
+            secret_slug.
           nullable: true
           type: string
           format: uri
@@ -13147,7 +13456,8 @@ components:
           description: Order ID in string format
           type: string
         public_order_url:
-          description: Public order URL built from metadata.custom_domain_full_url and secret_slug.
+          description: Public order URL built from metadata.custom_domain_full_url and
+            secret_slug.
           nullable: true
           type: string
           format: uri
@@ -13226,7 +13536,8 @@ components:
           description: Order ID in string format
           type: string
         public_order_url:
-          description: Public order URL built from metadata.custom_domain_full_url and secret_slug.
+          description: Public order URL built from metadata.custom_domain_full_url and
+            secret_slug.
           nullable: true
           type: string
           format: uri
@@ -13299,7 +13610,8 @@ components:
                 description: Order ID in string format
                 type: string
               public_order_url:
-                description: Public order URL built from metadata.custom_domain_full_url and secret_slug.
+                description: Public order URL built from metadata.custom_domain_full_url and
+                  secret_slug.
                 nullable: true
                 type: string
                 format: uri
@@ -13633,7 +13945,8 @@ components:
         order_id:
           type: string
         public_order_url:
-          description: Public order URL built from metadata.custom_domain_full_url and secret_slug.
+          description: Public order URL built from metadata.custom_domain_full_url and
+            secret_slug.
           nullable: true
           type: string
           format: uri
@@ -13707,7 +14020,8 @@ components:
           description: Order ID in string format
           type: string
         public_order_url:
-          description: Public order URL built from metadata.custom_domain_full_url and secret_slug.
+          description: Public order URL built from metadata.custom_domain_full_url and
+            secret_slug.
           nullable: true
           type: string
           format: uri
@@ -13852,7 +14166,8 @@ components:
           description: Order primary key
           type: integer
         public_order_url:
-          description: Public order URL built from metadata.custom_domain_full_url and secret_slug.
+          description: Public order URL built from metadata.custom_domain_full_url and
+            secret_slug.
           nullable: true
           type: string
           format: uri
@@ -14502,10 +14817,14 @@ components:
           example: false
           nullable: false
           type: boolean
-        last_id:
-          example: 99
+        has_previous:
+          type: boolean
+        next_cursor:
           nullable: true
-          type: integer
+          type: string
+        previous_cursor:
+          nullable: true
+          type: string
         page_size:
           default: 25
           example: 25
@@ -14741,32 +15060,6 @@ components:
                         id:
                           description: Page Display ID
                           type: integer
-                        page:
-                          properties:
-                            id:
-                              description: Page ID
-                              type: integer
-                            is_published:
-                              description: Is the page published?
-                              type: boolean
-                            name:
-                              description: Name of the page
-                              type: string
-                            published_at:
-                              description: Publication date of the page
-                              format: date-time
-                              type: string
-                            slug:
-                              description: Slug for the page URL
-                              type: string
-                            store_id:
-                              description: ID of the store the page belongs to
-                              type: integer
-                            unique_id:
-                              description: Unique identifier for the page
-                              type: string
-                          title: PageSimple
-                          type: object
                       title: ForProductPageDisplay
                       type: object
                   title: ForProductFormDisplay
@@ -14820,32 +15113,6 @@ components:
                         id:
                           description: Page Display ID
                           type: integer
-                        page:
-                          properties:
-                            id:
-                              description: Page ID
-                              type: integer
-                            is_published:
-                              description: Is the page published?
-                              type: boolean
-                            name:
-                              description: Name of the page
-                              type: string
-                            published_at:
-                              description: Publication date of the page
-                              format: date-time
-                              type: string
-                            slug:
-                              description: Slug for the page URL
-                              type: string
-                            store_id:
-                              description: ID of the store the page belongs to
-                              type: integer
-                            unique_id:
-                              description: Unique identifier for the page
-                              type: string
-                          title: PageSimple
-                          type: object
                       title: ForProductPageDisplay
                       type: object
                   title: ForProductFormDisplay
@@ -15389,10 +15656,14 @@ components:
           example: false
           nullable: false
           type: boolean
-        last_id:
-          example: 99
+        has_previous:
+          type: boolean
+        next_cursor:
           nullable: true
-          type: integer
+          type: string
+        previous_cursor:
+          nullable: true
+          type: string
         page_size:
           default: 25
           example: 25
@@ -16029,10 +16300,14 @@ components:
           example: false
           nullable: false
           type: boolean
-        last_id:
-          example: 99
+        has_previous:
+          type: boolean
+        next_cursor:
           nullable: true
-          type: integer
+          type: string
+        previous_cursor:
+          nullable: true
+          type: string
         page_size:
           default: 25
           example: 25
@@ -16103,10 +16378,14 @@ components:
           example: false
           nullable: false
           type: boolean
-        last_id:
-          example: 99
+        has_previous:
+          type: boolean
+        next_cursor:
           nullable: true
-          type: integer
+          type: string
+        previous_cursor:
+          nullable: true
+          type: string
         page_size:
           default: 25
           example: 25
@@ -16218,10 +16497,14 @@ components:
           example: false
           nullable: false
           type: boolean
-        last_id:
-          example: 99
+        has_previous:
+          type: boolean
+        next_cursor:
           nullable: true
-          type: integer
+          type: string
+        previous_cursor:
+          nullable: true
+          type: string
         page_size:
           default: 25
           example: 25
@@ -16552,10 +16835,14 @@ components:
           example: false
           nullable: false
           type: boolean
-        last_id:
-          example: 99
+        has_previous:
+          type: boolean
+        next_cursor:
           nullable: true
-          type: integer
+          type: string
+        previous_cursor:
+          nullable: true
+          type: string
         page_size:
           default: 25
           example: 25
@@ -16617,11 +16904,6 @@ components:
         page_size:
           default: 25
           example: 25
-          nullable: false
-          type: integer
-        page:
-          default: 1
-          example: 1
           nullable: false
           type: integer
       additionalProperties: true
@@ -16766,10 +17048,14 @@ components:
           example: false
           nullable: false
           type: boolean
-        last_id:
-          example: 99
+        has_previous:
+          type: boolean
+        next_cursor:
           nullable: true
-          type: integer
+          type: string
+        previous_cursor:
+          nullable: true
+          type: string
         page_size:
           default: 25
           example: 25
@@ -16865,32 +17151,6 @@ components:
                         id:
                           description: Page Display ID
                           type: integer
-                        page:
-                          properties:
-                            id:
-                              description: Page ID
-                              type: integer
-                            is_published:
-                              description: Is the page published?
-                              type: boolean
-                            name:
-                              description: Name of the page
-                              type: string
-                            published_at:
-                              description: Publication date of the page
-                              format: date-time
-                              type: string
-                            slug:
-                              description: Slug for the page URL
-                              type: string
-                            store_id:
-                              description: ID of the store the page belongs to
-                              type: integer
-                            unique_id:
-                              description: Unique identifier for the page
-                              type: string
-                          title: PageSimple
-                          type: object
                       title: ForProductPageDisplay
                       type: object
                   title: ForProductFormDisplay
@@ -16955,32 +17215,6 @@ components:
                         id:
                           description: Page Display ID
                           type: integer
-                        page:
-                          properties:
-                            id:
-                              description: Page ID
-                              type: integer
-                            is_published:
-                              description: Is the page published?
-                              type: boolean
-                            name:
-                              description: Name of the page
-                              type: string
-                            published_at:
-                              description: Publication date of the page
-                              format: date-time
-                              type: string
-                            slug:
-                              description: Slug for the page URL
-                              type: string
-                            store_id:
-                              description: ID of the store the page belongs to
-                              type: integer
-                            unique_id:
-                              description: Unique identifier for the page
-                              type: string
-                          title: PageSimple
-                          type: object
                       title: ForProductPageDisplay
                       type: object
                   title: ForProductFormDisplay
@@ -17455,10 +17689,14 @@ components:
           example: false
           nullable: false
           type: boolean
-        last_id:
-          example: 99
+        has_previous:
+          type: boolean
+        next_cursor:
           nullable: true
-          type: integer
+          type: string
+        previous_cursor:
+          nullable: true
+          type: string
         page_size:
           default: 25
           example: 25
@@ -17775,10 +18013,14 @@ components:
           example: false
           nullable: false
           type: boolean
-        last_id:
-          example: 99
+        has_previous:
+          type: boolean
+        next_cursor:
           nullable: true
-          type: integer
+          type: string
+        previous_cursor:
+          nullable: true
+          type: string
         page_size:
           default: 25
           example: 25
@@ -17869,10 +18111,14 @@ components:
           example: false
           nullable: false
           type: boolean
-        last_id:
-          example: 99
+        has_previous:
+          type: boolean
+        next_cursor:
           nullable: true
-          type: integer
+          type: string
+        previous_cursor:
+          nullable: true
+          type: string
         page_size:
           default: 25
           example: 25
