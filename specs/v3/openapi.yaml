@@ -6602,6 +6602,18 @@ paths:
       security:
         - bearerAuth: []
         - apiKeyAuth: []
+      parameters:
+        - $ref: "#/components/parameters/PageSize"
+        - $ref: "#/components/parameters/NextCursor"
+        - $ref: "#/components/parameters/PreviousCursor"
+        - description: Primary-key ID of a WhatsApp message to center the first page
+            around. Cannot be used with `next_cursor` or `previous_cursor`. If not
+            found in this customer message list, `data` is empty.
+          in: query
+          name: anchor_id
+          required: false
+          schema:
+            type: string
       responses:
         "200":
           $ref: "#/components/responses/PaginatedCollectionResponse"
