@@ -2244,12 +2244,29 @@ paths:
           required: false
           schema:
             type: string
-        - description: Search term to filter orders by order ID, customer name, email, or
-            phone number
+        - description: Search term for the selected `search_field`. Defaults to order ID
+            search when `search_field` is omitted or unsupported.
           in: query
           name: search
           required: false
           schema:
+            type: string
+        - description: Field used by `search`. Defaults to `order_id` when omitted or
+            unsupported.
+          in: query
+          name: search_field
+          required: false
+          schema:
+            default: order_id
+            enum:
+              - order_id
+              - shipment_receipt
+              - external_id
+              - pg_reference_id
+              - gross_revenue
+              - customer_name
+              - customer_email
+              - customer_phone
             type: string
         - description: Filter spam orders
           in: query
@@ -2654,6 +2671,30 @@ paths:
           schema:
             default: 0
             type: integer
+        - description: Search term for the selected `search_field`. Defaults to order ID
+            search when `search_field` is omitted or unsupported.
+          in: query
+          name: search
+          required: false
+          schema:
+            type: string
+        - description: Field used by `search`. Defaults to `order_id` when omitted or
+            unsupported.
+          in: query
+          name: search_field
+          required: false
+          schema:
+            default: order_id
+            enum:
+              - order_id
+              - shipment_receipt
+              - external_id
+              - pg_reference_id
+              - gross_revenue
+              - customer_name
+              - customer_email
+              - customer_phone
+            type: string
         - description: Filter by order status
           in: query
           name: status
